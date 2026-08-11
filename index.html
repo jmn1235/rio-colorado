@@ -445,6 +445,19 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
         <div class="panel"><div class="panel-head"><div><div class="panel-title">Proveedores principales</div><p class="panel-sub">Ordenados por monto acumulado</p></div></div><div id="chart-proveedores"></div></div>
       </div>
       <div class="panel"><div class="panel-head"><div><div class="panel-title">Detalle por proveedor</div><p class="panel-sub">Movimientos, monto y rubros en los que participa</p></div></div><div class="table-wrap" id="tabla-proveedores"></div></div>
+
+      <div class="topbar" style="margin-top:34px;"><div><h1 style="font-size:19px;">IVA</h1><p>Crédito fiscal de la obra y movimientos con otros proyectos</p></div>
+        <div class="btn-row"><button class="btn btn-sm btn-primary" id="btn-iva-nuevo">Registrar movimiento</button></div></div>
+      <div class="kpi-grid" id="kpi-iva"></div>
+      <div class="grid-2">
+        <div class="panel"><div class="panel-head"><div><div class="panel-title">IVA por rubro</div><p class="panel-sub">Solo de comprobantes con IVA discriminado</p></div></div><div class="table-wrap" id="tabla-iva-rubro"></div></div>
+        <div class="panel"><div class="panel-head"><div><div class="panel-title">Formalización del gasto</div><p class="panel-sub">Cuánto de la obra está respaldado con comprobante</p></div></div><div id="chart-fiscal"></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div><div class="panel-title">Movimientos de IVA entre proyectos</div><p class="panel-sub">Compra y venta de crédito fiscal dentro de la desarrolladora. El efectivo entra o sale del fondo del proyecto.</p></div></div>
+        <div class="table-wrap" id="tabla-iva-mov"></div>
+      </div>
+      <div class="panel"><div class="panel-head"><div><div class="panel-title">IVA por proveedor</div><p class="panel-sub">Quiénes aportan el crédito fiscal de la obra</p></div></div><div class="table-wrap" id="tabla-iva-prov"></div></div>
     </section>
 
     <!-- ===== IA · ALERTAS Y PROYECCIÓN ===== -->
@@ -547,6 +560,8 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
             <div class="field"><label for="fa-comprobante">Comprobante</label><input type="text" id="fa-comprobante"></div>
             <div class="field"><label for="fa-financia">Financiado por</label><select id="fa-financia"></select></div>
             <div class="field"><label for="fa-unidad">Unidad / destino</label><select id="fa-unidad"></select></div>
+            <div class="field"><label for="fa-fiscal">Condición fiscal</label><select id="fa-fiscal"></select></div>
+            <div class="field"><label for="fa-iva">IVA de la factura $</label><input type="number" id="fa-iva" step="0.01" min="0" placeholder="0,00"><span class="hint">Se reparte entre los renglones.</span></div>
           </div>
         </div>
       </div>
@@ -575,10 +590,15 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
             <div class="field col-2"><label for="g-proveedor">Proveedor *</label>
               <div class="campo-con-btn"><select id="g-proveedor" required></select><button type="button" class="btn btn-sm" id="btn-nuevo-prov">Nuevo</button></div></div>
             <div class="field col-2"><label for="g-concepto">Concepto *</label><input type="text" id="g-concepto" placeholder="Ej. Viguetas pretensadas — losa PA" required></div>
-            <div class="field"><label for="g-monto">Monto en pesos *</label><input type="number" id="g-monto" step="0.01" min="0" placeholder="0,00" required></div>
+            <div class="field"><label for="g-monto">Monto total en pesos *</label><input type="number" id="g-monto" step="0.01" min="0" placeholder="0,00" required><span class="hint">Lo que efectivamente se paga, IVA incluido.</span></div>
             <div class="field"><label for="g-cot">Dólar MEP del día</label><input type="number" id="g-cot" step="0.01" min="0" placeholder="Buscando…"><span class="hint" id="g-cot-hint">Se completa sola. Podés corregirla.</span></div>
             <div class="field"><label for="g-usd">Queda registrado en</label><input type="text" id="g-usd" readonly value="—"></div>
             <div class="field"><label for="g-unidad">Unidad / destino</label><select id="g-unidad"></select></div>
+
+            <div class="field"><label for="g-fiscal">Condición fiscal *</label><select id="g-fiscal"></select></div>
+            <div class="field" id="campo-alicuota"><label for="g-alicuota">Alícuota IVA</label><select id="g-alicuota"></select></div>
+            <div class="field" id="campo-iva"><label for="g-iva">IVA en pesos</label><input type="number" id="g-iva" step="0.01" min="0" placeholder="0,00"><span class="hint" id="g-iva-hint">Se calcula sola. Corregila si la factura dice otra cosa.</span></div>
+            <div class="field" id="campo-neto"><label for="g-neto">Neto gravado</label><input type="text" id="g-neto" readonly value="—"></div>
             <div class="field"><label for="g-financia">Financiado por *</label><select id="g-financia" required></select></div>
             <div class="field"><label for="g-pago">Forma de pago</label><select id="g-pago"></select></div>
             <div class="field"><label for="g-estado">Estado</label><select id="g-estado"><option>Pagado</option><option>Comprometido</option><option>Pendiente</option></select></div>
@@ -608,7 +628,7 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
     <!-- ===== PRESUPUESTO ===== -->
     <section id="view-presupuesto" class="view">
       <div class="topbar"><div><h1>Presupuesto y avance</h1><p>Objetivos en dólares, ventana de ejecución y avance físico</p></div>
-        <div class="btn-row"><button class="btn btn-sm" id="btn-rubros-base">Cargar rubros base</button></div></div>
+        <div class="btn-row"><button class="btn btn-sm" id="btn-gestion-rubros">Agregar / eliminar rubro</button></div></div>
       <div class="kpi-grid" id="kpi-presupuesto"></div>
       <div class="panel">
         <div class="panel-head"><div><div class="panel-title">Agregar o editar un rubro</div><p class="panel-sub">Los objetivos se cargan en dólares. El monto se reparte lineal entre el mes de inicio y el de fin.</p></div></div>
@@ -636,7 +656,7 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
     <!-- ===== PROVEEDORES ===== -->
     <section id="view-proveedores" class="view">
       <div class="topbar"><div><h1>Proveedores</h1><p>Listado maestro que alimenta la carga de gastos</p></div>
-        <div class="btn-row"><button class="btn btn-primary btn-sm" id="btn-prov-nuevo">Nuevo proveedor</button><button class="btn btn-sm" id="btn-prov-base">Cargar los conocidos</button></div></div>
+        <div class="btn-row"><button class="btn btn-primary btn-sm" id="btn-prov-nuevo">Nuevo proveedor</button></div></div>
       <div class="panel"><div class="panel-head"><div><div class="panel-title">Listado</div><p class="panel-sub" id="prov-resumen">Sin proveedores cargados</p></div></div><div class="table-wrap" id="tabla-proveedores-abm"></div></div>
     </section>
 
@@ -694,38 +714,9 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
           <p class="panel-sub" style="margin-top:12px;">Cargá el monto total que costó cada rubro en Abaucán, convertido al dólar de aquel momento.</p>
         </div>
       </div>
-      <div class="grid-2">
-        <div class="panel">
-          <div class="panel-head"><div><div class="panel-title">Cotización de referencia</div><p class="panel-sub">Dólar MEP, API pública ArgentinaDatos</p></div></div>
-          <div id="estado-dolar"></div>
-        </div>
-        <div class="panel">
-          <div class="panel-head"><div><div class="panel-title">Borrar todos los datos</div><p class="panel-sub">Vacía gastos, presupuesto, aportes, proveedores y Abaucán. No se puede deshacer.</p></div></div>
-          <div class="btn-row"><button class="btn" id="btn-limpiar-todo" style="color:#9E2B25;">Borrar todo</button></div>
-        </div>
-      </div>
       <div class="panel">
-        <div class="panel-head"><div><div class="panel-title">Puesta en marcha en Firebase y GitHub</div><p class="panel-sub">Lo que falta hacer una sola vez para que la app quede operativa en la nube</p></div></div>
-        <div id="estado-firebase" style="margin-bottom:18px;"></div>
-        <ol class="pasos">
-          <li>Entrá a <code>console.firebase.google.com</code> y creá un proyecto llamado <code>rio-colorado</code>. Es gratis en el plan Spark.</li>
-          <li>En <strong>Compilación → Authentication</strong>, activá el proveedor <strong>Google</strong>.</li>
-          <li>En <strong>Compilación → Firestore Database</strong>, creá la base en modo producción, región <code>southamerica-east1</code>.</li>
-          <li>En <strong>Configuración del proyecto → Tus apps</strong>, agregá una app web y copiá el objeto <code>firebaseConfig</code>.</li>
-          <li>Abrí este archivo HTML con el Bloc de notas, buscá <code>CONFIG_FIREBASE</code> arriba de todo y pegá ahí los valores. Guardá.</li>
-          <li>En Firestore → Reglas, pegá las reglas que están en el archivo <code>INSTRUCCIONES.md</code> que viene junto a esta app. Solo dejan entrar a los dos correos autorizados.</li>
-          <li>Creá un repositorio en GitHub, subí el HTML con el nombre <code>index.html</code> y activá <strong>Settings → Pages</strong> desde la rama principal.</li>
-          <li>En Firebase → Authentication → Configuración → Dominios autorizados, agregá el dominio que te dio GitHub Pages.</li>
-        </ol>
-      </div>
-      <div class="panel">
-        <div class="panel-head"><div><div class="panel-title">Plan de trabajo</div><p class="panel-sub">Dónde estamos</p></div></div>
-        <div class="fase-list">
-          <div class="fase done"><div class="fase-n">1</div><div><h4>Tablero con marca Magna</h4><p>Carga manual, presupuesto, curva de inversión, análisis por rubro y proveedor, import/export.</p></div></div>
-          <div class="fase done"><div class="fase-n">2</div><div><h4>Socios, macrorubros y avance físico</h4><p>Aportes y compromisos, objetivos por macrorubro, avance físico contra avance de gasto.</p></div></div>
-          <div class="fase now"><div class="fase-n">3</div><div><h4>Dólares, IA real, login y nube</h4><p>Seguimiento en dólares congelados, lectura de facturas multi-rubro, carga por texto, alertas, informe a socios, comparación con Abaucán, login con Google y datos en Firestore. Es lo que estás viendo.</p></div></div>
-          <div class="fase"><div class="fase-n">4</div><div><h4>Ajustes finos</h4><p>Reportes PDF con portada institucional, alertas automáticas por mail y control de versiones del presupuesto.</p></div></div>
-        </div>
+        <div class="panel-head"><div><div class="panel-title">Cotización de referencia</div><p class="panel-sub">Dólar MEP, API pública ArgentinaDatos</p></div></div>
+        <div id="estado-dolar"></div>
       </div>
     </section>
 
@@ -751,6 +742,48 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
       <div class="btn-row" style="margin-top:20px;">
         <button type="submit" class="btn btn-primary">Guardar</button>
         <button type="button" class="btn" id="pr-cerrar">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- modal gestión de rubros -->
+<div class="modal oculto" id="modal-rubros">
+  <div class="modal-card" style="max-width:680px;">
+    <h3>Rubros del proyecto</h3>
+    <p class="panel-sub">Agregá los rubros que necesites dentro de cada macrorubro. Solo se pueden eliminar los que no tengan presupuesto ni gastos cargados.</p>
+    <form id="form-rubro-nuevo" autocomplete="off" style="margin-bottom:22px;">
+      <div class="form-grid c2">
+        <div class="field"><label for="rb-macro">Macrorubro *</label><select id="rb-macro" required></select></div>
+        <div class="field"><label for="rb-nombre">Nombre del rubro *</label><input type="text" id="rb-nombre" placeholder="Ej. Vigas de fundación" required></div>
+      </div>
+      <div class="btn-row" style="margin-top:14px;"><button type="submit" class="btn btn-primary">Agregar rubro</button></div>
+    </form>
+    <div class="table-wrap" id="tabla-rubros-abm" style="max-height:44vh;overflow-y:auto;"></div>
+    <div class="btn-row" style="margin-top:20px;"><button type="button" class="btn" id="rb-cerrar">Cerrar</button></div>
+  </div>
+</div>
+
+<!-- modal movimiento de IVA entre proyectos -->
+<div class="modal oculto" id="modal-iva">
+  <div class="modal-card">
+    <h3 id="modal-iva-titulo">Movimiento de IVA entre proyectos</h3>
+    <p class="panel-sub">Compra o venta de crédito fiscal a otro proyecto de la desarrolladora.</p>
+    <form id="form-iva" autocomplete="off">
+      <input type="hidden" id="iv-id">
+      <div class="form-grid c2">
+        <div class="field"><label for="iv-fecha">Fecha *</label><input type="date" id="iv-fecha" required></div>
+        <div class="field"><label for="iv-tipo">Tipo *</label><select id="iv-tipo"><option value="vendido">Vendido a otro proyecto</option><option value="comprado">Comprado a otro proyecto</option></select></div>
+        <div class="field col-2"><label for="iv-proyecto">Proyecto contraparte *</label><input type="text" id="iv-proyecto" placeholder="Ej. Duplex Abaucán" required></div>
+        <div class="field"><label for="iv-iva">Monto de IVA involucrado $ *</label><input type="number" id="iv-iva" step="0.01" min="0" required><span class="hint">Crédito fiscal que cambia de proyecto.</span></div>
+        <div class="field"><label for="iv-efectivo">Efectivo cobrado o pagado $</label><input type="number" id="iv-efectivo" step="0.01" min="0"><span class="hint">Lo que realmente entra o sale de la caja.</span></div>
+        <div class="field"><label for="iv-cot">Dólar MEP del día</label><input type="number" id="iv-cot" step="0.01" min="0" placeholder="Buscando…"><span class="hint" id="iv-cot-hint">Se completa sola.</span></div>
+        <div class="field"><label for="iv-comprobante">Comprobante</label><input type="text" id="iv-comprobante" placeholder="Opcional"></div>
+        <div class="field col-2"><label for="iv-notas">Notas</label><input type="text" id="iv-notas" placeholder="Opcional"></div>
+      </div>
+      <div class="btn-row" style="margin-top:20px;">
+        <button type="submit" class="btn btn-primary">Guardar movimiento</button>
+        <button type="button" class="btn" id="iv-cerrar">Cancelar</button>
       </div>
     </form>
   </div>
@@ -789,7 +822,9 @@ const NOMBRES_POR_CORREO = { 'juliomonti91@gmail.com':'Julio', 'josemariamonti@g
 const PROYECTO = { nombre:'Río Colorado', unidades:4, superficie:414, desarrolladora:'Magna Desarrollos' };
 const REFERENCIA = { nombre:'Abaucán', unidades:3, superficie:336, periodo:'2019–2021', sistema:'losa tradicional' };
 
-const MACRORUBROS = [
+/* Lista de partida. Se puede editar desde Presupuesto → Agregar/eliminar rubro,
+   y a partir de ahí vive en los datos del proyecto (sincronizada por Firestore). */
+const MACRORUBROS_BASE = [
   { nombre:'Preliminares y movimiento de suelos', rubros:['Trabajos preliminares','Movimiento de suelos','Honorarios y permisos'] },
   { nombre:'Fundaciones y estructura', rubros:['Fundaciones','Estructura de hormigón','Losas y techos alivianados'] },
   { nombre:'Albañilería gruesa', rubros:['Mampostería','Contrapisos y carpetas','Revoques','Aislaciones'] },
@@ -798,13 +833,40 @@ const MACRORUBROS = [
   { nombre:'Aberturas y herrería', rubros:['Carpinterías','Herrería'] },
   { nombre:'Exteriores y generales', rubros:['Obras exteriores','Gastos generales de obra'] }
 ];
-const RUBROS = MACRORUBROS.reduce((a,m)=>a.concat(m.rubros),[]);
+/* MACRORUBROS es mutable: se reemplaza su contenido al cargar la estructura
+   guardada, sin romper las referencias que ya tomaron otras partes del código. */
+const MACRORUBROS = MACRORUBROS_BASE.map(m=>({nombre:m.nombre,rubros:m.rubros.slice()}));
+let RUBROS = [];
 const MACRO_DE = {};
-MACRORUBROS.forEach(m=>m.rubros.forEach(r=>{ MACRO_DE[r]=m.nombre; }));
-function macroDe(rubro){ return MACRO_DE[rubro] || 'Exteriores y generales'; }
+function reconstruirRubros(){
+  RUBROS.length = 0;
+  Object.keys(MACRO_DE).forEach(k=>delete MACRO_DE[k]);
+  MACRORUBROS.forEach(m=>m.rubros.forEach(r=>{ RUBROS.push(r); MACRO_DE[r]=m.nombre; }));
+}
+function macroDe(rubro){ return MACRO_DE[rubro] || MACRORUBROS[MACRORUBROS.length-1].nombre; }
+/* Estructura -> objeto plano para guardar, y viceversa */
+function estructuraActual(){ return MACRORUBROS.map(m=>({nombre:m.nombre,rubros:m.rubros.slice()})); }
+function aplicarEstructura(lista){
+  if(!Array.isArray(lista)||!lista.length) return;
+  MACRORUBROS.length = 0;
+  lista.forEach(m=>{ if(m&&m.nombre&&Array.isArray(m.rubros)) MACRORUBROS.push({nombre:m.nombre,rubros:m.rubros.slice()}); });
+  if(!MACRORUBROS.length) MACRORUBROS_BASE.forEach(m=>MACRORUBROS.push({nombre:m.nombre,rubros:m.rubros.slice()}));
+  reconstruirRubros();
+}
+reconstruirRubros();
 
 const TIPOS = ['Materiales','Mano de obra','Equipos','Subcontrato','Indirectos'];
 function familiaTipo(t){ return t==='Mano de obra'?'mo':(t==='Materiales'?'mat':'otros'); }
+
+/* ---------- IVA ---------- */
+const FISCAL_DISCRIMINADO='Con IVA discriminado (Factura A)';
+const FISCAL_INCLUIDO='IVA incluido sin discriminar (Factura B)';
+const FISCAL_SIN='Sin IVA / sin factura';
+const CONDICIONES_FISCALES=[FISCAL_DISCRIMINADO,FISCAL_INCLUIDO,FISCAL_SIN];
+const ALICUOTAS=[21,10.5,27];
+/* Solo el comprobante con IVA discriminado genera crédito fiscal computable. */
+function ivaDeGasto(g){ return (g.fiscal===FISCAL_DISCRIMINADO)?(g.ivaARS||0):0; }
+function ivaUSDDeGasto(g){ const iva=ivaDeGasto(g); return (iva&&g.cotizacion)?iva/g.cotizacion:0; }
 const PAGOS = ['Transferencia','Efectivo','Cheque','Tarjeta','Débito automático'];
 const SOCIOS = ['Mamá','Julio','Jose','Gerardo','Francisco'];
 const FONDO = 'Fondo común';
@@ -834,7 +896,11 @@ const MEM = {};
 
 /* ---------- ESTADO ---------- */
 const Store = {
-  gastos:[], presupuesto:[], aportes:[], compromisos:{}, proveedores:[], abaucan:[], config:{ supAbaucan:REFERENCIA.superficie },
+  gastos:[], presupuesto:[], aportes:[], compromisos:{}, proveedores:[], abaucan:[], ivamov:[], config:{ supAbaucan:REFERENCIA.superficie },
+  guardarIvaMov(m){ if(m.id){ const i=this.ivamov.findIndex(x=>x.id===m.id); if(i>=0){ this.ivamov[i]=m; this._sync('ivamov',m); return m; } }
+    m.id=this.nuevoId(); this.ivamov.push(m); this._sync('ivamov',m); return m; },
+  borrarIvaMov(id){ this.ivamov=this.ivamov.filter(m=>m.id!==id); this._sync('ivamov',{id},true); },
+  guardarEstructura(){ if(MODO_NUBE&&FB) FB.guardarDoc('config','estructura',{macrorubros:estructuraActual()}).catch(()=>{}); },
   nuevoId(){ return 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); },
   _sync(col,obj,borrar){ if(MODO_NUBE&&FB) FB.guardar(col,obj,borrar).catch(e=>toast('No se pudo sincronizar: '+e.message,true)); },
   guardarGasto(g){ if(g.id){ const i=this.gastos.findIndex(x=>x.id===g.id); if(i>=0){ this.gastos[i]=g; this._sync('gastos',g); return g; } }
@@ -862,9 +928,11 @@ const Store = {
     this.aportes=Array.isArray(d.aportes)?d.aportes:[];
     this.proveedores=Array.isArray(d.proveedores)?d.proveedores:[];
     this.abaucan=Array.isArray(d.abaucan)?d.abaucan:[];
+    this.ivamov=Array.isArray(d.ivamov)?d.ivamov:[];
     this.compromisos=(d.compromisos&&typeof d.compromisos==='object')?d.compromisos:{};
     this.config=Object.assign({supAbaucan:REFERENCIA.superficie},d.config||{});
-    if(MODO_NUBE&&FB) FB.subirTodo(this).catch(e=>toast('No se pudo subir: '+e.message,true));
+    if(d.macrorubros) aplicarEstructura(d.macrorubros);
+    if(MODO_NUBE&&FB){ FB.subirTodo(this).catch(e=>toast('No se pudo subir: '+e.message,true)); this.guardarEstructura(); }
   }
 };
 
@@ -1046,8 +1114,29 @@ function pagosDirectosDe(socio){ return Store.gastos.filter(g=>g.financia===soci
 function aportesAlFondoDe(socio){ return Store.aportes.filter(a=>a.socio===socio).reduce((s,a)=>s+(a.montoUSD||0),0); }
 function integradoPorSocio(socio){ return aportesAlFondoDe(socio)+pagosDirectosDe(socio); }
 function totalPagosDirectos(){ return SOCIOS.reduce((s,x)=>s+pagosDirectosDe(x),0); }
-/* Plata efectivamente disponible en la caja común */
-function fondoDisponible(){ return aportesAlFondo()-gastosDelFondo(); }
+/* ---------- IVA ----------
+   Solo los comprobantes con IVA discriminado (Factura A) generan crédito
+   fiscal computable. La Factura B tiene IVA adentro pero no se puede usar,
+   así que no suma. Los movimientos entre proyectos ajustan el neto. */
+function ivaGastadoUSD(){ return Store.gastos.reduce((s,g)=>s+ivaUSDDeGasto(g),0); }
+function ivaGastadoARS(){ return Store.gastos.reduce((s,g)=>s+ivaDeGasto(g),0); }
+function ivaVendidoUSD(){ return Store.ivamov.filter(m=>m.tipo==='vendido').reduce((s,m)=>s+(m.ivaUSD||0),0); }
+function ivaCompradoUSD(){ return Store.ivamov.filter(m=>m.tipo==='comprado').reduce((s,m)=>s+(m.ivaUSD||0),0); }
+function ivaNetoUSD(){ return ivaGastadoUSD()-ivaVendidoUSD()+ivaCompradoUSD(); }
+/* Efectivo que entra o sale de la caja por estos movimientos */
+function efectivoIvaUSD(){
+  return Store.ivamov.reduce((s,m)=>s+((m.tipo==='vendido'?1:-1)*(m.efectivoUSD||0)),0);
+}
+/* Gasto según respaldo documental */
+function gastoPorCondicion(){
+  const o={}; CONDICIONES_FISCALES.forEach(c=>o[c]=0);
+  Store.gastos.forEach(g=>{ const c=CONDICIONES_FISCALES.indexOf(g.fiscal)>=0?g.fiscal:FISCAL_SIN; o[c]+=(g.montoUSD||0); });
+  return o;
+}
+
+/* Plata efectivamente disponible en la caja común.
+   Incluye el efectivo neto de los movimientos de IVA entre proyectos. */
+function fondoDisponible(){ return aportesAlFondo()-gastosDelFondo()+efectivoIvaUSD(); }
 /* Total puesto por todos los socios, por cualquiera de las dos vías */
 function totalIntegrado(){ return aportesAlFondo()+totalPagosDirectos(); }
 function totalAportado(){ return totalIntegrado(); }
@@ -1165,6 +1254,7 @@ function contextoObra(){
 
 /* ---------- LECTURA DE FACTURAS (multi-rubro) ---------- */
 let renglones = [];
+let facturaFiscal = FISCAL_DISCRIMINADO, facturaIVA = 0, facturaAlicuota = 21;
 
 function archivoABase64(file){
   return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.onerror=()=>rej(new Error('No se pudo leer el archivo.')); r.readAsDataURL(file); });
@@ -1185,8 +1275,13 @@ async function leerFactura(file){
       : {type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}};
     const sistema='Sos un asistente de control de costos de obra en Argentina. Analizás facturas de proveedores de construcción y las imputás a los rubros de la obra. Respondés SOLO con JSON válido, sin explicaciones ni markdown.';
     const instruccion='Analizá esta factura y devolvé un JSON con esta forma exacta:\n'
-      +'{"fecha":"AAAA-MM-DD","proveedor":"","cuit":"","comprobante":"","total":0,"renglones":[{"concepto":"","rubro":"","tipo":"","monto":0}]}\n\n'
-      +'Reglas:\n'
+      +'{"fecha":"AAAA-MM-DD","proveedor":"","cuit":"","comprobante":"","tipo_comprobante":"A|B|C|X","total":0,"neto":0,"iva":0,"alicuota":21,"renglones":[{"concepto":"","rubro":"","tipo":"","monto":0}]}\n\n'
+      +'Reglas sobre el IVA:\n'
+      +'- "tipo_comprobante": la letra de la factura (A, B, C) tal como figura. Si no se distingue, poné "X".\n'
+      +'- Si es Factura A, el IVA viene discriminado: copiá "neto" e "iva" EXACTAMENTE como figuran en el comprobante, no los calcules. "alicuota" es el porcentaje aplicado.\n'
+      +'- Si es Factura B o C, el IVA no está discriminado: poné "iva":0 y "neto" igual al total. No lo estimes.\n'
+      +'- "total" siempre es el importe final a pagar.\n\n'
+      +'Reglas sobre los renglones:\n'
       +'- "rubro" debe ser exactamente uno de esta lista: '+RUBROS.join(' | ')+'\n'
       +'- "tipo" debe ser exactamente uno de: '+TIPOS.join(' | ')+'\n'
       +'- Si la factura tiene ítems de rubros distintos, generá un renglón por cada rubro y repartí los montos. La suma de los renglones debe dar el total de la factura (IVA incluido, prorrateado si hace falta).\n'
@@ -1200,6 +1295,14 @@ async function leerFactura(file){
     document.getElementById('fa-proveedor').value=d.proveedor||'';
     document.getElementById('fa-cuit').value=d.cuit||'';
     document.getElementById('fa-comprobante').value=d.comprobante||'';
+    // condición fiscal deducida del tipo de comprobante
+    const letra=String(d.tipo_comprobante||'').toUpperCase().trim();
+    const ivaLeido=Number(d.iva)||0;
+    facturaFiscal = (letra==='A'&&ivaLeido>0) ? FISCAL_DISCRIMINADO : (letra==='B'||letra==='C' ? FISCAL_INCLUIDO : FISCAL_SIN);
+    facturaIVA = facturaFiscal===FISCAL_DISCRIMINADO ? ivaLeido : 0;
+    facturaAlicuota = Number(d.alicuota)||21;
+    const selF=document.getElementById('fa-fiscal'); if(selF) selF.value=facturaFiscal;
+    const inpI=document.getElementById('fa-iva'); if(inpI) inpI.value=facturaIVA||'';
     renglones=(d.renglones||[]).map(r=>({
       id:Store.nuevoId(), concepto:r.concepto||'(sin concepto)',
       rubro:RUBROS.indexOf(r.rubro)>=0?r.rubro:'Gastos generales de obra',
@@ -1258,7 +1361,9 @@ function renderRenglones(){
   document.getElementById('fa-guardar').disabled=false;
 }
 function limpiarFactura(){
-  renglones=[];
+  renglones=[]; facturaFiscal=FISCAL_DISCRIMINADO; facturaIVA=0; facturaAlicuota=21;
+  const sf=document.getElementById('fa-fiscal'); if(sf) sf.value=FISCAL_DISCRIMINADO;
+  const si=document.getElementById('fa-iva'); if(si) si.value='';
   ['fa-fecha','fa-proveedor','fa-cuit','fa-comprobante'].forEach(id=>{ const e=document.getElementById(id); if(e)e.value=''; });
   document.getElementById('fa-fecha').value=hoyISO();
   document.getElementById('factura-preview').innerHTML='';
@@ -1276,10 +1381,17 @@ async function guardarRenglones(){
   const c=await cotizacionMEP(fecha);
   if(!c){ toast('No se pudo obtener la cotización. Cargá el gasto a mano.',true); return; }
   asegurarProveedor(prov,cuit);
+  const fiscal=(document.getElementById('fa-fiscal')||{}).value||facturaFiscal;
+  const ivaTotal=fiscal===FISCAL_DISCRIMINADO?(parseFloat((document.getElementById('fa-iva')||{}).value)||facturaIVA||0):0;
+  const totalFactura=validos.reduce((s,r)=>s+Number(r.monto),0);
   validos.forEach(r=>{ const monto=Number(r.monto);
+    // el IVA de la factura se reparte entre renglones en proporción a su monto
+    const ivaR=(ivaTotal&&totalFactura)?ivaTotal*(monto/totalFactura):0;
     Store.guardarGasto({ fecha, rubro:r.rubro, tipo:r.tipo, proveedor:prov, concepto:r.concepto, montoARS:monto,
       cotizacion:c.valor, montoUSD:monto/c.valor, unidad:uni, financia:fin, formaPago:'', estado:'Pagado',
-      cargadoPor:USUARIO?USUARIO.nombre:'—', comprobante:comp, notas:cuit?('CUIT '+cuit):'' }); });
+      cargadoPor:USUARIO?USUARIO.nombre:'—', comprobante:comp, notas:cuit?('CUIT '+cuit):'',
+      fiscal, alicuota:fiscal===FISCAL_DISCRIMINADO?facturaAlicuota:null,
+      ivaARS:Number(ivaR.toFixed(2)), ivaUSD:ivaR/c.valor }); });
   limpiarFactura(); renderTodo(); toast(validos.length+' gasto(s) guardados desde la factura'); irA('gastos');
 }
 
@@ -1597,6 +1709,9 @@ function limpiarFormGasto(){
   document.getElementById('form-gasto').reset();
   document.getElementById('g-id').value=''; document.getElementById('g-fecha').value=hoyISO(); document.getElementById('g-usd').value='—';
   document.getElementById('g-financia').value=FONDO; document.getElementById('g-unidad').value=UNIDADES[0];
+  document.getElementById('g-fiscal').value=FISCAL_DISCRIMINADO;
+  delete document.getElementById('g-iva').dataset.tocado;
+  actualizarCamposFiscales();
   document.getElementById('form-titulo').textContent='Nuevo gasto'; document.getElementById('btn-guardar').textContent='Guardar gasto';
   document.getElementById('btn-cancelar').style.display='none'; buscarCotizacion(hoyISO(),'g-cot','g-cot-hint');
 }
@@ -1607,6 +1722,11 @@ function editarGasto(id){ const g=Store.gastos.find(x=>x.id===id); if(!g)return;
   document.getElementById('g-monto').value=g.montoARS; document.getElementById('g-cot').value=g.cotizacion||''; document.getElementById('g-unidad').value=g.unidad||UNIDADES[0];
   document.getElementById('g-financia').value=g.financia||FONDO; document.getElementById('g-pago').value=g.formaPago||''; document.getElementById('g-estado').value=g.estado||'Pagado';
   document.getElementById('g-comprobante').value=g.comprobante||''; document.getElementById('g-notas').value=g.notas||'';
+  document.getElementById('g-fiscal').value=CONDICIONES_FISCALES.indexOf(g.fiscal)>=0?g.fiscal:FISCAL_SIN;
+  if(g.alicuota) document.getElementById('g-alicuota').value=g.alicuota;
+  document.getElementById('g-iva').value=g.ivaARS||'';
+  document.getElementById('g-iva').dataset.tocado='1';
+  actualizarCamposFiscales();
   document.getElementById('form-titulo').textContent='Editando un gasto'; document.getElementById('btn-guardar').textContent='Guardar cambios';
   document.getElementById('btn-cancelar').style.display='inline-flex'; recalcularUSD(); irA('gastos'); window.scrollTo({top:0,behavior:'smooth'}); }
 function filtrarGastos(){
@@ -1624,16 +1744,19 @@ function filtrarGastos(){
 function renderTablaGastos(){
   const cont=document.getElementById('tabla-gastos'); const filas=filtrarGastos();
   const tUSD=filas.reduce((s,g)=>s+(g.montoUSD||0),0),tARS=filas.reduce((s,g)=>s+(g.montoARS||0),0);
-  document.getElementById('gastos-resumen').textContent=Store.gastos.length?fmtNum(filas.length)+' de '+fmtNum(Store.gastos.length)+' movimientos · '+fmtUSD(tUSD)+' · '+fmtARS(tARS)+' nominales':'Sin movimientos todavía';
+  document.getElementById('gastos-resumen').textContent=Store.gastos.length?fmtNum(filas.length)+' de '+fmtNum(Store.gastos.length)+' movimientos · '+fmtUSD(tUSD)+' · IVA '+fmtUSD(filas.reduce((a,g)=>a+ivaUSDDeGasto(g),0)):'Sin movimientos todavía';
   if(!filas.length){ cont.innerHTML='<div class="empty"><strong>'+(Store.gastos.length?'Ningún gasto coincide con el filtro':'Sin gastos cargados')+'</strong>'+(Store.gastos.length?'Probá otros criterios.':'Completá el formulario, usá la carga rápida o leé una factura.')+'</div>'; return; }
-  let html='<table><thead><tr><th>Fecha</th><th>Rubro</th><th>Tipo</th><th>Proveedor</th><th>Concepto</th><th>Financia</th><th class="money">USD</th><th class="money">ARS</th><th>MEP</th><th>Carga</th><th></th></tr></thead><tbody>';
+  let html='<table><thead><tr><th>Fecha</th><th>Rubro</th><th>Tipo</th><th>Proveedor</th><th>Concepto</th><th>Financia</th><th class="money">USD</th><th class="money">IVA</th><th>Fiscal</th><th class="money">ARS</th><th>Carga</th><th></th></tr></thead><tbody>';
   filas.forEach(g=>{ html+='<tr><td>'+fmtFecha(g.fecha)+'</td><td>'+esc(g.rubro)+'</td><td><span class="tag">'+esc(g.tipo||'—')+'</span></td><td>'+esc(g.proveedor)+'</td><td>'+esc(g.concepto)+'</td>'
     +'<td><span class="tag '+(g.financia&&g.financia!==FONDO?'socio':'')+'">'+esc(g.financia||FONDO)+'</span></td>'
-    +'<td class="money">'+(g.montoUSD?fmtUSD(g.montoUSD,2):'—')+'</td><td class="money" style="font-weight:400;color:var(--n-500);">'+fmtARS(g.montoARS,2)+'</td>'
-    +'<td style="font-size:11.5px;color:var(--n-500);">'+(g.cotizacion?fmtNum(Math.round(g.cotizacion)):'—')+'</td>'
+    +'<td class="money">'+(g.montoUSD?fmtUSD(g.montoUSD,2):'—')+'</td>'
+    +'<td class="money" style="font-weight:400;">'+(ivaUSDDeGasto(g)?fmtUSD(ivaUSDDeGasto(g),2):'—')+'</td>'
+    +'<td>'+(g.fiscal===FISCAL_DISCRIMINADO?'<span class="tag verde">A</span>':(g.fiscal===FISCAL_INCLUIDO?'<span class="tag marron">B</span>':'<span class="tag">S/F</span>'))+'</td>'
+    +'<td class="money" style="font-weight:400;color:var(--n-500);">'+fmtARS(g.montoARS,2)+'</td>'
     +'<td style="font-size:11.5px;color:var(--n-500);">'+esc(g.cargadoPor||'—')+'</td>'
     +'<td style="white-space:nowrap;text-align:right;"><button class="btn btn-ghost btn-sm" data-editar="'+esc(g.id)+'">Editar</button><button class="btn btn-ghost btn-sm" data-borrar="'+esc(g.id)+'" style="color:#9E2B25;">Borrar</button></td></tr>'; });
-  html+='<tr class="total-row"><td colspan="6">Total filtrado</td><td class="money">'+fmtUSD(tUSD)+'</td><td class="money">'+fmtARS(tARS)+'</td><td colspan="3"></td></tr></tbody></table>';
+  const tIVA=filas.reduce((a,g)=>a+ivaUSDDeGasto(g),0);
+  html+='<tr class="total-row"><td colspan="6">Total filtrado</td><td class="money">'+fmtUSD(tUSD)+'</td><td class="money">'+fmtUSD(tIVA)+'</td><td></td><td class="money">'+fmtARS(tARS)+'</td><td colspan="2"></td></tr></tbody></table>';
   cont.innerHTML=html;
   cont.querySelectorAll('[data-editar]').forEach(b=>b.addEventListener('click',()=>editarGasto(b.dataset.editar)));
   cont.querySelectorAll('[data-borrar]').forEach(b=>b.addEventListener('click',()=>{ const g=Store.gastos.find(x=>x.id===b.dataset.borrar);
@@ -1849,20 +1972,181 @@ function renderEstadoIA(problema){
   document.querySelectorAll('.chip-ia').forEach(c=>{ c.style.opacity=hayIA()?'1':'.45'; });
 }
 function renderEstadoFirebase(){
-  const cont=document.getElementById('estado-firebase'); if(!cont)return;
-  cont.innerHTML=MODO_NUBE
-    ? '<div class="aviso verde" style="margin-bottom:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C6F46" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg><div><strong>Conectado a Firestore.</strong> Los datos se guardan solos y los ven Julio y Jose. Los pasos de abajo ya están hechos.</div></div>'
-    : '<div class="aviso marron" style="margin-bottom:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><div><strong>Modo local.</strong> Falta configurar Firebase: los datos viven solo en esta pestaña y se pierden al cerrarla. Exportá el respaldo antes de salir.</div></div>';
   const badge=document.getElementById('badge-store');
   if(badge){ badge.className='badge-store'+(MODO_NUBE?' nube':''); badge.innerHTML='<span class="dot"></span>'+(MODO_NUBE?'Datos en la nube':'Modo local'); }
 }
+/* ---------- VISTA · IVA ---------- */
+function renderIVA(){
+  const gast=ivaGastadoUSD(), vend=ivaVendidoUSD(), comp=ivaCompradoUSD(), neto=ivaNetoUSD(), efec=efectivoIvaUSD();
+  const ejec=totalEjecutado();
+  const cont=document.getElementById('kpi-iva');
+  if(cont) cont.innerHTML=
+    '<div class="kpi acento"><div class="kpi-label">IVA gastado</div><div class="kpi-value num">'+fmtUSD(gast)+'</div><div class="kpi-sub">De comprobantes con IVA discriminado</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Vendido a otros proyectos</div><div class="kpi-value num">'+fmtUSD(vend)+'</div><div class="kpi-sub">'+(comp?'Comprado '+fmtEje(comp):'Crédito cedido')+'</div></div>'
+    +'<div class="kpi"><div class="kpi-label">IVA neto</div><div class="kpi-value num">'+fmtUSD(neto)+'</div><div class="kpi-sub">Gastado − vendido + comprado</div></div>'
+    +'<div class="kpi '+(efec<0?'acento-m':'')+'"><div class="kpi-label">Efectivo por movimientos</div><div class="kpi-value num">'+fmtUSD(efec)+'</div><div class="kpi-sub">'+(efec>=0?'Entró al fondo del proyecto':'Salió del fondo')+'</div></div>';
+
+  // IVA por rubro
+  const tr=document.getElementById('tabla-iva-rubro');
+  const porRubro={};
+  Store.gastos.forEach(g=>{ const v=ivaUSDDeGasto(g); if(v>0) porRubro[g.rubro]=(porRubro[g.rubro]||0)+v; });
+  const filas=Object.entries(porRubro).sort((a,b)=>b[1]-a[1]);
+  if(!filas.length){ tr.innerHTML='<div class="empty"><strong>Sin IVA discriminado</strong>Cargá gastos con condición fiscal "Con IVA discriminado" para ver el detalle.</div>'; }
+  else { let h='<table><thead><tr><th>Rubro</th><th class="money">IVA</th><th style="width:70px;">Incid.</th></tr></thead><tbody>';
+    filas.forEach(f=>{ h+='<tr><td>'+esc(f[0])+'</td><td class="money">'+fmtUSD(f[1])+'</td><td style="font-size:12px;color:var(--gris);">'+(gast?(f[1]/gast*100).toFixed(1):'0')+'%</td></tr>'; });
+    tr.innerHTML=h+'<tr class="total-row"><td>Total</td><td class="money">'+fmtUSD(gast)+'</td><td></td></tr></tbody></table>'; }
+
+  // formalizacion del gasto
+  const porCond=gastoPorCondicion();
+  const items=[
+    {label:'Factura A',value:porCond[FISCAL_DISCRIMINADO],color:'#0C6F46'},
+    {label:'Factura B',value:porCond[FISCAL_INCLUIDO],color:'#8B6F60'},
+    {label:'Sin factura',value:porCond[FISCAL_SIN],color:'#9A9A97'}
+  ].filter(x=>x.value>0);
+  const cf=document.getElementById('chart-fiscal');
+  if(!items.length){ cf.innerHTML=svgVacio('Cargá gastos para ver la formalización.'); }
+  else { const conFactura=porCond[FISCAL_DISCRIMINADO]+porCond[FISCAL_INCLUIDO];
+    cf.innerHTML=svgDonut(items,'Ejecutado')+leyenda(items)
+      +'<p class="panel-sub" style="text-align:center;margin-top:14px;">'+fmtPct(ejec?conFactura/ejec*100:0)+' de la obra está respaldada con comprobante.</p>'; }
+
+  // movimientos entre proyectos
+  const tm=document.getElementById('tabla-iva-mov');
+  const movs=Store.ivamov.slice().sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  if(!movs.length){ tm.innerHTML='<div class="empty"><strong>Sin movimientos</strong>Registrá acá las compras o ventas de crédito fiscal a otros proyectos de la desarrolladora.</div>'; }
+  else { let h='<table><thead><tr><th>Fecha</th><th>Tipo</th><th>Proyecto</th><th class="money">IVA</th><th class="money">Efectivo</th><th style="width:70px;">Ratio</th><th>Comprob.</th><th></th></tr></thead><tbody>';
+    let ti=0,te=0;
+    movs.forEach(m=>{ const signo=m.tipo==='vendido'?1:-1; ti+=signo*(m.ivaUSD||0); te+=signo*(m.efectivoUSD||0);
+      const ratio=(m.ivaUSD>0&&m.efectivoUSD)?(m.efectivoUSD/m.ivaUSD*100):null;
+      h+='<tr><td>'+fmtFecha(m.fecha)+'</td>'
+        +'<td><span class="tag '+(m.tipo==='vendido'?'verde':'marron')+'">'+(m.tipo==='vendido'?'Vendido':'Comprado')+'</span></td>'
+        +'<td>'+esc(m.proyecto||'—')+'</td><td class="money">'+fmtUSD(m.ivaUSD||0)+'</td>'
+        +'<td class="money">'+fmtUSD(m.efectivoUSD||0)+'</td>'
+        +'<td style="font-size:12px;color:var(--gris);">'+(ratio!==null?ratio.toFixed(0)+'%':'—')+'</td>'
+        +'<td style="font-size:12px;">'+esc(m.comprobante||'—')+'</td>'
+        +'<td style="white-space:nowrap;text-align:right;"><button class="btn btn-ghost btn-sm" data-ivedit="'+esc(m.id)+'">Editar</button><button class="btn btn-ghost btn-sm" data-ivdel="'+esc(m.id)+'" style="color:#9E2B25;">Borrar</button></td></tr>'; });
+    h+='<tr class="total-row"><td colspan="3">Neto (vendido − comprado)</td><td class="money">'+fmtUSD(ti)+'</td><td class="money">'+fmtUSD(te)+'</td><td colspan="3"></td></tr></tbody></table>';
+    tm.innerHTML=h;
+    tm.querySelectorAll('[data-ivedit]').forEach(b=>b.addEventListener('click',()=>abrirModalIva(b.dataset.ivedit)));
+    tm.querySelectorAll('[data-ivdel]').forEach(b=>b.addEventListener('click',()=>{ const m=Store.ivamov.find(x=>x.id===b.dataset.ivdel);
+      if(m&&confirm('¿Borrar el movimiento de IVA con '+m.proyecto+' por '+fmtUSD(m.ivaUSD||0)+'?')){ Store.borrarIvaMov(b.dataset.ivdel); toast('Movimiento borrado'); renderTodo(); } })); }
+
+  // IVA por proveedor
+  const tp=document.getElementById('tabla-iva-prov');
+  const porProv={};
+  Store.gastos.forEach(g=>{ const v=ivaUSDDeGasto(g); if(v>0){ const p=g.proveedor||'Sin proveedor'; porProv[p]=(porProv[p]||0)+v; } });
+  const fp=Object.entries(porProv).sort((a,b)=>b[1]-a[1]);
+  if(!fp.length){ tp.innerHTML='<div class="empty"><strong>Sin datos</strong>El IVA por proveedor sale de los gastos con factura A.</div>'; return; }
+  let h='<table><thead><tr><th>Proveedor</th><th class="money">IVA aportado</th><th class="money">Gasto total</th><th style="width:80px;">% con IVA</th></tr></thead><tbody>';
+  const gastoProv=agrupar(Store.gastos,g=>g.proveedor||'Sin proveedor');
+  fp.forEach(f=>{ const tot=gastoProv[f[0]]||0;
+    h+='<tr><td style="font-weight:600;color:var(--tinta);">'+esc(f[0])+'</td><td class="money">'+fmtUSD(f[1])+'</td>'
+      +'<td class="money" style="font-weight:400;color:var(--n-500);">'+fmtUSD(tot)+'</td>'
+      +'<td style="font-size:12px;color:var(--gris);">'+(tot?fmtPct(f[1]/tot*100):'—')+'</td></tr>'; });
+  tp.innerHTML=h+'<tr class="total-row"><td>Total</td><td class="money">'+fmtUSD(gast)+'</td><td class="money">'+fmtUSD(totalEjecutado())+'</td><td></td></tr></tbody></table>';
+}
+
+/* ---------- MODAL MOVIMIENTO DE IVA ---------- */
+function abrirModalIva(id){
+  const m=document.getElementById('modal-iva');
+  document.getElementById('form-iva').reset(); document.getElementById('iv-id').value='';
+  document.getElementById('modal-iva-titulo').textContent='Movimiento de IVA entre proyectos';
+  document.getElementById('iv-fecha').value=hoyISO();
+  if(id){ const mv=Store.ivamov.find(x=>x.id===id);
+    if(mv){ document.getElementById('iv-id').value=mv.id; document.getElementById('iv-fecha').value=mv.fecha;
+      document.getElementById('iv-tipo').value=mv.tipo; document.getElementById('iv-proyecto').value=mv.proyecto||'';
+      document.getElementById('iv-iva').value=mv.ivaARS||''; document.getElementById('iv-efectivo').value=mv.efectivoARS||'';
+      document.getElementById('iv-cot').value=mv.cotizacion||''; document.getElementById('iv-comprobante').value=mv.comprobante||'';
+      document.getElementById('iv-notas').value=mv.notas||'';
+      document.getElementById('modal-iva-titulo').textContent='Editar movimiento de IVA'; } }
+  else buscarCotizacion(hoyISO(),'iv-cot','iv-cot-hint');
+  m.classList.remove('oculto');
+}
+
+/* ---------- GESTIÓN DE RUBROS ---------- */
+function usosDeRubro(r){
+  return { gastos:Store.gastos.filter(g=>g.rubro===r).length,
+           presu:Store.presupuesto.filter(p=>p.rubro===r&&objetivoRubro(p)>0).length,
+           abaucan:Store.abaucan.filter(a=>a.rubro===r).length };
+}
+function abrirModalRubros(){
+  poblarSelect(document.getElementById('rb-macro'),MACRORUBROS.map(m=>m.nombre),'Elegí un macrorubro');
+  renderRubrosABM();
+  document.getElementById('modal-rubros').classList.remove('oculto');
+}
+function renderRubrosABM(){
+  const cont=document.getElementById('tabla-rubros-abm');
+  let h='<table><thead><tr><th>Rubro</th><th style="width:80px;">Gastos</th><th style="width:110px;">Presupuesto</th><th></th></tr></thead><tbody>';
+  MACRORUBROS.forEach(m=>{
+    h+='<tr class="macro-row"><td colspan="4">'+esc(m.nombre)+'</td></tr>';
+    if(!m.rubros.length) h+='<tr><td colspan="4" style="padding-left:26px;color:var(--n-500);font-size:12.5px;">Sin rubros</td></tr>';
+    m.rubros.forEach(r=>{
+      const u=usosDeRubro(r); const p=Store.presupuesto.find(x=>x.rubro===r); const obj=p?objetivoRubro(p):0;
+      const bloqueado=u.gastos>0||obj>0;
+      h+='<tr><td style="padding-left:26px;">'+esc(r)+'</td>'
+        +'<td style="font-size:12.5px;color:'+(u.gastos?'var(--tinta)':'var(--n-500)')+'">'+(u.gastos||'—')+'</td>'
+        +'<td class="money" style="font-weight:400;">'+(obj?fmtUSD(obj):'—')+'</td>'
+        +'<td style="text-align:right;">'+(bloqueado
+          ? '<span class="tag" title="Tiene datos cargados">En uso</span>'
+          : '<button class="btn btn-ghost btn-sm" data-rbdel="'+esc(r)+'" style="color:#9E2B25;">Eliminar</button>')+'</td></tr>';
+    });
+  });
+  cont.innerHTML=h+'</tbody></table>';
+  cont.querySelectorAll('[data-rbdel]').forEach(b=>b.addEventListener('click',()=>eliminarRubro(b.dataset.rbdel)));
+}
+function agregarRubro(macro,nombre){
+  const n=(nombre||'').trim();
+  if(!macro){ toast('Elegí un macrorubro',true); return false; }
+  if(!n){ toast('Poné un nombre',true); return false; }
+  if(RUBROS.some(r=>r.toLowerCase()===n.toLowerCase())){ toast('Ya existe un rubro con ese nombre',true); return false; }
+  const m=MACRORUBROS.find(x=>x.nombre===macro);
+  if(!m){ toast('No se encontró el macrorubro',true); return false; }
+  m.rubros.push(n); reconstruirRubros(); Store.guardarEstructura();
+  return true;
+}
+function eliminarRubro(r){
+  const u=usosDeRubro(r); const p=Store.presupuesto.find(x=>x.rubro===r); const obj=p?objetivoRubro(p):0;
+  if(u.gastos>0){ toast('No se puede: "'+r+'" tiene '+u.gastos+' gasto(s) cargados',true); return; }
+  if(obj>0){ toast('No se puede: "'+r+'" tiene presupuesto cargado. Ponelo en cero primero.',true); return; }
+  if(!confirm('¿Eliminar el rubro "'+r+'"?'))return;
+  MACRORUBROS.forEach(m=>{ m.rubros=m.rubros.filter(x=>x!==r); });
+  // limpiar registros vacíos asociados
+  if(p) Store.borrarPresu(p.id);
+  Store.abaucan.filter(a=>a.rubro===r).forEach(a=>Store.borrarAbaucan(a.id));
+  reconstruirRubros(); Store.guardarEstructura();
+  toast('Rubro eliminado'); renderRubrosABM(); renderTodo();
+}
+
+/* ---------- CÁLCULO DE IVA EN EL FORMULARIO ---------- */
+function actualizarCamposFiscales(){
+  const cond=document.getElementById('g-fiscal').value;
+  const disc=(cond===FISCAL_DISCRIMINADO);
+  ['campo-alicuota','campo-iva','campo-neto'].forEach(id=>{
+    const e=document.getElementById(id); if(e) e.style.display=disc?'flex':'none'; });
+  if(!disc){ document.getElementById('g-iva').value=''; document.getElementById('g-neto').value='—'; }
+  else recalcularIVA(true);
+}
+/* recalcula el IVA a partir del total y la alícuota.
+   forzar = true reescribe el campo aunque el usuario lo haya tocado */
+function recalcularIVA(forzar){
+  const cond=document.getElementById('g-fiscal').value;
+  if(cond!==FISCAL_DISCRIMINADO) return;
+  const total=parseFloat(document.getElementById('g-monto').value)||0;
+  const ali=parseFloat(document.getElementById('g-alicuota').value)||21;
+  const campoIva=document.getElementById('g-iva');
+  if(forzar||!campoIva.dataset.tocado){
+    const iva=total>0?total-(total/(1+ali/100)):0;
+    campoIva.value=iva>0?iva.toFixed(2):'';
+  }
+  const iva=parseFloat(campoIva.value)||0;
+  document.getElementById('g-neto').value=total>0?fmtARS(total-iva,2):'—';
+}
 /* ---------- IMPORTAR / EXPORTAR ---------- */
-const COLUMNAS=['Fecha','Rubro','Tipo de costo','Proveedor','Concepto','Monto ARS','Cotizacion MEP','Financiado por','Unidad','Forma de pago','Estado','Comprobante','Notas'];
+const COLUMNAS=['Fecha','Rubro','Tipo de costo','Proveedor','Concepto','Monto ARS','Cotizacion MEP','Condicion fiscal','Alicuota %','IVA ARS','Financiado por','Unidad','Forma de pago','Estado','Comprobante','Notas'];
 function hayXLSX(){ return typeof XLSX!=='undefined'; }
 function descargarArchivo(nombre,contenido,tipo){ const blob=contenido instanceof Blob?contenido:new Blob([contenido],{type:tipo||'text/plain;charset=utf-8'});
   const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=nombre; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),1500); }
 function descargarPlantilla(){
-  const ej=[['2026-08-01','Losas y techos alivianados','Materiales','Prevedello','Viguetas pretensadas — dúplex 1',1850000,'',FONDO,'Común / toda la obra','Transferencia','Pagado','Factura A 0001-00001234','']];
+  const ej=[['2026-08-01','Losas y techos alivianados','Materiales','Prevedello','Viguetas pretensadas — dúplex 1',1850000,'',FISCAL_DISCRIMINADO,21,321074.38,FONDO,'Común / toda la obra','Transferencia','Pagado','Factura A 0001-00001234','']];
   if(hayXLSX()){ const ws=XLSX.utils.aoa_to_sheet([COLUMNAS].concat(ej)); ws['!cols']=COLUMNAS.map(c=>({wch:Math.max(c.length+4,14)}));
     const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Gastos'); XLSX.writeFile(wb,'Plantilla_Gastos_Rio_Colorado.xlsx'); }
   else { const csv=[COLUMNAS.join(';')].concat(ej.map(f=>f.join(';'))).join('\n'); descargarArchivo('Plantilla_Gastos_Rio_Colorado.csv','\uFEFF'+csv,'text/csv;charset=utf-8'); }
@@ -1894,12 +2178,19 @@ async function procesarImportacion(filas){
       cotizacion:normalizarNumero(buscarCampo(f,['Cotizacion MEP','Cotizacion','MEP','Dolar']))||null,
       financia:FINANCIA_OPC.indexOf(fin)>=0?fin:FONDO,unidad:String(buscarCampo(f,['Unidad','Destino'])||UNIDADES[0]).trim(),
       formaPago:String(buscarCampo(f,['Forma de pago','Pago'])||'').trim(),estado:String(buscarCampo(f,['Estado'])||'Pagado').trim(),
-      cargadoPor:USUARIO?USUARIO.nombre:'—',comprobante:String(buscarCampo(f,['Comprobante','Factura'])||'').trim(),notas:String(buscarCampo(f,['Notas','Observaciones'])||'').trim() });
+      cargadoPor:USUARIO?USUARIO.nombre:'—',comprobante:String(buscarCampo(f,['Comprobante','Factura'])||'').trim(),notas:String(buscarCampo(f,['Notas','Observaciones'])||'').trim(),
+      fiscal:(function(){ const c=String(buscarCampo(f,['Condicion fiscal','Condicion'])||'').trim();
+        return CONDICIONES_FISCALES.indexOf(c)>=0?c:FISCAL_SIN; })(),
+      alicuota:normalizarNumero(buscarCampo(f,['Alicuota %','Alicuota']))||null,
+      ivaARS:normalizarNumero(buscarCampo(f,['IVA ARS','IVA'])) });
   });
   res.innerHTML='<p class="panel-sub">Buscando cotizaciones faltantes…</p>';
   const sinCot=Array.from(new Set(nuevos.filter(n=>!n.cotizacion).map(n=>n.fecha)));
   for(const f of sinCot.slice(0,40)){ const c=await cotizacionMEP(f); if(c)nuevos.forEach(n=>{ if(n.fecha===f&&!n.cotizacion)n.cotizacion=c.valor; }); }
-  nuevos.forEach(n=>{ n.montoUSD=n.cotizacion?n.montoARS/n.cotizacion:null; asegurarProveedor(n.proveedor,''); Store.guardarGasto(n); });
+  nuevos.forEach(n=>{ n.montoUSD=n.cotizacion?n.montoARS/n.cotizacion:null;
+    if(n.fiscal!==FISCAL_DISCRIMINADO){ n.ivaARS=0; n.alicuota=null; }
+    n.ivaUSD=(n.ivaARS&&n.cotizacion)?n.ivaARS/n.cotizacion:0;
+    asegurarProveedor(n.proveedor,''); Store.guardarGasto(n); });
   let html='<div class="aviso"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="'+(errores.length?'#B3541E':'#0C6F46')+'" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg><div><strong>Se importaron '+nuevos.length+' gastos.</strong>';
   if(errores.length) html+='<div style="margin-top:8px;">'+errores.length+' filas quedaron afuera:</div><ul style="margin:6px 0 0;padding-left:18px;font-size:12.5px;">'+errores.slice(0,12).map(e=>'<li>'+esc(e)+'</li>').join('')+(errores.length>12?'<li>… y '+(errores.length-12)+' más.</li>':'')+'</ul>';
   res.innerHTML=html+'</div></div>'; renderTodo(); toast(nuevos.length+' gastos importados'); renderEstadoDolar();
@@ -1921,27 +2212,62 @@ function importarArchivo(file){
 }
 function exportarExcel(){
   if(!Store.gastos.length&&!Store.presupuesto.length&&!Store.aportes.length){ toast('No hay nada para exportar',true); return; }
-  const fG=[COLUMNAS.concat(['Monto USD','Cargado por'])].concat(Store.gastos.slice().sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''))
-    .map(g=>[g.fecha,g.rubro,g.tipo,g.proveedor,g.concepto,g.montoARS,g.cotizacion||'',g.financia||FONDO,g.unidad||'',g.formaPago||'',g.estado||'',g.comprobante||'',g.notas||'',g.montoUSD?Number(g.montoUSD.toFixed(2)):'',g.cargadoPor||'']));
+  const fG=[COLUMNAS.concat(['Monto USD','IVA USD','Neto USD','Cargado por'])].concat(Store.gastos.slice().sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''))
+    .map(g=>{ const ivaU=ivaUSDDeGasto(g);
+      return [g.fecha,g.rubro,g.tipo,g.proveedor,g.concepto,g.montoARS,g.cotizacion||'',g.fiscal||FISCAL_SIN,g.alicuota||'',g.ivaARS||0,
+        g.financia||FONDO,g.unidad||'',g.formaPago||'',g.estado||'',g.comprobante||'',g.notas||'',
+        g.montoUSD?Number(g.montoUSD.toFixed(2)):'',Number(ivaU.toFixed(2)),Number(((g.montoUSD||0)-ivaU).toFixed(2)),g.cargadoPor||'']; }));
   const fP=[['Rubro','Macrorubro','MO USD','Materiales USD','Otros USD','Objetivo USD','Avance fisico %','Mes desde','Mes hasta','Notas']]
     .concat(Store.presupuesto.map(p=>[p.rubro,macroDe(p.rubro),p.objMO||0,p.objMat||0,p.objOtros||0,objetivoRubro(p),p.avance||0,p.mesDesde,p.mesHasta,p.notas||'']));
   const fA=[['Fecha','Socio','Medio','Monto ARS','Cotizacion','Monto USD','Notas']]
     .concat(Store.aportes.map(a=>[a.fecha,a.socio,a.medio||'',a.montoARS,a.cotizacion||'',a.montoUSD?Number(a.montoUSD.toFixed(2)):'',a.notas||'']));
-  const fS=[['Socio','Comprometido USD','Aportado USD','Resta USD']].concat(SOCIOS.map(s=>{ const ap=Store.aportes.filter(x=>x.socio===s).reduce((t,x)=>t+(x.montoUSD||0),0);
-    const c=Store.compromisos[s]||0; return [s,c,Number(ap.toFixed(2)),Number(Math.max(c-ap,0).toFixed(2))]; }));
+  const fS=[['Socio','Comprometido USD','Aporte al fondo USD','Pago directo USD','Integrado USD','Resta USD','% del total']]
+    .concat(SOCIOS.map(s=>{ const af=aportesAlFondoDe(s),pd=pagosDirectosDe(s),tot=af+pd,c=Store.compromisos[s]||0,ti=totalIntegrado();
+      return [s,c,Number(af.toFixed(2)),Number(pd.toFixed(2)),Number(tot.toFixed(2)),Number(Math.max(c-tot,0).toFixed(2)),ti?Number((tot/ti*100).toFixed(1)):0]; }))
+    .concat([['TOTAL',totalComprometidoSocios(),Number(aportesAlFondo().toFixed(2)),Number(totalPagosDirectos().toFixed(2)),
+      Number(totalIntegrado().toFixed(2)),Number(Math.max(totalComprometidoSocios()-totalIntegrado(),0).toFixed(2)),100]])
+    .concat([[''],['Fondo disponible en caja USD',Number(fondoDisponible().toFixed(2))],
+      ['  Aportes al fondo',Number(aportesAlFondo().toFixed(2))],
+      ['  Gastos pagados del fondo',Number((-gastosDelFondo()).toFixed(2))],
+      ['  Efectivo neto por movimientos de IVA',Number(efectivoIvaUSD().toFixed(2))]]);
   const fPr=[['Nombre','Tipo','Rubro habitual','CUIT','Contacto','Condicion de pago','Notas']].concat(Store.proveedores.map(p=>[p.nombre,p.tipo||'',p.rubro||'',p.cuit||'',p.contacto||'',p.cond||'',p.notas||'']));
   const t=lineaDeTiempo(); let ap=0,ar=0; const fC=[['Mes','Plan USD','Real USD','Plan acum','Real acum','Desvio acum']];
   t.meses.forEach(m=>{ const p=t.plan[m]||0,r=t.real[m]||0; ap+=p; ar+=r; fC.push([m,Number(p.toFixed(2)),Number(r.toFixed(2)),Number(ap.toFixed(2)),Number(ar.toFixed(2)),Number((ar-ap).toFixed(2))]); });
   const fAb=[['Rubro','Monto USD Abaucan','Notas']].concat(Store.abaucan.map(a=>[a.rubro,a.montoUSD,a.notas||'']));
+
+  // ---- hoja de IVA ----
+  const ivaPorRubro={}; Store.gastos.forEach(g=>{ const v=ivaUSDDeGasto(g); if(v>0) ivaPorRubro[g.rubro]=(ivaPorRubro[g.rubro]||0)+v; });
+  const cond=gastoPorCondicion();
+  const fIVA=[['RESUMEN DE IVA (en dolares)'],[''],
+    ['IVA gastado (comprobantes con IVA discriminado)',Number(ivaGastadoUSD().toFixed(2))],
+    ['IVA vendido a otros proyectos',Number((-ivaVendidoUSD()).toFixed(2))],
+    ['IVA comprado a otros proyectos',Number(ivaCompradoUSD().toFixed(2))],
+    ['IVA NETO',Number(ivaNetoUSD().toFixed(2))],
+    [''],
+    ['Efectivo neto por movimientos de IVA',Number(efectivoIvaUSD().toFixed(2))],
+    [''],
+    ['GASTO SEGUN RESPALDO DOCUMENTAL'],
+    ['Con IVA discriminado (Factura A)',Number(cond[FISCAL_DISCRIMINADO].toFixed(2))],
+    ['IVA incluido sin discriminar (Factura B)',Number(cond[FISCAL_INCLUIDO].toFixed(2))],
+    ['Sin IVA / sin factura',Number(cond[FISCAL_SIN].toFixed(2))],
+    ['Total ejecutado',Number(totalEjecutado().toFixed(2))],
+    [''],
+    ['IVA POR RUBRO'],['Rubro','IVA USD']]
+    .concat(Object.entries(ivaPorRubro).sort((a,b)=>b[1]-a[1]).map(e=>[e[0],Number(e[1].toFixed(2))]))
+    .concat([[''],['MOVIMIENTOS ENTRE PROYECTOS'],['Fecha','Tipo','Proyecto','IVA ARS','IVA USD','Efectivo ARS','Efectivo USD','Comprobante','Notas']])
+    .concat(Store.ivamov.slice().sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''))
+      .map(m=>[m.fecha,m.tipo==='vendido'?'Vendido':'Comprado',m.proyecto||'',m.ivaARS||0,Number((m.ivaUSD||0).toFixed(2)),
+        m.efectivoARS||0,Number((m.efectivoUSD||0).toFixed(2)),m.comprobante||'',m.notas||'']));
   if(hayXLSX()){ const wb=XLSX.utils.book_new();
-    [['Gastos',fG],['Presupuesto',fP],['Aportes',fA],['Socios',fS],['Proveedores',fPr],['Curva',fC],['Abaucan',fAb]]
+    [['Gastos',fG],['Presupuesto',fP],['Aportes',fA],['Socios',fS],['IVA',fIVA],['Proveedores',fPr],['Curva',fC],['Abaucan',fAb]]
       .forEach(([n,d])=>XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(d),n));
     XLSX.writeFile(wb,'Rio_Colorado_Gestion_'+hoyISO()+'.xlsx');
   } else descargarArchivo('Rio_Colorado_Gastos_'+hoyISO()+'.csv','\uFEFF'+fG.map(f=>f.join(';')).join('\n'),'text/csv;charset=utf-8');
   toast('Exportación lista');
 }
 function exportarJSON(){ const d={proyecto:PROYECTO,exportado:new Date().toISOString(),gastos:Store.gastos,presupuesto:Store.presupuesto,
-  aportes:Store.aportes,compromisos:Store.compromisos,proveedores:Store.proveedores,abaucan:Store.abaucan,config:Store.config};
+  aportes:Store.aportes,compromisos:Store.compromisos,proveedores:Store.proveedores,abaucan:Store.abaucan,
+  ivamov:Store.ivamov,macrorubros:estructuraActual(),config:Store.config};
   descargarArchivo('Respaldo_Rio_Colorado_'+hoyISO()+'.json',JSON.stringify(d,null,2),'application/json'); toast('Respaldo descargado'); }
 function restaurarJSON(file){ const r=new FileReader(); r.onload=e=>{ try{ const d=JSON.parse(String(e.target.result));
   if(!d.gastos&&!d.presupuesto&&!d.aportes)throw new Error('El archivo no tiene datos reconocibles.');
@@ -2048,13 +2374,7 @@ function importarAbaucan(file){
   });
 }
 
-function limpiarTodo(){
-  if(!confirm('Borra gastos, presupuesto, aportes, compromisos, proveedores y datos de Abaucán'+(MODO_NUBE?', también en la nube':'')+'. ¿Seguís?'))return;
-  if(!confirm('Confirmá una vez más: esta acción no se puede deshacer.'))return;
-  if(MODO_NUBE&&FB){ FB.borrarTodo().catch(e=>toast('Error al borrar en la nube: '+e.message,true)); }
-  Store.gastos=[]; Store.presupuesto=[]; Store.aportes=[]; Store.compromisos={}; Store.proveedores=[]; Store.abaucan=[];
-  renderTodo(); toast('Todo borrado');
-}
+
 
 /* ---------- MANIFIESTO PWA ----------
    Se arma en memoria para que el archivo siga siendo uno solo.
@@ -2084,7 +2404,7 @@ function irA(v){ document.querySelectorAll('.nav-btn').forEach(b=>b.classList.to
   const el=document.getElementById('view-'+v); if(el)el.classList.add('active');
   menuCerrar(); window.scrollTo({top:0}); }
 function renderTodo(){ actualizarProveedores(); renderDashboard(); renderMacro(); renderSocios(); renderTablaGastos(); renderPresupuesto();
-  renderProveedoresABM(); renderCurva(); renderAnalisis(); renderProyeccion(); renderAbaucan(); renderEstadoDolar(); renderEstadoIA(); renderEstadoFirebase(); }
+  renderProveedoresABM(); renderCurva(); renderAnalisis(); renderIVA(); renderProyeccion(); renderAbaucan(); renderEstadoDolar(); renderEstadoIA(); renderEstadoFirebase(); }
 
 /* ---------- ARRANQUE ---------- */
 function armarUI(){
@@ -2093,6 +2413,9 @@ function armarUI(){
   poblarSelect(document.getElementById('g-pago'),PAGOS);
   poblarSelect(document.getElementById('g-financia'),FINANCIA_OPC);
   poblarSelect(document.getElementById('g-unidad'),UNIDADES);
+  poblarSelect(document.getElementById('g-fiscal'),CONDICIONES_FISCALES);
+  const selAli=document.getElementById('g-alicuota');
+  selAli.innerHTML=ALICUOTAS.map(a=>'<option value="'+a+'">'+String(a).replace('.',',')+'%</option>').join('');
   poblarRubrosAgrupados(document.getElementById('p-rubro'),'Elegí un rubro');
   poblarSelect(document.getElementById('f-macro'),MACRORUBROS.map(m=>m.nombre),'Todos los macrorubros');
   poblarSelect(document.getElementById('f-financia'),FINANCIA_OPC,'Todas las fuentes');
@@ -2100,6 +2423,7 @@ function armarUI(){
   poblarSelect(document.getElementById('c-socio'),SOCIOS,'Elegí un socio');
   poblarSelect(document.getElementById('fa-financia'),FINANCIA_OPC);
   poblarSelect(document.getElementById('fa-unidad'),UNIDADES);
+  poblarSelect(document.getElementById('fa-fiscal'),CONDICIONES_FISCALES);
   poblarRubrosAgrupados(document.getElementById('ab-rubro'),'Elegí un rubro');
   poblarRubrosAgrupados(document.getElementById('pr-rubro'),'Sin rubro fijo');
   document.getElementById('inf-mes').value=hoyISO().slice(0,7);
@@ -2112,11 +2436,41 @@ function armarUI(){
     if(abierto) menuCerrar(); else menuAbrir();
   });
   document.getElementById('velo').addEventListener('click',menuCerrar);
-  document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ menuCerrar(); document.getElementById('modal-prov').classList.add('oculto'); } });
+
+  // gestión de rubros
+  document.getElementById('btn-gestion-rubros').addEventListener('click',abrirModalRubros);
+  document.getElementById('rb-cerrar').addEventListener('click',()=>document.getElementById('modal-rubros').classList.add('oculto'));
+  document.getElementById('modal-rubros').addEventListener('click',e=>{ if(e.target.id==='modal-rubros') e.currentTarget.classList.add('oculto'); });
+  document.getElementById('form-rubro-nuevo').addEventListener('submit',e=>{ e.preventDefault();
+    if(agregarRubro(document.getElementById('rb-macro').value,document.getElementById('rb-nombre').value)){
+      document.getElementById('rb-nombre').value=''; renderRubrosABM(); renderTodo(); toast('Rubro agregado'); } });
+
+  // movimientos de IVA
+  document.getElementById('btn-iva-nuevo').addEventListener('click',()=>abrirModalIva(null));
+  document.getElementById('iv-cerrar').addEventListener('click',()=>document.getElementById('modal-iva').classList.add('oculto'));
+  document.getElementById('modal-iva').addEventListener('click',e=>{ if(e.target.id==='modal-iva') e.currentTarget.classList.add('oculto'); });
+  document.getElementById('iv-fecha').addEventListener('change',e=>buscarCotizacion(e.target.value,'iv-cot','iv-cot-hint'));
+  document.getElementById('form-iva').addEventListener('submit',e=>{ e.preventDefault();
+    const iva=parseFloat(document.getElementById('iv-iva').value),cot=parseFloat(document.getElementById('iv-cot').value);
+    const efe=parseFloat(document.getElementById('iv-efectivo').value)||0;
+    const proy=document.getElementById('iv-proyecto').value.trim();
+    if(!proy){ toast('Indicá el proyecto contraparte',true); return; }
+    if(!(iva>0)){ toast('El monto de IVA tiene que ser mayor a cero',true); return; }
+    if(!(cot>0)){ toast('Falta la cotización para congelar el valor en dólares',true); return; }
+    Store.guardarIvaMov({ id:document.getElementById('iv-id').value||null, fecha:document.getElementById('iv-fecha').value,
+      tipo:document.getElementById('iv-tipo').value, proyecto:proy, ivaARS:iva, ivaUSD:iva/cot,
+      efectivoARS:efe, efectivoUSD:efe/cot, cotizacion:cot,
+      comprobante:document.getElementById('iv-comprobante').value.trim(), notas:document.getElementById('iv-notas').value.trim(),
+      cargadoPor:USUARIO?USUARIO.nombre:'—' });
+    document.getElementById('modal-iva').classList.add('oculto'); renderTodo(); toast('Movimiento guardado'); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ menuCerrar(); ['modal-prov','modal-rubros','modal-iva'].forEach(id=>document.getElementById(id).classList.add('oculto')); } });
 
   // gastos
   document.getElementById('g-fecha').addEventListener('change',e=>buscarCotizacion(e.target.value,'g-cot','g-cot-hint'));
-  document.getElementById('g-monto').addEventListener('input',recalcularUSD);
+  document.getElementById('g-monto').addEventListener('input',()=>{ recalcularUSD(); recalcularIVA(false); });
+  document.getElementById('g-fiscal').addEventListener('change',actualizarCamposFiscales);
+  document.getElementById('g-alicuota').addEventListener('change',()=>recalcularIVA(true));
+  document.getElementById('g-iva').addEventListener('input',e=>{ e.target.dataset.tocado='1'; recalcularIVA(false); });
   document.getElementById('g-cot').addEventListener('input',recalcularUSD);
   document.getElementById('btn-cancelar').addEventListener('click',limpiarFormGasto);
   document.getElementById('btn-nuevo-prov').addEventListener('click',()=>abrirModalProv(null));
@@ -2131,7 +2485,11 @@ function armarUI(){
       proveedor:prov, concepto:document.getElementById('g-concepto').value.trim(), montoARS:monto, cotizacion:cot, montoUSD:monto/cot,
       unidad:document.getElementById('g-unidad').value, financia:document.getElementById('g-financia').value, formaPago:document.getElementById('g-pago').value,
       estado:document.getElementById('g-estado').value, cargadoPor:USUARIO?USUARIO.nombre:'—',
-      comprobante:document.getElementById('g-comprobante').value.trim(), notas:document.getElementById('g-notas').value.trim() };
+      comprobante:document.getElementById('g-comprobante').value.trim(), notas:document.getElementById('g-notas').value.trim(),
+      fiscal:document.getElementById('g-fiscal').value,
+      alicuota:document.getElementById('g-fiscal').value===FISCAL_DISCRIMINADO?(parseFloat(document.getElementById('g-alicuota').value)||21):null,
+      ivaARS:document.getElementById('g-fiscal').value===FISCAL_DISCRIMINADO?(parseFloat(document.getElementById('g-iva').value)||0):0 };
+    g.ivaUSD=(g.ivaARS&&cot)?g.ivaARS/cot:0;
     const ed=!!g.id; Store.guardarGasto(g); limpiarFormGasto(); renderTodo(); toast(ed?'Cambios guardados':'Gasto guardado');
   });
   ['f-buscar','f-macro','f-financia','f-desde','f-hasta'].forEach(id=>document.getElementById(id).addEventListener('input',renderTablaGastos));
@@ -2150,10 +2508,6 @@ function armarUI(){
     Store.guardarPresu({rubro,objMO:mo,objMat:mat,objOtros:otros,mesDesde:d,mesHasta:h,avance:Math.min(Math.max(av,0),100),notas:document.getElementById('p-notas').value.trim()});
     limpiarFormPresu(); renderTodo(); toast('Rubro guardado');
   });
-  document.getElementById('btn-rubros-base').addEventListener('click',()=>{ if(!confirm('Agrega todos los rubros del proyecto en cero. ¿Seguís?'))return;
-    const hoy=hoyISO().slice(0,7);
-    RUBROS.forEach(r=>{ if(!Store.presupuesto.some(p=>p.rubro===r)) Store.guardarPresu({rubro:r,objMO:0,objMat:0,objOtros:0,mesDesde:hoy,mesHasta:hoy,avance:0,notas:''}); });
-    renderTodo(); toast('Rubros base cargados'); });
 
   // aportes
   document.getElementById('a-fecha').addEventListener('change',e=>buscarCotizacion(e.target.value,'a-cot','a-cot-hint'));
@@ -2192,9 +2546,6 @@ function armarUI(){
     const sel=document.getElementById('g-proveedor'); if(sel&&!id) sel.value=nom;
     toast('Proveedor guardado');
   });
-  document.getElementById('btn-prov-base').addEventListener('click',()=>{
-    let n=0; PROVEEDORES_BASE.forEach(p=>{ if(!Store.proveedores.some(x=>x.nombre.toLowerCase()===p.nombre.toLowerCase())){ Store.guardarProv(Object.assign({},p)); n++; } });
-    renderTodo(); toast(n?n+' proveedores agregados':'Ya estaban todos cargados'); });
 
   // facturas
   const dz=document.getElementById('dropzone'),fi=document.getElementById('file-factura');
@@ -2250,7 +2601,6 @@ function armarUI(){
   document.getElementById('btn-exportar-json').addEventListener('click',exportarJSON);
   document.getElementById('btn-importar-json').addEventListener('click',()=>document.getElementById('file-json').click());
   document.getElementById('file-json').addEventListener('change',e=>{ if(e.target.files[0]) restaurarJSON(e.target.files[0]); e.target.value=''; });
-  document.getElementById('btn-limpiar-todo').addEventListener('click',limpiarTodo);
   document.getElementById('btn-plantilla-presu').addEventListener('click',plantillaPresupuesto);
   document.getElementById('btn-importar-presu').addEventListener('click',()=>document.getElementById('file-presu').click());
   document.getElementById('file-presu').addEventListener('change',e=>{ if(e.target.files[0]) importarPresupuesto(e.target.files[0]); e.target.value=''; });
@@ -2322,7 +2672,7 @@ window.arrancarApp = arrancarApp;
       const auth = authMod.getAuth(app);
       const db   = fsMod.getFirestore(app);
       const RAIZ = 'proyectos/rio-colorado';
-      const COLS = ['gastos','presupuesto','aportes','proveedores','abaucan'];
+      const COLS = ['gastos','presupuesto','aportes','proveedores','abaucan','ivamov'];
 
       api = {
         entrar(){ const p=new authMod.GoogleAuthProvider(); p.setCustomParameters({prompt:'select_account'}); return authMod.signInWithPopup(auth,p); },
@@ -2350,6 +2700,10 @@ window.arrancarApp = arrancarApp;
           fsMod.onSnapshot(fsMod.doc(db,RAIZ+'/config','general'),d=>{
             if(d.exists()) Store.config=Object.assign(Store.config||{},d.data()); alCambiar();
           },()=>{});
+          fsMod.onSnapshot(fsMod.doc(db,RAIZ+'/config','estructura'),d=>{
+            if(d.exists()&&d.data().macrorubros) aplicarEstructura(d.data().macrorubros);
+            alCambiar();
+          },()=>{});
         },
 
         async subirTodo(Store){
@@ -2360,6 +2714,7 @@ window.arrancarApp = arrancarApp;
           }
           await this.guardarDoc('config','compromisos',{valores:Store.compromisos||{}});
           await this.guardarDoc('config','general',Store.config||{});
+          await this.guardarDoc('config','estructura',{macrorubros:estructuraActual()});
         },
         async borrarTodo(){
           for(const col of COLS){
