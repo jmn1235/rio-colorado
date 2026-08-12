@@ -48,8 +48,8 @@ a{color:var(--verde);}
 .app{display:flex;min-height:100vh;}
 .app.oculto{display:none;}
 .sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--blanco);border-right:1px solid var(--n-200);display:flex;flex-direction:column;padding:26px 16px 16px;position:sticky;top:0;height:100vh;overflow-y:auto;}
-.brand{display:flex;flex-direction:column;gap:12px;padding:0 6px 20px;}
-.brand img{width:58px;height:auto;display:block;}
+.brand{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:0 6px 20px;}
+.brand img{width:87px;height:auto;display:block;}
 .brand .proj{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--gris);font-weight:700;}
 .brand .proj strong{display:block;font-size:15px;letter-spacing:0;text-transform:none;color:var(--tinta);font-weight:700;margin-top:3px;}
 .nav{display:flex;flex-direction:column;gap:1px;}
@@ -330,6 +330,7 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
       <button class="nav-btn" data-view="macro"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Macrorubros</button>
       <button class="nav-btn" data-view="socios"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M17 14c2.5 0 4 2 4 4.5"/></svg>Socios y aportes</button>
       <button class="nav-btn" data-view="analisis"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 4"/></svg>Rubros y proveedores</button>
+      <button class="nav-btn" data-view="finiva"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19 19 4"/><circle cx="7" cy="7" r="2.6"/><circle cx="16" cy="16" r="2.6"/></svg>Intereses e IVA</button>
 
       <div class="nav-group">Inteligencia</div>
       <button class="nav-btn" data-view="ia"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="3.2"/></svg>Alertas y proyección<span class="chip-ia">IA</span></button>
@@ -342,7 +343,6 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
     <div class="sidebar-foot">
       <div class="user-box" id="user-box"></div>
       <span class="badge-store" id="badge-store"><span class="dot"></span>Modo local</span>
-      <p id="foot-nota">Revisión 3 · Seguimiento en dólares</p>
       <button class="btn btn-ghost btn-sm" id="btn-salir" style="margin-top:8px;display:none;">Cerrar sesión</button>
     </div>
   </aside>
@@ -356,7 +356,6 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
       <div id="aviso-vacio"></div>
       <div id="aviso-honorarios"></div>
       <div class="kpi-grid k5" id="kpi-grid"></div>
-      <div id="bloque-financiero"></div>
       <div class="grid-2-wide">
         <div class="panel"><div class="panel-head"><div><div class="panel-title">Ejecución mensual en dólares</div><p class="panel-sub">Gasto del mes en barras, acumulado en línea</p></div></div><div id="chart-mensual"></div></div>
         <div class="panel"><div class="panel-head"><div><div class="panel-title">Peso de cada macrorubro</div><p class="panel-sub">Distribución del gasto ejecutado</p></div></div><div id="chart-macro"></div></div>
@@ -365,7 +364,6 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
         <div class="panel"><div class="panel-head"><div><div class="panel-title">Avance físico y avance de gasto</div><p class="panel-sub">Cuánto se construyó contra cuánto se pagó</p></div></div><div class="table-wrap" id="tabla-avance-dash"></div></div>
         <div class="panel"><div class="panel-head"><div><div class="panel-title">Composición del costo</div><p class="panel-sub">Mano de obra, materiales, equipos e indirectos</p></div></div><div id="chart-tipos"></div></div>
       </div>
-      <div class="panel"><div class="panel-head"><div><div class="panel-title">Últimos movimientos</div><p class="panel-sub">Los diez gastos más recientes</p></div></div><div class="table-wrap" id="tabla-ultimos"></div></div>
       <footer class="appfoot">Magna Desarrollos<span>·</span>Río Colorado<span>·</span>Tablero interno de gestión</footer>
     </section>
 
@@ -447,6 +445,23 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
         <div class="panel"><div class="panel-head"><div><div class="panel-title">Proveedores principales</div><p class="panel-sub">Ordenados por monto acumulado</p></div></div><div id="chart-proveedores"></div></div>
       </div>
       <div class="panel"><div class="panel-head"><div><div class="panel-title">Detalle por proveedor</div><p class="panel-sub">Movimientos, monto y rubros en los que participa</p></div></div><div class="table-wrap" id="tabla-proveedores"></div></div>
+    </section>
+
+    <!-- ===== INTERESES E IVA ===== -->
+    <section id="view-finiva" class="view">
+      <div class="topbar"><div><h1>Intereses e IVA</h1><p>Costo financiero de la obra por socio y crédito fiscal, en dólares</p></div></div>
+
+      <div id="bloque-financiero"></div>
+
+      <div class="grid-2">
+        <div class="panel"><div class="panel-head"><div><div class="panel-title">Costo por socio</div><p class="panel-sub">Lo integrado en bruto, el interés devengado y el total actualizado de cada uno</p></div></div><div class="table-wrap" id="tabla-fin-socios"></div></div>
+        <div class="panel"><div class="panel-head"><div><div class="panel-title">Peso de cada socio</div><p class="panel-sub">Distribución del costo total actualizado</p></div></div><div id="chart-fin-socios"></div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><div><div class="panel-title">Interés devengado mes a mes por socio</div><p class="panel-sub">Lo que generó cada mes, no el acumulado. Cada columna es un socio; la última fila es el total del proyecto.</p></div></div>
+        <div class="table-wrap" id="tabla-fin-matriz"></div>
+      </div>
 
       <div class="topbar" style="margin-top:34px;"><div><h1 style="font-size:19px;">IVA</h1><p>Crédito fiscal de la obra y movimientos con otros proyectos</p></div>
         <div class="btn-row"><button class="btn btn-sm btn-primary" id="btn-iva-nuevo">Registrar movimiento</button></div></div>
@@ -502,11 +517,13 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
       <div class="kpi-grid" id="kpi-abaucan"></div>
       <div class="grid-2">
         <div class="panel">
-          <div class="panel-head"><div><div class="panel-title">Cargar un rubro de Abaucán</div><p class="panel-sub">Monto total del rubro en aquella obra, en dólares</p></div></div>
+          <div class="panel-head"><div><div class="panel-title">Cargar un rubro de Abaucán</div><p class="panel-sub">Lo que costó el rubro en aquella obra, separado en materiales, mano de obra y generales, en dólares</p></div></div>
           <form id="form-abaucan" autocomplete="off">
             <div class="form-grid c2">
               <div class="field col-2"><label for="ab-rubro">Rubro *</label><select id="ab-rubro" required></select></div>
-              <div class="field"><label for="ab-usd">Monto en USD *</label><input type="number" id="ab-usd" step="0.01" min="0" required></div>
+              <div class="field"><label for="ab-mat">Materiales USD</label><input type="number" id="ab-mat" step="0.01" min="0" placeholder="0,00"></div>
+              <div class="field"><label for="ab-mo">Mano de obra USD</label><input type="number" id="ab-mo" step="0.01" min="0" placeholder="0,00"></div>
+              <div class="field"><label for="ab-gen">Generales USD</label><input type="number" id="ab-gen" step="0.01" min="0" placeholder="0,00"><span class="hint">Equipos, subcontratos e indirectos.</span></div>
               <div class="field"><label for="ab-notas">Notas</label><input type="text" id="ab-notas" placeholder="Opcional"></div>
             </div>
             <div class="btn-row" style="margin-top:18px;"><button type="submit" class="btn btn-primary">Guardar rubro</button></div>
@@ -706,7 +723,7 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
           <p class="panel-sub" style="margin-top:12px;">Solo se actualizan los rubros que vengan con datos. Los que dejes vacíos quedan como están.</p>
         </div>
         <div class="panel">
-          <div class="panel-head"><div><div class="panel-title">Abaucán por Excel</div><p class="panel-sub">Misma lógica para los costos de la obra de referencia, en dólares de la época.</p></div></div>
+          <div class="panel-head"><div><div class="panel-title">Abaucán por Excel</div><p class="panel-sub">Misma lógica para los costos de la obra de referencia, en dólares de la época, separados en materiales, mano de obra y generales.</p></div></div>
           <div class="btn-row">
             <button class="btn" id="btn-plantilla-abaucan">Descargar plantilla</button>
             <button class="btn btn-primary" id="btn-importar-abaucan">Subir completada</button>
@@ -1098,7 +1115,7 @@ function svgBarH(items){
 
 function svgBarrasComparadas(filas){
   if(!filas.length) return svgVacio('Cargá presupuesto y gastos para comparar.');
-  const W=880,izq=210,der=100,arr=10,bloque=44,H=filas.length*bloque+arr+10,pw=W-izq-der;
+  const W=880,izq=210,der=150,arr=10,bloque=44,H=filas.length*bloque+arr+10,pw=W-izq-der;
   const max=techoLindo(Math.max.apply(null,filas.map(f=>Math.max(f.obj,f.eje)).concat([1])));
   let out='';
   filas.forEach((f,i)=>{
@@ -1107,7 +1124,8 @@ function svgBarrasComparadas(filas){
     out+='<text x="'+(izq-12)+'" y="'+(y+16)+'" text-anchor="end" font-size="11.5" fill="#303038" font-family="Montserrat,sans-serif">'+esc(nom)+'<title>'+esc(f.nombre)+'</title></text>'
       +'<rect x="'+izq+'" y="'+(y+4)+'" width="'+wo.toFixed(1)+'" height="11" rx="2" fill="#D2D2CF"><title>Objetivo · '+esc(fmtUSD(f.obj))+'</title></rect>'
       +'<rect x="'+izq+'" y="'+(y+18)+'" width="'+we.toFixed(1)+'" height="11" rx="2" fill="'+(exceso?'#B3541E':'#0C6F46')+'"><title>Ejecutado · '+esc(fmtUSD(f.eje))+'</title></rect>'
-      +'<text x="'+(izq+Math.max(wo,we)+8).toFixed(1)+'" y="'+(y+19)+'" font-size="10.5" fill="'+(exceso?'#B3541E':'#5C5C5E')+'" font-family="Montserrat,sans-serif">'+esc(fmtEje(f.eje))+' · '+fmtPct(f.obj?f.eje/f.obj*100:0)+'</text>';
+      +'<text x="'+(izq+Math.max(wo,we)+8).toFixed(1)+'" y="'+(y+12)+'" font-size="10.5" fill="#7B7B79" font-family="Montserrat,sans-serif">Obj. '+esc(fmtUSD(f.obj))+'</text>'
+      +'<text x="'+(izq+Math.max(wo,we)+8).toFixed(1)+'" y="'+(y+26)+'" font-size="10.5" fill="'+(exceso?'#B3541E':'#5C5C5E')+'" font-family="Montserrat,sans-serif">'+esc(fmtEje(f.eje))+' · '+fmtPct(f.obj?f.eje/f.obj*100:0)+'</text>';
   });
   out+='<g transform="translate('+izq+','+(H-2)+')"><rect x="0" y="-9" width="14" height="9" rx="2" fill="#D2D2CF"/><text x="19" y="-1" font-size="10.5" fill="#7B7B79" font-family="Montserrat,sans-serif">Objetivo</text>'
     +'<rect x="90" y="-9" width="14" height="9" rx="2" fill="#0C6F46"/><text x="109" y="-1" font-size="10.5" fill="#7B7B79" font-family="Montserrat,sans-serif">Ejecutado</text></g>';
@@ -1145,6 +1163,20 @@ function svgCurvaS(labels,plan,real){
 
 /* ---------- CÁLCULOS (todo en USD) ---------- */
 function objetivoRubro(p){ return (p.objMO||0)+(p.objMat||0)+(p.objOtros||0); }
+/* Abaucán se carga separado en las mismas tres familias que el presupuesto:
+   materiales, mano de obra y generales (equipos, subcontratos e indirectos). */
+function totalAbaucanRubro(a){ return (a.mat||0)+(a.mo||0)+(a.gen||0); }
+function totalAbaucanUSD(){ return Store.abaucan.reduce((s,a)=>s+totalAbaucanRubro(a),0); }
+function totalAbaucanFamilia(f){ return Store.abaucan.reduce((s,a)=>s+(a[f]||0),0); }
+/* Ejecutado de Río Colorado partido en las mismas familias, según el tipo del gasto */
+function ejecutadoPorFamilia(rubro){
+  const out={mat:0,mo:0,gen:0};
+  Store.gastos.filter(g=>rubro===undefined||g.rubro===rubro).forEach(g=>{
+    const f=familiaTipo(g.tipo);
+    out[f==='otros'?'gen':f]+=(g.montoUSD||0);
+  });
+  return out;
+}
 function totalPresupuesto(){ return Store.presupuesto.reduce((s,p)=>s+objetivoRubro(p),0); }
 function totalEjecutado(){ return Store.gastos.reduce((s,g)=>s+(g.montoUSD||0),0); }
 function totalEjecutadoARS(){ return Store.gastos.reduce((s,g)=>s+(g.montoARS||0),0); }
@@ -1206,6 +1238,33 @@ function interesDe_socio(socio,hastaISO){ return interesDirectoDe(socio,hastaISO
 /* Lo integrado por un socio, con su costo financiero incluido */
 function integradoActualizadoDe(socio,hastaISO){ return integradoPorSocio(socio)+interesDe_socio(socio,hastaISO); }
 function totalIntegradoActualizado(hastaISO){ return SOCIOS.reduce((s,x)=>s+integradoActualizadoDe(x,hastaISO),0); }
+
+/* Interés devengado dentro de un mes concreto (no acumulado).
+   Se calcula como la diferencia entre el interés acumulado al cierre del mes
+   y el acumulado al cierre del mes anterior. El último corte nunca pasa de hoy,
+   así no se devenga interés futuro. Sumadas todas las filas de un socio se llega
+   exactamente a su interés total, porque los cortes se cancelan entre sí. */
+function finDeMes(ym){
+  const y=Number(ym.slice(0,4)), m=Number(ym.slice(5,7));
+  const d=new Date(y,m,0).getDate();
+  return ym+'-'+String(d).padStart(2,'0');
+}
+function mesAnterior(ym){
+  let y=Number(ym.slice(0,4)), m=Number(ym.slice(5,7))-1;
+  if(m<1){ m=12; y--; }
+  return y+'-'+String(m).padStart(2,'0');
+}
+function corteDeMes(ym){ const f=finDeMes(ym), h=hoyISO(); return f>h?h:f; }
+/* Meses con interés a mostrar: desde el primer gasto hasta el mes en curso */
+function mesesConInteres(){
+  const fechas=Store.gastos.map(g=>mesClave(g.fecha)).filter(Boolean).sort();
+  if(!fechas.length) return [];
+  return rangoMeses(fechas[0], hoyISO().slice(0,7));
+}
+function interesMesDe(socio,ym){
+  const hasta=corteDeMes(ym), desde=corteDeMes(mesAnterior(ym));
+  return interesDe_socio(socio,hasta)-interesDe_socio(socio,desde);
+}
 
 /* ---------- HONORARIOS DE DIRECCIÓN Y GERENCIAMIENTO ----------
    Se calculan como un porcentaje de la mano de obra ejecutada en el mes.
@@ -1643,20 +1702,26 @@ async function compararAbaucan(){
   cont.innerHTML='<div class="aviso" style="margin-bottom:0;"><div><span class="spinner"></span>Comparando obras…</div></div>';
   try{
     const supA=Number(Store.config.supAbaucan)||REFERENCIA.superficie;
-    const porRubro=agrupar(Store.gastos,g=>g.rubro);
+    const r2=v=>Math.round(v*100)/100;
     const comparacion=Store.abaucan.map(a=>{
-      const rc=porRubro[a.rubro]||0; const p=Store.presupuesto.find(x=>x.rubro===a.rubro);
-      return { rubro:a.rubro, abaucan_usd_m2:Math.round(a.montoUSD/supA*100)/100,
-        rio_colorado_usd_m2:Math.round(rc/PROYECTO.superficie*100)/100,
+      const e=ejecutadoPorFamilia(a.rubro); const p=Store.presupuesto.find(x=>x.rubro===a.rubro);
+      return { rubro:a.rubro,
+        abaucan_usd_m2:{ materiales:r2((a.mat||0)/supA), mano_de_obra:r2((a.mo||0)/supA), generales:r2((a.gen||0)/supA), total:r2(totalAbaucanRubro(a)/supA) },
+        rio_colorado_usd_m2:{ materiales:r2(e.mat/PROYECTO.superficie), mano_de_obra:r2(e.mo/PROYECTO.superficie), generales:r2(e.gen/PROYECTO.superficie), total:r2((e.mat+e.mo+e.gen)/PROYECTO.superficie) },
         rio_colorado_avance_fisico_pct:p?Math.round(p.avance||0):0,
-        rio_colorado_objetivo_usd_m2:p?Math.round(objetivoRubro(p)/PROYECTO.superficie*100)/100:null };
+        rio_colorado_objetivo_usd_m2:p?r2(objetivoRubro(p)/PROYECTO.superficie):null };
     });
+    const totA={ materiales:r2(totalAbaucanFamilia('mat')/supA), mano_de_obra:r2(totalAbaucanFamilia('mo')/supA), generales:r2(totalAbaucanFamilia('gen')/supA) };
+    const eT=ejecutadoPorFamilia();
+    const totR={ materiales:r2(eT.mat/PROYECTO.superficie), mano_de_obra:r2(eT.mo/PROYECTO.superficie), generales:r2(eT.gen/PROYECTO.superficie) };
     const sistema='Sos un controller de costos de obra en Argentina. Comparás dos obras de dúplex del mismo desarrollador para detectar dónde los costos se están yendo de lo esperable. Sos preciso y no inventás. Respondés en texto llano, español rioplatense, sin markdown.';
     const inst='Compará el costo por m² en dólares de Río Colorado (obra en curso) contra Abaucán (obra terminada de referencia). '
+      +'Cada rubro viene abierto en tres familias: materiales, mano de obra y generales (equipos, subcontratos e indirectos). Compará SIEMPRE familia contra familia, no solo el total: que un rubro cierre parecido en total no significa que la mano de obra o los materiales estén alineados, y ahí suele estar el problema real. '
       +'IMPORTANTE: los valores de Río Colorado son lo ejecutado a la fecha, no el costo final, así que un rubro con avance físico bajo va a mostrar un costo por m² bajo simplemente porque todavía no se terminó. Tené eso en cuenta y comparalo de forma proporcional al avance cuando corresponda. '
-      +'Decí en qué rubros Río Colorado va por encima de lo esperable, en cuáles por debajo, y cuáles todavía no se pueden juzgar. Máximo 250 palabras.\n\n'
+      +'Decí en qué rubros y en qué familia Río Colorado va por encima de lo esperable, en cuáles por debajo, y cuáles todavía no se pueden juzgar. Cerrá con una lectura de las tres familias a nivel obra completa. Máximo 300 palabras.\n\n'
       +'Contexto: Abaucán fueron 3 dúplex, '+supA+' m², construida entre 2019 y 2021 con losa tradicional. Río Colorado son 4 dúplex, '+PROYECTO.superficie+' m², con techos alivianados (viguetas y telgopor), lo que debería abaratar el rubro de losas y techos.\n\n'
-      +'Datos (USD por m²):\n'+JSON.stringify(comparacion,null,1);
+      +'Totales de obra (USD por m²):\nAbaucán: '+JSON.stringify(totA)+'\nRío Colorado ejecutado: '+JSON.stringify(totR)+'\n\n'
+      +'Detalle por rubro (USD por m²):\n'+JSON.stringify(comparacion,null,1);
     const rta=await llamarClaude([{role:'user',content:inst}],sistema,1600);
     cont.innerHTML='<div class="ia-out">'+esc(rta)+'</div>';
     toast('Comparación lista');
@@ -1701,7 +1766,7 @@ function renderDashboard(){
   const itT=Object.entries(porTipo).sort((a,b)=>b[1]-a[1]).map((e,i)=>({label:e[0],value:e[1],color:SERIES[i%SERIES.length]}));
   document.getElementById('chart-tipos').innerHTML=itT.length?svgDonut(itT,'Ejecutado')+leyenda(itT):svgVacio('Cargá gastos para ver la composición.');
 
-  renderAvanceDash(macros); renderUltimos();
+  renderAvanceDash(macros);
 }
 function renderAvanceDash(macros){
   const cont=document.getElementById('tabla-avance-dash');
@@ -1716,17 +1781,6 @@ function renderAvanceDash(macros){
       +'<td>'+se+'</td></tr>'; });
   cont.innerHTML=html+'</tbody></table>';
 }
-function renderUltimos(){
-  const cont=document.getElementById('tabla-ultimos');
-  const filas=Store.gastos.slice().sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')).slice(0,10);
-  if(!filas.length){ cont.innerHTML='<div class="empty"><strong>Sin movimientos</strong>Los gastos que cargues aparecen acá.</div>'; return; }
-  let html='<table><thead><tr><th>Fecha</th><th>Rubro</th><th>Proveedor</th><th>Concepto</th><th>Financia</th><th class="money">USD</th><th class="money">ARS</th></tr></thead><tbody>';
-  filas.forEach(g=>{ html+='<tr><td>'+fmtFecha(g.fecha)+'</td><td><span class="tag verde">'+esc(g.rubro)+'</span></td><td>'+esc(g.proveedor)+'</td><td>'+esc(g.concepto)+'</td>'
-    +'<td><span class="tag '+(g.financia&&g.financia!==FONDO?'socio':'')+'">'+esc(g.financia||FONDO)+'</span></td>'
-    +'<td class="money">'+(g.montoUSD?fmtUSD(g.montoUSD):'—')+'</td><td class="money" style="font-weight:400;color:var(--n-500);">'+fmtARS(g.montoARS)+'</td></tr>'; });
-  cont.innerHTML=html+'</tbody></table>';
-}
-
 /* ---------- MACRORUBROS ---------- */
 function renderMacro(){
   const macros=resumenMacro();
@@ -1955,21 +2009,37 @@ function renderPresupuesto(){
   const cont=document.getElementById('tabla-presupuesto');
   if(!Store.presupuesto.length){ cont.innerHTML='<div class="empty"><strong>Sin rubros presupuestados</strong>Cargalos con el formulario, o usá "Cargar rubros base".</div>'; return; }
   const porRubro=agrupar(Store.gastos,g=>g.rubro);
-  let html='<table><thead><tr><th>Rubro</th><th class="money">Mano obra</th><th class="money">Materiales</th><th class="money">Otros</th><th class="money">Objetivo</th><th style="width:80px;">Avance fís.</th><th class="money">Ejecutado</th><th class="money">Saldo</th><th></th></tr></thead><tbody>';
+  const incid=v=>total>0?(v/total*100).toFixed(1)+'%':'—';
+  let html='<table><thead><tr><th>Rubro</th><th class="money">Mano obra</th><th class="money">Materiales</th><th class="money">Otros</th><th class="money">Objetivo</th><th style="width:66px;">Incid.</th><th style="width:80px;">Avance fís.</th><th class="money">Ejecutado</th><th class="money">Saldo</th><th></th></tr></thead><tbody>';
+  let totMO=0,totMat=0,totOtros=0;
   MACRORUBROS.forEach(m=>{
     const en=Store.presupuesto.filter(p=>macroDe(p.rubro)===m.nombre); if(!en.length)return;
-    html+='<tr class="macro-row"><td colspan="9">'+esc(m.nombre)+'</td></tr>';
+    // subtotales del macrorubro
+    const sMO=en.reduce((s,p)=>s+(p.objMO||0),0), sMat=en.reduce((s,p)=>s+(p.objMat||0),0),
+          sOtros=en.reduce((s,p)=>s+(p.objOtros||0),0), sObj=en.reduce((s,p)=>s+objetivoRubro(p),0),
+          sEje=en.reduce((s,p)=>s+(porRubro[p.rubro]||0),0);
+    totMO+=sMO; totMat+=sMat; totOtros+=sOtros;
+    html+='<tr class="macro-row"><td>'+esc(m.nombre)+'</td>'
+      +'<td class="money">'+(sMO?fmtUSD(sMO):'—')+'</td><td class="money">'+(sMat?fmtUSD(sMat):'—')+'</td><td class="money">'+(sOtros?fmtUSD(sOtros):'—')+'</td>'
+      +'<td class="money">'+fmtUSD(sObj)+'</td>'
+      +'<td style="font-size:12px;color:var(--gris);">'+incid(sObj)+'</td>'
+      +'<td></td>'
+      +'<td class="money">'+fmtUSD(sEje)+'</td><td class="money" style="color:'+(sObj-sEje<0?'#B3541E':'inherit')+'">'+fmtUSD(sObj-sEje)+'</td><td></td></tr>';
     en.sort((a,b)=>objetivoRubro(b)-objetivoRubro(a)).forEach(p=>{
       const obj=objetivoRubro(p),e=porRubro[p.rubro]||0;
       html+='<tr><td>'+esc(p.rubro)+(p.notas?'<div style="font-size:11.5px;color:var(--n-500);">'+esc(p.notas)+'</div>':'')+'</td>'
         +'<td class="money" style="font-weight:400;">'+(p.objMO?fmtUSD(p.objMO):'—')+'</td><td class="money" style="font-weight:400;">'+(p.objMat?fmtUSD(p.objMat):'—')+'</td><td class="money" style="font-weight:400;">'+(p.objOtros?fmtUSD(p.objOtros):'—')+'</td>'
         +'<td class="money">'+fmtUSD(obj)+'</td>'
+        +'<td style="font-size:12px;color:var(--gris);">'+incid(obj)+'</td>'
         +'<td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:'+Math.min(p.avance||0,100).toFixed(0)+'%"></div></div><span style="font-size:11px;color:var(--verde);min-width:30px;text-align:right;">'+fmtPct(p.avance||0)+'</span></div></td>'
         +'<td class="money">'+fmtUSD(e)+'</td><td class="money" style="color:'+(obj-e<0?'#B3541E':'inherit')+'">'+fmtUSD(obj-e)+'</td>'
         +'<td style="white-space:nowrap;text-align:right;"><button class="btn btn-ghost btn-sm" data-pedit="'+esc(p.id)+'">Editar</button><button class="btn btn-ghost btn-sm" data-pdel="'+esc(p.id)+'" style="color:#9E2B25;">Borrar</button></td></tr>';
     });
   });
-  html+='<tr class="total-row"><td>Total</td><td colspan="3"></td><td class="money">'+fmtUSD(total)+'</td><td></td><td class="money">'+fmtUSD(ejec)+'</td><td class="money">'+fmtUSD(total-ejec)+'</td><td></td></tr></tbody></table>';
+  html+='<tr class="total-row"><td>Total obra</td>'
+    +'<td class="money">'+fmtUSD(totMO)+'</td><td class="money">'+fmtUSD(totMat)+'</td><td class="money">'+fmtUSD(totOtros)+'</td>'
+    +'<td class="money">'+fmtUSD(total)+'</td><td style="font-size:12px;color:var(--gris);">'+(total>0?'100,0%':'—')+'</td><td></td>'
+    +'<td class="money">'+fmtUSD(ejec)+'</td><td class="money">'+fmtUSD(total-ejec)+'</td><td></td></tr></tbody></table>';
   cont.innerHTML=html;
   cont.querySelectorAll('[data-pedit]').forEach(b=>b.addEventListener('click',()=>editarPresu(b.dataset.pedit)));
   cont.querySelectorAll('[data-pdel]').forEach(b=>b.addEventListener('click',()=>{ const p=Store.presupuesto.find(x=>x.id===b.dataset.pdel);
@@ -2051,7 +2121,7 @@ function renderProyeccion(){
 /* ---------- ABAUCÁN ---------- */
 function renderAbaucan(){
   const supA=Number(Store.config.supAbaucan)||REFERENCIA.superficie;
-  const totalA=Store.abaucan.reduce((s,a)=>s+(a.montoUSD||0),0);
+  const totalA=totalAbaucanUSD();
   const ejec=totalEjecutado(); const presu=totalPresupuesto();
   document.getElementById('kpi-abaucan').innerHTML=
     '<div class="kpi acento"><div class="kpi-label">Abaucán · costo por m²</div><div class="kpi-value num">'+(totalA?fmtUSD(totalA/supA):'—')+'</div><div class="kpi-sub">'+(totalA?fmtUSD(totalA)+' en '+supA+' m²':'Cargá los rubros')+'</div></div>'
@@ -2059,18 +2129,35 @@ function renderAbaucan(){
     +'<div class="kpi"><div class="kpi-label">Río Colorado · objetivo por m²</div><div class="kpi-value num">'+(presu?fmtUSD(presu/PROYECTO.superficie):'—')+'</div><div class="kpi-sub">Según presupuesto cargado</div></div>'
     +'<div class="kpi"><div class="kpi-label">Rubros de Abaucán cargados</div><div class="kpi-value num">'+Store.abaucan.length+' <span style="font-size:15px;color:var(--gris);font-weight:600;">de '+RUBROS.length+'</span></div><div class="kpi-sub">Cuantos más, mejor la comparación</div></div>';
   const cont=document.getElementById('tabla-abaucan');
-  if(!Store.abaucan.length){ cont.innerHTML='<div class="empty"><strong>Sin datos de Abaucán</strong>Cargá los rubros de aquella obra en dólares para poder comparar.</div>'; return; }
-  const porRubro=agrupar(Store.gastos,g=>g.rubro);
-  let html='<table><thead><tr><th>Rubro</th><th class="money">Abaucán USD/m²</th><th class="money">Río Colorado USD/m²</th><th style="width:74px;">Avance</th><th class="money">Diferencia</th><th></th></tr></thead><tbody>';
-  Store.abaucan.slice().sort((a,b)=>b.montoUSD-a.montoUSD).forEach(a=>{
-    const am=a.montoUSD/supA, rc=(porRubro[a.rubro]||0)/PROYECTO.superficie;
+  if(!Store.abaucan.length){ cont.innerHTML='<div class="empty"><strong>Sin datos de Abaucán</strong>Cargá los rubros de aquella obra en dólares, separados en materiales, mano de obra y generales.</div>'; return; }
+  /* Ambas obras se comparan con el mismo criterio de familias: el tipo de cada
+     gasto de Río Colorado (Mano de obra / Materiales / el resto como generales)
+     contra los tres campos cargados de Abaucán. Todo en USD por m². */
+  let html='<table><thead><tr><th rowspan="2">Rubro</th><th colspan="3" style="text-align:center;">Abaucán USD/m²</th><th colspan="3" style="text-align:center;">Río Colorado USD/m²</th><th rowspan="2" class="money">Abaucán total</th><th rowspan="2" class="money">RC total</th><th rowspan="2" style="width:74px;">Avance</th><th rowspan="2" class="money">Diferencia</th><th rowspan="2"></th></tr>'
+    +'<tr><th class="money">Mat.</th><th class="money">M. obra</th><th class="money">Grales.</th><th class="money">Mat.</th><th class="money">M. obra</th><th class="money">Grales.</th></tr></thead><tbody>';
+  let tRC={mat:0,mo:0,gen:0};
+  Store.abaucan.slice().sort((a,b)=>totalAbaucanRubro(b)-totalAbaucanRubro(a)).forEach(a=>{
+    const e=ejecutadoPorFamilia(a.rubro);
+    tRC.mat+=e.mat; tRC.mo+=e.mo; tRC.gen+=e.gen;
+    const aT=totalAbaucanRubro(a), rT=e.mat+e.mo+e.gen;
+    const am=aT/supA, rc=rT/PROYECTO.superficie;
     const p=Store.presupuesto.find(x=>x.rubro===a.rubro); const av=p?(p.avance||0):0;
     const dif=rc-am; const juzgable=av>=50;
-    html+='<tr><td>'+esc(a.rubro)+'</td><td class="money">'+fmtUSD(am,1)+'</td><td class="money">'+fmtUSD(rc,1)+'</td>'
+    const c=(v,sup)=>'<td class="money" style="font-weight:400;">'+(v?fmtUSD(v/sup,1):'—')+'</td>';
+    html+='<tr><td>'+esc(a.rubro)+(a.notas?'<div style="font-size:11.5px;color:var(--n-500);">'+esc(a.notas)+'</div>':'')+'</td>'
+      +c(a.mat,supA)+c(a.mo,supA)+c(a.gen,supA)
+      +c(e.mat,PROYECTO.superficie)+c(e.mo,PROYECTO.superficie)+c(e.gen,PROYECTO.superficie)
+      +'<td class="money">'+fmtUSD(am,1)+'</td><td class="money">'+fmtUSD(rc,1)+'</td>'
       +'<td style="font-size:12px;color:var(--gris);">'+fmtPct(av)+'</td>'
       +'<td class="money" style="color:'+(!juzgable?'var(--n-500)':(dif>0?'#B3541E':'#0C6F46'))+'">'+(juzgable?((dif>0?'+':'')+fmtUSD(dif,1)):'sin terminar')+'</td>'
       +'<td style="text-align:right;"><button class="btn btn-ghost btn-sm" data-abdel="'+esc(a.id)+'" style="color:#9E2B25;">Borrar</button></td></tr>'; });
-  html+='<tr class="total-row"><td>Total</td><td class="money">'+fmtUSD(totalA/supA,1)+'</td><td class="money">'+fmtUSD(ejec/PROYECTO.superficie,1)+'</td><td colspan="3"></td></tr></tbody></table>';
+  const aMat=totalAbaucanFamilia('mat'), aMo=totalAbaucanFamilia('mo'), aGen=totalAbaucanFamilia('gen');
+  const ct=(v,sup)=>'<td class="money">'+(v?fmtUSD(v/sup,1):'—')+'</td>';
+  html+='<tr class="total-row"><td>Total</td>'
+    +ct(aMat,supA)+ct(aMo,supA)+ct(aGen,supA)
+    +ct(tRC.mat,PROYECTO.superficie)+ct(tRC.mo,PROYECTO.superficie)+ct(tRC.gen,PROYECTO.superficie)
+    +'<td class="money">'+fmtUSD(totalA/supA,1)+'</td><td class="money">'+fmtUSD((tRC.mat+tRC.mo+tRC.gen)/PROYECTO.superficie,1)+'</td><td colspan="3"></td></tr></tbody></table>'
+    +'<p class="panel-sub" style="margin-top:12px;">Los generales agrupan todo lo que no es material ni mano de obra directa: equipos, subcontratos e indirectos. En Río Colorado salen del tipo cargado en cada gasto.</p>';
   cont.innerHTML=html;
   cont.querySelectorAll('[data-abdel]').forEach(b=>b.addEventListener('click',()=>{ Store.borrarAbaucan(b.dataset.abdel); toast('Rubro borrado'); renderTodo(); }));
 }
@@ -2303,6 +2390,63 @@ function renderFinanciero(){
   cont.innerHTML=html+'</div>';
 }
 
+/* ---------- INTERESES POR SOCIO ---------- */
+function renderFinSocios(){
+  const tabla=document.getElementById('tabla-fin-socios'), torta=document.getElementById('chart-fin-socios');
+  if(!tabla||!torta) return;
+  const filas=SOCIOS.map(s=>({ socio:s, bruto:integradoPorSocio(s), interes:interesDe_socio(s), total:integradoActualizadoDe(s) }))
+    .filter(f=>f.bruto>0||f.interes>0);
+  if(!filas.length){
+    tabla.innerHTML='<div class="empty"><strong>Sin datos por socio</strong>Cargá aportes o gastos financiados por cada socio.</div>';
+    torta.innerHTML=svgVacio('Cargá aportes y gastos para ver el peso de cada socio.');
+    return;
+  }
+  filas.sort((a,b)=>b.total-a.total);
+  const tB=filas.reduce((s,f)=>s+f.bruto,0), tI=filas.reduce((s,f)=>s+f.interes,0), tT=tB+tI;
+  let h='<table><thead><tr><th>Socio</th><th class="money">Integrado bruto</th><th class="money">Interés</th><th class="money">Total actualizado</th><th style="width:66px;">Interés</th><th style="width:60px;">% obra</th></tr></thead><tbody>';
+  filas.forEach(f=>{
+    h+='<tr><td><span class="tag socio">'+esc(f.socio)+'</span></td>'
+      +'<td class="money">'+fmtUSD(f.bruto)+'</td>'
+      +'<td class="money" style="color:var(--marron);">'+fmtUSD(f.interes)+'</td>'
+      +'<td class="money">'+fmtUSD(f.total)+'</td>'
+      +'<td style="font-size:12px;color:var(--gris);">'+(f.bruto?fmtPct(f.interes/f.bruto*100):'—')+'</td>'
+      +'<td style="font-size:12px;color:var(--gris);">'+(tT?(f.total/tT*100).toFixed(1)+'%':'—')+'</td></tr>';
+  });
+  h+='<tr class="total-row"><td>Total</td><td class="money">'+fmtUSD(tB)+'</td><td class="money">'+fmtUSD(tI)+'</td>'
+    +'<td class="money">'+fmtUSD(tT)+'</td><td style="font-size:12px;color:var(--gris);">'+(tB?fmtPct(tI/tB*100):'—')+'</td>'
+    +'<td style="font-size:12px;color:var(--gris);">'+(tT?'100,0%':'—')+'</td></tr></tbody></table>';
+  tabla.innerHTML=h;
+
+  const items=filas.filter(f=>f.total>0).map((f,i)=>({label:f.socio,value:f.total,color:SERIES[i%SERIES.length]}));
+  torta.innerHTML=items.length?svgDonut(items,'Actualizado')+leyenda(items):svgVacio('Sin montos para graficar.');
+}
+
+function renderFinMatriz(){
+  const cont=document.getElementById('tabla-fin-matriz'); if(!cont) return;
+  if(tasaAnual()<=0){ cont.innerHTML='<div class="empty"><strong>Sin tasa de interés cargada</strong>Definila en Datos y configuración para ver el devengamiento mes a mes.</div>'; return; }
+  const meses=mesesConInteres();
+  const activos=SOCIOS.filter(s=>integradoPorSocio(s)>0||interesDe_socio(s)>0);
+  if(!meses.length||!activos.length){ cont.innerHTML='<div class="empty"><strong>Sin movimientos</strong>El interés empieza a devengar con el primer gasto cargado.</div>'; return; }
+  let h='<table><thead><tr><th>Mes</th>';
+  activos.forEach(s=>{ h+='<th class="money">'+esc(s)+'</th>'; });
+  h+='<th class="money">Total del mes</th></tr></thead><tbody>';
+  const totPorSocio={}; activos.forEach(s=>totPorSocio[s]=0);
+  let totGeneral=0;
+  meses.forEach(m=>{
+    let totMes=0;
+    let fila='<tr><td>'+mesLabel(m)+'</td>';
+    activos.forEach(s=>{ const v=interesMesDe(s,m); totPorSocio[s]+=v; totMes+=v;
+      fila+='<td class="money" style="font-weight:400;">'+(v>0.005?fmtUSD(v):'—')+'</td>'; });
+    totGeneral+=totMes;
+    fila+='<td class="money">'+(totMes>0.005?fmtUSD(totMes):'—')+'</td></tr>';
+    h+=fila;
+  });
+  h+='<tr class="total-row"><td>Total del proyecto</td>';
+  activos.forEach(s=>{ h+='<td class="money">'+fmtUSD(totPorSocio[s])+'</td>'; });
+  h+='<td class="money">'+fmtUSD(totGeneral)+'</td></tr></tbody></table>';
+  cont.innerHTML=h;
+}
+
 function renderAvisoHonorarios(){
   const cont=document.getElementById('aviso-honorarios'); if(!cont) return;
   const pend=mesesPendientesHonorarios();
@@ -2460,7 +2604,7 @@ function exportarExcel(){
   const fPr=[['Nombre','Tipo','Rubro habitual','CUIT','Contacto','Condicion de pago','Notas']].concat(Store.proveedores.map(p=>[p.nombre,p.tipo||'',p.rubro||'',p.cuit||'',p.contacto||'',p.cond||'',p.notas||'']));
   const t=lineaDeTiempo(); let ap=0,ar=0; const fC=[['Mes','Plan USD','Real USD','Plan acum','Real acum','Desvio acum']];
   t.meses.forEach(m=>{ const p=t.plan[m]||0,r=t.real[m]||0; ap+=p; ar+=r; fC.push([m,Number(p.toFixed(2)),Number(r.toFixed(2)),Number(ap.toFixed(2)),Number(ar.toFixed(2)),Number((ar-ap).toFixed(2))]); });
-  const fAb=[['Rubro','Monto USD Abaucan','Notas']].concat(Store.abaucan.map(a=>[a.rubro,a.montoUSD,a.notas||'']));
+  const fAb=[['Rubro','Materiales USD','Mano de obra USD','Generales USD','Total USD','Notas']].concat(Store.abaucan.map(a=>[a.rubro,a.mat||0,a.mo||0,a.gen||0,totalAbaucanRubro(a),a.notas||'']));
 
   // ---- hoja de costo financiero y honorarios ----
   const mesesFin=Array.from(new Set(Store.gastos.map(g=>mesClave(g.fecha)).filter(Boolean))).sort();
@@ -2532,7 +2676,7 @@ function restaurarJSON(file){ const r=new FileReader(); r.onload=e=>{ try{ const
 
 /* ---------- PLANTILLAS Y CARGA MASIVA ---------- */
 const COL_PRESU=['Rubro','Macrorubro','Mano de obra USD','Materiales USD','Otros USD','Mes desde (AAAA-MM)','Mes hasta (AAAA-MM)','Avance fisico %','Notas'];
-const COL_ABAUCAN=['Rubro','Monto USD','Notas'];
+const COL_ABAUCAN=['Rubro','Materiales USD','Mano de obra USD','Generales USD','Notas'];
 
 function plantillaPresupuesto(){
   const hoy=hoyISO().slice(0,7);
@@ -2551,9 +2695,9 @@ function plantillaPresupuesto(){
 function plantillaAbaucan(){
   const filas=[COL_ABAUCAN].concat(RUBROS.map(r=>{
     const a=Store.abaucan.find(x=>x.rubro===r);
-    return a ? [r,a.montoUSD||'',a.notas||''] : [r,'',''];
+    return a ? [r,a.mat||'',a.mo||'',a.gen||'',a.notas||''] : [r,'','','',''];
   }));
-  if(hayXLSX()){ const ws=XLSX.utils.aoa_to_sheet(filas); ws['!cols']=[{wch:30},{wch:16},{wch:30}];
+  if(hayXLSX()){ const ws=XLSX.utils.aoa_to_sheet(filas); ws['!cols']=[{wch:30},{wch:16},{wch:18},{wch:16},{wch:30}];
     const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Abaucan');
     XLSX.writeFile(wb,'Plantilla_Abaucan.xlsx');
   } else descargarArchivo('Plantilla_Abaucan.csv','\uFEFF'+filas.map(f=>f.join(';')).join('\n'),'text/csv;charset=utf-8');
@@ -2618,9 +2762,11 @@ function importarAbaucan(file){
     filas.forEach((f,i)=>{
       const rubro=String(buscarCampo(f,['Rubro'])||'').trim(); if(!rubro) return;
       if(RUBROS.indexOf(rubro)===-1){ errores.push('Fila '+(i+2)+': el rubro "'+rubro+'" no existe en la lista.'); return; }
-      const monto=normalizarNumero(buscarCampo(f,['Monto USD','Monto','USD']));
-      if(monto<=0){ omitidos++; return; }
-      Store.guardarAbaucan({rubro,montoUSD:monto,notas:String(buscarCampo(f,['Notas'])||'').trim()}); ok++;
+      const mat=normalizarNumero(buscarCampo(f,['Materiales USD','Materiales','Material']));
+      const mo=normalizarNumero(buscarCampo(f,['Mano de obra USD','Mano de obra','Mano obra','MO']));
+      const gen=normalizarNumero(buscarCampo(f,['Generales USD','Generales','General','Otros']));
+      if(mat+mo+gen<=0){ omitidos++; return; }
+      Store.guardarAbaucan({rubro,mat:mat,mo:mo,gen:gen,notas:String(buscarCampo(f,['Notas'])||'').trim()}); ok++;
     });
     let html='<div class="aviso '+(errores.length?'marron':'verde')+'" style="margin-bottom:0;"><div><strong>Se cargaron '+ok+' rubros de Abaucán.</strong>';
     if(omitidos) html+=' Se saltearon '+omitidos+' filas sin monto.';
@@ -2672,7 +2818,7 @@ function irA(v){ document.querySelectorAll('.nav-btn').forEach(b=>b.classList.to
   menuCerrar(); window.scrollTo({top:0}); }
 function renderTodo(){ actualizarProveedores(); renderDashboard(); renderMacro(); renderSocios(); renderTablaGastos(); renderPresupuesto();
   renderProveedoresABM(); renderCurva(); renderAnalisis(); renderIVA(); renderProyeccion(); renderAbaucan();
-  renderFinanciero(); renderAvisoHonorarios(); renderEstadoTasa(); volcarConfig(); renderEstadoDolar(); renderEstadoIA(); renderEstadoFirebase(); }
+  renderFinanciero(); renderFinSocios(); renderFinMatriz(); renderAvisoHonorarios(); renderEstadoTasa(); volcarConfig(); renderEstadoDolar(); renderEstadoIA(); renderEstadoFirebase(); }
 
 /* ---------- ARRANQUE ---------- */
 function armarUI(){
@@ -2840,9 +2986,13 @@ function armarUI(){
 
   // abaucán
   document.getElementById('form-abaucan').addEventListener('submit',e=>{ e.preventDefault();
-    const r=document.getElementById('ab-rubro').value,m=parseFloat(document.getElementById('ab-usd').value);
-    if(!r){ toast('Elegí un rubro',true); return; } if(!(m>0)){ toast('El monto tiene que ser mayor a cero',true); return; }
-    Store.guardarAbaucan({rubro:r,montoUSD:m,notas:document.getElementById('ab-notas').value.trim()});
+    const r=document.getElementById('ab-rubro').value;
+    const mat=parseFloat(document.getElementById('ab-mat').value)||0,
+          mo=parseFloat(document.getElementById('ab-mo').value)||0,
+          gen=parseFloat(document.getElementById('ab-gen').value)||0;
+    if(!r){ toast('Elegí un rubro',true); return; }
+    if(!(mat+mo+gen>0)){ toast('Cargá al menos un monto mayor a cero',true); return; }
+    Store.guardarAbaucan({rubro:r,mat:mat,mo:mo,gen:gen,notas:document.getElementById('ab-notas').value.trim()});
     document.getElementById('form-abaucan').reset(); renderTodo(); toast('Rubro de Abaucán guardado'); });
   document.getElementById('ab-sup').addEventListener('change',e=>{ Store.config.supAbaucan=parseFloat(e.target.value)||REFERENCIA.superficie; Store.guardarConfig(); renderTodo(); });
 
