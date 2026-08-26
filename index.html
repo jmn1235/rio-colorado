@@ -144,6 +144,17 @@ tr.macro-row:hover td{background:var(--n-050);}
 .field input[readonly]{background:var(--n-100);color:var(--n-700);}
 .field .hint{font-size:11px;color:var(--n-500);}
 .field .hint.warn{color:var(--alerta);}
+.field.tilde{flex-direction:row;align-items:center;gap:9px;}
+.field.tilde input[type="checkbox"]{width:17px;height:17px;flex:none;accent-color:var(--verde);cursor:pointer;}
+.field.tilde label{text-transform:none;letter-spacing:0;font-size:13px;color:var(--tinta);cursor:pointer;}
+.caja-calc{background:var(--n-050);border:1px solid var(--n-200);border-left:3px solid var(--verde);border-radius:var(--r-sm);padding:11px 13px;font-size:12.5px;}
+.caja-calc div{display:flex;justify-content:space-between;gap:14px;padding:2.5px 0;}
+.caja-calc div span:last-child{font-family:'Montserrat',sans-serif;font-weight:700;color:var(--tinta);}
+.caja-calc div.destacar{border-top:1px solid var(--n-300);margin-top:4px;padding-top:6px;}
+.caja-calc div.destacar span:last-child{color:var(--verde);}
+tr.fila-mes{cursor:pointer;}
+tr.fila-mes:hover td{background:var(--n-100);}
+tr.fila-mes td:first-child::after{content:'›';margin-left:7px;color:var(--gris);font-weight:700;}
 .campo-con-btn{display:flex;gap:8px;align-items:stretch;}
 .campo-con-btn select{flex:1;min-width:0;}
 .search-input{border:1px solid var(--n-300);border-radius:var(--r-sm);padding:9px 12px;font-size:13.5px;width:260px;max-width:100%;background:var(--blanco);font-family:'Source Sans 3',sans-serif;}
@@ -406,6 +417,10 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
         <div class="panel"><div class="panel-head"><div><div class="panel-title">Aportado contra comprometido</div><p class="panel-sub">Por socio, con lo que resta integrar</p></div></div><div class="table-wrap" id="tabla-socios"></div></div>
         <div class="panel"><div class="panel-head"><div><div class="panel-title">Participación en aportes</div><p class="panel-sub">Porción del total integrado</p></div></div><div id="chart-socios"></div></div>
       </div>
+      <div class="panel" id="panel-marcaton">
+        <div class="panel-head"><div><div class="panel-title">Beneficio MARCATON por socio</div><p class="panel-sub">Reintegros bancarios cobrados por quien puso el cupo. No son plata del proyecto: al fondo entra el pagado menos 5% y el resto queda para quien lo consiguió.</p></div></div>
+        <div class="table-wrap" id="tabla-marcaton"></div>
+      </div>
       <div class="grid-2">
         <div class="panel">
           <div class="panel-head"><div><div class="panel-title">Registrar un aporte</div><p class="panel-sub">Se ingresa en pesos y se congela al dólar del día</p></div></div>
@@ -414,10 +429,12 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
             <div class="form-grid c2">
               <div class="field"><label for="a-fecha">Fecha *</label><input type="date" id="a-fecha" required></div>
               <div class="field"><label for="a-socio">Socio *</label><select id="a-socio" required></select></div>
-              <div class="field"><label for="a-monto">Monto en pesos *</label><input type="number" id="a-monto" step="0.01" min="0" required></div>
+              <div class="field"><label for="a-monto">Monto en pesos *</label><input type="number" id="a-monto" step="0.01" min="0" required><span class="hint" id="a-monto-hint">Lo efectivamente pagado.</span></div>
               <div class="field"><label for="a-cot">Dólar MEP del día</label><input type="number" id="a-cot" step="0.01" min="0" placeholder="Buscando…"><span class="hint" id="a-cot-hint">Se completa sola.</span></div>
               <div class="field"><label for="a-usd">Equivale a</label><input type="text" id="a-usd" readonly value="—"></div>
               <div class="field"><label for="a-medio">Medio</label><select id="a-medio"><option>Transferencia</option><option>Efectivo</option><option>Cheque</option><option>Aporte en especie</option></select></div>
+              <div class="field tilde col-2"><input type="checkbox" id="a-marcaton"><label for="a-marcaton">Pagado con promoción MARCATON</label></div>
+              <div class="field col-2" id="a-marcaton-caja" style="display:none;"><div class="caja-calc" id="a-marcaton-detalle"></div></div>
               <div class="field col-2"><label for="a-notas">Notas</label><input type="text" id="a-notas" placeholder="Opcional"></div>
             </div>
             <div class="btn-row" style="margin-top:18px;"><button type="submit" class="btn btn-primary">Guardar aporte</button><button type="button" class="btn" id="a-cancelar" style="display:none;">Cancelar edición</button></div>
@@ -609,7 +626,9 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
             <div class="field col-2"><label for="g-proveedor">Proveedor *</label>
               <div class="campo-con-btn"><select id="g-proveedor" required></select><button type="button" class="btn btn-sm" id="btn-nuevo-prov">Nuevo</button></div></div>
             <div class="field col-2"><label for="g-concepto">Concepto *</label><input type="text" id="g-concepto" placeholder="Ej. Viguetas pretensadas — losa PA" required></div>
-            <div class="field"><label for="g-monto">Monto total en pesos *</label><input type="number" id="g-monto" step="0.01" min="0" placeholder="0,00" required><span class="hint">Lo que efectivamente se paga, IVA incluido.</span></div>
+            <div class="field"><label for="g-bruto">Monto de la factura $ *</label><input type="number" id="g-bruto" step="0.01" min="0" placeholder="0,00" required><span class="hint">Lo que dice la factura, IVA incluido.</span></div>
+            <div class="field"><label for="g-desc">Descuento %</label><input type="number" id="g-desc" step="0.01" min="0" max="100" placeholder="0"><span class="hint">Nota de crédito o descuento pactado.</span></div>
+            <div class="field"><label for="g-monto">Monto a imputar $</label><input type="number" id="g-monto" step="0.01" min="0" placeholder="0,00" readonly tabindex="-1"><span class="hint" id="g-desc-hint">La factura menos el descuento. Es el monto que usa toda la app.</span></div>
             <div class="field"><label for="g-cot">Dólar MEP del día</label><input type="number" id="g-cot" step="0.01" min="0" placeholder="Buscando…"><span class="hint" id="g-cot-hint">Se completa sola. Podés corregirla.</span></div>
             <div class="field"><label for="g-usd">Queda registrado en</label><input type="text" id="g-usd" readonly value="—"></div>
             <div class="field"><label for="g-unidad">Unidad / destino</label><select id="g-unidad"></select></div>
@@ -647,7 +666,8 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
     <!-- ===== PRESUPUESTO ===== -->
     <section id="view-presupuesto" class="view">
       <div class="topbar"><div><h1>Presupuesto y avance</h1><p>Objetivos en dólares, ventana de ejecución y avance físico</p></div>
-        <div class="btn-row"><button class="btn btn-sm" id="btn-gestion-rubros">Agregar / eliminar rubro</button></div></div>
+        <div class="btn-row"><button class="btn btn-sm" id="btn-linea-base">Congelar línea base</button><button class="btn btn-sm" id="btn-gestion-rubros">Agregar / eliminar rubro</button></div></div>
+      <div id="aviso-linea-base"></div>
       <div class="kpi-grid" id="kpi-presupuesto"></div>
       <div class="panel">
         <div class="panel-head"><div><div class="panel-title">Agregar o editar un rubro</div><p class="panel-sub">Los objetivos se cargan en dólares. El monto se reparte lineal entre el mes de inicio y el de fin.</p></div></div>
@@ -670,6 +690,10 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
         </form>
       </div>
       <div class="panel"><div class="panel-head"><div><div class="panel-title">Presupuesto por rubro</div><p class="panel-sub">Agrupado por macrorubro, en dólares</p></div></div><div class="table-wrap" id="tabla-presupuesto"></div></div>
+      <div class="panel" id="panel-linea-base" style="display:none;">
+        <div class="panel-head"><div><div class="panel-title">Desvíos contra la línea base</div><p class="panel-sub">El presupuesto vigente contra el que se congeló al arrancar. Los rubros agregados después quedan fuera de la comparación.</p></div></div>
+        <div class="table-wrap" id="tabla-linea-base"></div>
+      </div>
     </section>
 
     <!-- ===== PROVEEDORES ===== -->
@@ -800,6 +824,16 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
     </form>
     <div class="table-wrap" id="tabla-rubros-abm" style="max-height:44vh;overflow-y:auto;"></div>
     <div class="btn-row" style="margin-top:20px;"><button type="button" class="btn" id="rb-cerrar">Cerrar</button></div>
+  </div>
+</div>
+
+<!-- modal detalle de un mes de la curva -->
+<div class="modal oculto" id="modal-mes">
+  <div class="modal-card" style="max-width:760px;">
+    <h3 id="modal-mes-titulo">Detalle del mes</h3>
+    <p class="panel-sub" id="modal-mes-sub"></p>
+    <div id="modal-mes-cuerpo" style="margin-top:18px;"></div>
+    <div class="btn-row" style="margin-top:20px;"><button type="button" class="btn" id="mes-cerrar">Cerrar</button></div>
   </div>
 </div>
 
@@ -1162,6 +1196,9 @@ function svgCurvaS(labels,plan,real){
 }
 
 /* ---------- CÁLCULOS (todo en USD) ---------- */
+/* Los gastos viejos no tienen bruto ni descuento: se asume factura sin descuento. */
+function brutoARSDe(g){ return g.montoBrutoARS!=null?g.montoBrutoARS:(g.montoARS||0); }
+function descuentoARSDe(g){ return brutoARSDe(g)-(g.montoARS||0); }
 function objetivoRubro(p){ return (p.objMO||0)+(p.objMat||0)+(p.objOtros||0); }
 /* Abaucán se carga separado en las mismas tres familias que el presupuesto:
    materiales, mano de obra y generales (equipos, subcontratos e indirectos). */
@@ -1562,7 +1599,7 @@ async function guardarRenglones(){
   validos.forEach(r=>{ const monto=Number(r.monto);
     // el IVA de la factura se reparte entre renglones en proporción a su monto
     const ivaR=(ivaTotal&&totalFactura)?ivaTotal*(monto/totalFactura):0;
-    Store.guardarGasto({ fecha, rubro:r.rubro, tipo:r.tipo, proveedor:prov, concepto:r.concepto, montoARS:monto,
+    Store.guardarGasto({ fecha, rubro:r.rubro, tipo:r.tipo, proveedor:prov, concepto:r.concepto, montoARS:monto, montoBrutoARS:monto, descuentoPct:0,
       cotizacion:c.valor, montoUSD:monto/c.valor, unidad:uni, financia:fin, formaPago:'', estado:'Pagado',
       cargadoPor:USUARIO?USUARIO.nombre:'—', comprobante:comp, notas:cuit?('CUIT '+cuit):'',
       fiscal, alicuota:fiscal===FISCAL_DISCRIMINADO?facturaAlicuota:null,
@@ -1626,7 +1663,7 @@ async function guardarRapida(){
   for(const r of validos){
     const c=await cotizacionMEP(r.fecha);
     asegurarProveedor(r.proveedor,'');
-    Store.guardarGasto({ fecha:r.fecha, rubro:r.rubro, tipo:r.tipo, proveedor:r.proveedor, concepto:r.concepto, montoARS:r.monto,
+    Store.guardarGasto({ fecha:r.fecha, rubro:r.rubro, tipo:r.tipo, proveedor:r.proveedor, concepto:r.concepto, montoARS:r.monto, montoBrutoARS:r.monto, descuentoPct:0,
       cotizacion:c?c.valor:null, montoUSD:c?r.monto/c.valor:null, unidad:UNIDADES[0], financia:FONDO, formaPago:'', estado:'Pagado',
       cargadoPor:USUARIO?USUARIO.nombre:'—', comprobante:'', notas:'Cargado por texto' });
   }
@@ -1818,8 +1855,81 @@ function renderMacro(){
 }
 
 /* ---------- SOCIOS ---------- */
-function recalcularUSDAporte(){ const m=parseFloat(document.getElementById('a-monto').value),c=parseFloat(document.getElementById('a-cot').value);
+/* ---------- MARCATON ----------
+   Promo bancaria: se paga con recargo del 5% y el banco reintegra el 20%.
+   Al fondo del proyecto entra el pagado menos ese 5% de recargo (así coincide
+   con el descuento del 5% que se imputa en la factura del proveedor).
+   La diferencia entre el reintegro del 20% y el recargo del 5% queda para quien
+   puso el cupo — propio o de un tercero que consiguió — y no es plata de la obra. */
+const MARCATON_RECARGO=5, MARCATON_REINTEGRO=20;
+function marcatonNeto(bruto){ return Math.round((bruto||0)*(1-MARCATON_RECARGO/100)*100)/100; }
+function marcatonReintegro(bruto){ return Math.round((bruto||0)*(MARCATON_REINTEGRO/100)*100)/100; }
+function marcatonBeneficio(bruto){ return marcatonReintegro(bruto)-((bruto||0)-marcatonNeto(bruto)); }
+function esMarcaton(a){ return !!a.marcaton; }
+/* El bruto pagado: en aportes viejos o no-MARCATON es el propio monto acreditado */
+function brutoARSAporte(a){ return a.marcaton?(a.montoBrutoARS||0):(a.montoARS||0); }
+
+function montoAporteAcreditado(){
+  const b=parseFloat(document.getElementById('a-monto').value)||0;
+  return document.getElementById('a-marcaton').checked?marcatonNeto(b):b;
+}
+function actualizarMarcaton(){
+  const on=document.getElementById('a-marcaton').checked;
+  const caja=document.getElementById('a-marcaton-caja');
+  const hint=document.getElementById('a-monto-hint');
+  caja.style.display=on?'':'none';
+  if(hint) hint.textContent=on?'Lo efectivamente pagado con la promo, antes del reintegro.':'Lo efectivamente pagado.';
+  const bruto=parseFloat(document.getElementById('a-monto').value)||0;
+  if(on){
+    const neto=marcatonNeto(bruto), rein=marcatonReintegro(bruto), ben=marcatonBeneficio(bruto);
+    document.getElementById('a-marcaton-detalle').innerHTML=
+      '<div><span>Pagado con la promo</span><span>'+fmtARS(bruto,2)+'</span></div>'
+      +'<div><span>Reintegro del banco ('+MARCATON_REINTEGRO+'%)</span><span>'+fmtARS(rein,2)+'</span></div>'
+      +'<div><span>Recargo que absorbe el proyecto ('+MARCATON_RECARGO+'%)</span><span>'+fmtARS(bruto-neto,2)+'</span></div>'
+      +'<div><span>Beneficio de quien puso el cupo</span><span>'+fmtARS(ben,2)+'</span></div>'
+      +'<div class="destacar"><span>Se acredita al fondo</span><span>'+fmtARS(neto,2)+'</span></div>';
+  }
+  recalcularUSDAporte();
+}
+
+function recalcularUSDAporte(){ const m=montoAporteAcreditado(),c=parseFloat(document.getElementById('a-cot').value);
   const e=document.getElementById('a-usd'); if(e) e.value=(m>0&&c>0)?fmtUSD(m/c,2):'—'; }
+function renderMarcaton(){
+  const cont=document.getElementById('tabla-marcaton'); if(!cont) return;
+  const panel=document.getElementById('panel-marcaton');
+  const usados=Store.aportes.filter(esMarcaton);
+  if(!usados.length){
+    panel.style.display='none';
+    cont.innerHTML=''; return;
+  }
+  panel.style.display='';
+  const filas=SOCIOS.map(s=>{
+    const de=usados.filter(a=>a.socio===s);
+    return { socio:s, cupos:de.length,
+      pagado:de.reduce((t,a)=>t+brutoARSAporte(a),0),
+      acreditado:de.reduce((t,a)=>t+(a.montoARS||0),0),
+      acreditadoUSD:de.reduce((t,a)=>t+(a.montoUSD||0),0),
+      reintegro:de.reduce((t,a)=>t+(a.reintegroARS||marcatonReintegro(brutoARSAporte(a))),0),
+      beneficio:de.reduce((t,a)=>t+(a.beneficioARS||marcatonBeneficio(brutoARSAporte(a))),0) };
+  }).filter(f=>f.cupos>0).sort((a,b)=>b.beneficio-a.beneficio);
+  let h='<table><thead><tr><th>Socio</th><th style="width:70px;">Cupos</th><th class="money">Pagado</th><th class="money">Reintegro 20%</th><th class="money">Beneficio propio</th><th class="money">Acreditado al fondo</th><th class="money">Acreditado USD</th></tr></thead><tbody>';
+  filas.forEach(f=>{
+    h+='<tr><td><span class="tag socio">'+esc(f.socio)+'</span></td>'
+      +'<td style="font-family:\'Montserrat\',sans-serif;font-weight:700;">'+f.cupos+'</td>'
+      +'<td class="money" style="font-weight:400;">'+fmtARS(f.pagado,0)+'</td>'
+      +'<td class="money" style="font-weight:400;">'+fmtARS(f.reintegro,0)+'</td>'
+      +'<td class="money" style="color:var(--verde);">'+fmtARS(f.beneficio,0)+'</td>'
+      +'<td class="money">'+fmtARS(f.acreditado,0)+'</td>'
+      +'<td class="money">'+fmtUSD(f.acreditadoUSD)+'</td></tr>';
+  });
+  const t=k=>filas.reduce((s,f)=>s+f[k],0);
+  h+='<tr class="total-row"><td>Total</td><td style="font-family:\'Montserrat\',sans-serif;">'+t('cupos')+'</td>'
+    +'<td class="money">'+fmtARS(t('pagado'),0)+'</td><td class="money">'+fmtARS(t('reintegro'),0)+'</td>'
+    +'<td class="money" style="color:var(--verde);">'+fmtARS(t('beneficio'),0)+'</td>'
+    +'<td class="money">'+fmtARS(t('acreditado'),0)+'</td><td class="money">'+fmtUSD(t('acreditadoUSD'))+'</td></tr></tbody></table>';
+  cont.innerHTML=h;
+}
+
 function renderSocios(){
   const integrado=totalIntegrado(),comp=totalComprometidoSocios();
   const fondo=fondoDisponible(),directos=totalPagosDirectos();
@@ -1858,7 +1968,7 @@ function renderSocios(){
   const pagos=Store.gastos.filter(g=>g.financia&&g.financia!==FONDO).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
   if(!ap.length&&!pagos.length){ det.innerHTML='<div class="empty"><strong>Sin movimientos de socios</strong>Registrá un aporte al fondo, o cargá un gasto indicando qué socio lo pagó.</div>'; return; }
   let h='<table><thead><tr><th>Fecha</th><th>Socio</th><th>Origen</th><th class="money">USD</th><th></th></tr></thead><tbody>';
-  ap.slice(0,10).forEach(a=>{ h+='<tr><td>'+fmtFecha(a.fecha)+'</td><td><span class="tag socio">'+esc(a.socio)+'</span></td><td><span class="tag verde">Aporte al fondo</span></td><td class="money">'+fmtUSD(a.montoUSD||0)+'</td>'
+  ap.slice(0,10).forEach(a=>{ h+='<tr><td>'+fmtFecha(a.fecha)+'</td><td><span class="tag socio">'+esc(a.socio)+'</span></td><td><span class="tag verde">Aporte al fondo</span>'+(a.marcaton?' <span class="tag marron">MARCATON</span>':'')+'</td><td class="money">'+fmtUSD(a.montoUSD||0)+'</td>'
     +'<td style="text-align:right;white-space:nowrap;"><button class="btn btn-ghost btn-sm" data-aedit="'+esc(a.id)+'">Editar</button><button class="btn btn-ghost btn-sm" data-adel="'+esc(a.id)+'" style="color:#9E2B25;">Borrar</button></td></tr>'; });
   pagos.slice(0,10).forEach(g=>{ h+='<tr><td>'+fmtFecha(g.fecha)+'</td><td><span class="tag socio">'+esc(g.financia)+'</span></td><td><span class="tag marron">Pagó '+esc(g.rubro)+'</span></td><td class="money">'+fmtUSD(g.montoUSD||0)+'</td>'
     +'<td style="text-align:right;"><button class="btn btn-ghost btn-sm" data-gedit="'+esc(g.id)+'">Ver gasto</button></td></tr>'; });
@@ -1870,17 +1980,32 @@ function renderSocios(){
 }
 function editarAporte(id){ const a=Store.aportes.find(x=>x.id===id); if(!a)return;
   document.getElementById('a-id').value=a.id; document.getElementById('a-fecha').value=a.fecha; document.getElementById('a-socio').value=a.socio;
-  document.getElementById('a-monto').value=a.montoARS; document.getElementById('a-cot').value=a.cotizacion||'';
+  document.getElementById('a-marcaton').checked=!!a.marcaton;
+  document.getElementById('a-monto').value=brutoARSAporte(a); document.getElementById('a-cot').value=a.cotizacion||'';
   document.getElementById('a-medio').value=a.medio||'Transferencia'; document.getElementById('a-notas').value=a.notas||'';
-  document.getElementById('a-cancelar').style.display='inline-flex'; recalcularUSDAporte(); window.scrollTo({top:0,behavior:'smooth'}); }
+  document.getElementById('a-cancelar').style.display='inline-flex'; actualizarMarcaton(); window.scrollTo({top:0,behavior:'smooth'}); }
 function limpiarFormAporte(){ const f=document.getElementById('form-aporte'); f.reset();
   document.getElementById('a-id').value=''; document.getElementById('a-fecha').value=hoyISO(); document.getElementById('a-usd').value='—';
-  document.getElementById('a-cancelar').style.display='none'; buscarCotizacion(hoyISO(),'a-cot','a-cot-hint'); }
+  document.getElementById('a-cancelar').style.display='none'; actualizarMarcaton(); buscarCotizacion(hoyISO(),'a-cot','a-cot-hint'); }
 
 /* ---------- GASTOS ---------- */
 function poblarSelect(sel,ops,ph){ if(!sel)return; sel.innerHTML=(ph?'<option value="">'+esc(ph)+'</option>':'')+ops.map(o=>'<option>'+esc(o)+'</option>').join(''); }
 function poblarRubrosAgrupados(sel,ph){ if(!sel)return; let h=ph?'<option value="">'+esc(ph)+'</option>':'';
   MACRORUBROS.forEach(m=>{ h+='<optgroup label="'+esc(m.nombre)+'">'+m.rubros.map(r=>'<option>'+esc(r)+'</option>').join('')+'</optgroup>'; }); sel.innerHTML=h; }
+/* El monto que usa toda la app es el neto: la factura menos el descuento pactado
+   (nota de crédito por conjunto de facturas, descuento por transferencia, etc.). */
+function recalcularDescuento(){
+  const b=parseFloat(document.getElementById('g-bruto').value)||0;
+  let d=parseFloat(document.getElementById('g-desc').value)||0;
+  if(d<0)d=0; if(d>100)d=100;
+  const neto=b>0?Math.round(b*(1-d/100)*100)/100:'';
+  document.getElementById('g-monto').value=neto;
+  const h=document.getElementById('g-desc-hint');
+  if(h) h.textContent = (b>0&&d>0)
+    ? 'Descuento de '+fmtARS(b-neto,2)+' sobre '+fmtARS(b,2)+'. Se imputa '+fmtARS(neto,2)+'.'
+    : 'La factura menos el descuento. Es el monto que usa toda la app.';
+  recalcularUSD(); recalcularIVA(false);
+}
 function recalcularUSD(){ const m=parseFloat(document.getElementById('g-monto').value),c=parseFloat(document.getElementById('g-cot').value);
   document.getElementById('g-usd').value=(m>0&&c>0)?fmtUSD(m/c,2):'—'; }
 function limpiarFormGasto(){
@@ -1889,6 +2014,7 @@ function limpiarFormGasto(){
   document.getElementById('g-financia').value=FONDO; document.getElementById('g-unidad').value=UNIDADES[0];
   document.getElementById('g-fiscal').value=FISCAL_DISCRIMINADO;
   delete document.getElementById('g-iva').dataset.tocado;
+  recalcularDescuento();
   actualizarCamposFiscales();
   document.getElementById('form-titulo').textContent='Nuevo gasto'; document.getElementById('btn-guardar').textContent='Guardar gasto';
   document.getElementById('btn-cancelar').style.display='none'; buscarCotizacion(hoyISO(),'g-cot','g-cot-hint');
@@ -1897,6 +2023,8 @@ function editarGasto(id){ const g=Store.gastos.find(x=>x.id===id); if(!g)return;
   asegurarProveedor(g.proveedor,'');
   document.getElementById('g-id').value=g.id; document.getElementById('g-fecha').value=g.fecha; document.getElementById('g-rubro').value=g.rubro;
   document.getElementById('g-tipo').value=g.tipo; document.getElementById('g-proveedor').value=g.proveedor; document.getElementById('g-concepto').value=g.concepto;
+  document.getElementById('g-bruto').value=(g.montoBrutoARS!=null?g.montoBrutoARS:g.montoARS);
+  document.getElementById('g-desc').value=(g.descuentoPct||'');
   document.getElementById('g-monto').value=g.montoARS; document.getElementById('g-cot').value=g.cotizacion||''; document.getElementById('g-unidad').value=g.unidad||UNIDADES[0];
   document.getElementById('g-financia').value=g.financia||FONDO; document.getElementById('g-pago').value=g.formaPago||''; document.getElementById('g-estado').value=g.estado||'Pagado';
   document.getElementById('g-comprobante').value=g.comprobante||''; document.getElementById('g-notas').value=g.notas||'';
@@ -2058,13 +2186,164 @@ function renderCurva(){
   const hoyMes=hoyISO().slice(0,7);
   let html='<table><thead><tr><th>Mes</th><th class="money">Plan</th><th class="money">Real</th><th class="money">Plan acum.</th><th class="money">Real acum.</th><th class="money">Desvío</th></tr></thead><tbody>';
   t.meses.forEach((m,i)=>{ const fut=m>hoyMes&&realMes[i]===0; const d=fut?null:realAc[i]-planAc[i];
-    html+='<tr'+(fut?' style="color:var(--n-500);"':'')+'><td>'+mesLabel(m)+(fut?' <span class="tag">previsto</span>':'')+'</td><td class="money">'+fmtUSD(planMes[i])+'</td><td class="money">'+(fut?'—':fmtUSD(realMes[i]))+'</td><td class="money">'+fmtUSD(planAc[i])+'</td><td class="money">'+(fut?'—':fmtUSD(realAc[i]))+'</td>'
+    html+='<tr class="fila-mes" data-mes="'+m+'" title="Ver el detalle de este mes"'+(fut?' style="color:var(--n-500);"':'')+'><td>'+mesLabel(m)+(fut?' <span class="tag">previsto</span>':'')+'</td><td class="money">'+fmtUSD(planMes[i])+'</td><td class="money">'+(fut?'—':fmtUSD(realMes[i]))+'</td><td class="money">'+fmtUSD(planAc[i])+'</td><td class="money">'+(fut?'—':fmtUSD(realAc[i]))+'</td>'
       +'<td class="money" style="color:'+(d===null?'inherit':(d>0?'#B3541E':'#0C6F46'))+'">'+(d===null?'—':(d>0?'+':'')+fmtUSD(d))+'</td></tr>'; });
-  document.getElementById('tabla-curva').innerHTML=html+'</tbody></table>';
+  const tc=document.getElementById('tabla-curva');
+  tc.innerHTML=html+'</tbody></table>';
+  tc.querySelectorAll('[data-mes]').forEach(tr=>tr.addEventListener('click',()=>abrirDetalleMes(tr.dataset.mes)));
   const fut=t.meses.filter(m=>m>hoyMes);
   if(fut.length){ const vals=fut.map(m=>t.plan[m]||0); let a=0; const li=vals.map(v=>a+=v);
     document.getElementById('chart-prevision').innerHTML=svgCombo(fut.map(mesLabel),vals,li)+'<p class="panel-sub" style="text-align:center;margin-top:12px;">Quedan '+fmtUSD(vals.reduce((s,v)=>s+v,0))+' por ejecutar en '+fut.length+' meses.</p>';
   } else document.getElementById('chart-prevision').innerHTML=svgVacio('El plan no tiene meses futuros pendientes.');
+}
+
+/* Detalle de un mes de la curva: lo real (gastos cargados con esa fecha) y lo
+   planificado (el objetivo de cada rubro repartido entre los meses de su ventana),
+   ambos abiertos por rubro y separados en mano de obra, materiales y otros. */
+function detalleRealMes(ym){
+  const mapa={};
+  Store.gastos.filter(g=>mesClave(g.fecha)===ym).forEach(g=>{
+    const r=g.rubro||'(sin rubro)';
+    if(!mapa[r]) mapa[r]={rubro:r,mo:0,mat:0,otros:0,total:0,n:0};
+    const f=familiaTipo(g.tipo), v=g.montoUSD||0;
+    mapa[r][f==='mat'?'mat':(f==='mo'?'mo':'otros')]+=v;
+    mapa[r].total+=v; mapa[r].n++;
+  });
+  return Object.values(mapa).sort((a,b)=>b.total-a.total);
+}
+function detallePlanMes(ym){
+  const filas=[];
+  Store.presupuesto.forEach(p=>{
+    const meses=rangoMeses(p.mesDesde,p.mesHasta);
+    if(meses.indexOf(ym)===-1) return;
+    const n=meses.length;
+    const mo=(p.objMO||0)/n, mat=(p.objMat||0)/n, otros=(p.objOtros||0)/n;
+    filas.push({rubro:p.rubro,mo:mo,mat:mat,otros:otros,total:mo+mat+otros,n:n});
+  });
+  return filas.sort((a,b)=>b.total-a.total);
+}
+function tablaDetalleMes(filas,tipo){
+  if(!filas.length) return '<div class="empty" style="padding:22px;"><strong>Sin movimientos</strong>'+(tipo==='real'?'No hay gastos cargados en este mes.':'Ningún rubro tiene ejecución planificada en este mes.')+'</div>';
+  let h='<table><thead><tr><th>Rubro</th><th class="money">Mano de obra</th><th class="money">Materiales</th><th class="money">Otros</th><th class="money">Total</th></tr></thead><tbody>';
+  filas.forEach(f=>{
+    h+='<tr><td>'+esc(f.rubro)
+      +(tipo==='real'?'<div style="font-size:11.5px;color:var(--n-500);">'+f.n+' gasto'+(f.n===1?'':'s')+'</div>'
+                     :'<div style="font-size:11.5px;color:var(--n-500);">1 de '+f.n+' meses del plan</div>')
+      +'</td><td class="money" style="font-weight:400;">'+(f.mo?fmtUSD(f.mo):'—')+'</td>'
+      +'<td class="money" style="font-weight:400;">'+(f.mat?fmtUSD(f.mat):'—')+'</td>'
+      +'<td class="money" style="font-weight:400;">'+(f.otros?fmtUSD(f.otros):'—')+'</td>'
+      +'<td class="money">'+fmtUSD(f.total)+'</td></tr>';
+  });
+  const t=k=>filas.reduce((s,f)=>s+f[k],0);
+  h+='<tr class="total-row"><td>Total</td><td class="money">'+fmtUSD(t('mo'))+'</td><td class="money">'+fmtUSD(t('mat'))+'</td>'
+    +'<td class="money">'+fmtUSD(t('otros'))+'</td><td class="money">'+fmtUSD(t('total'))+'</td></tr></tbody></table>';
+  return h;
+}
+function abrirDetalleMes(ym){
+  const real=detalleRealMes(ym), plan=detallePlanMes(ym);
+  const tR=real.reduce((s,f)=>s+f.total,0), tP=plan.reduce((s,f)=>s+f.total,0);
+  document.getElementById('modal-mes-titulo').textContent='Detalle de '+mesNombre(ym);
+  const d=tR-tP;
+  document.getElementById('modal-mes-sub').innerHTML=
+    'Planificado '+fmtUSD(tP)+' · Ejecutado '+fmtUSD(tR)
+    +(tP||tR?' · <strong style="color:'+(d>0?'#B3541E':'#0C6F46')+'">'+(d>0?'+':'')+fmtUSD(d)+'</strong> en el mes':'');
+  document.getElementById('modal-mes-cuerpo').innerHTML=
+    '<div class="panel-title" style="margin-bottom:9px;">Ejecutado</div>'+tablaDetalleMes(real,'real')
+    +'<div class="panel-title" style="margin:22px 0 9px;">Planificado</div>'+tablaDetalleMes(plan,'plan');
+  document.getElementById('modal-mes').classList.remove('oculto');
+}
+
+/* ---------- LÍNEA BASE DEL PRESUPUESTO ----------
+   Al congelar, cada rubro existente guarda una copia fija de sus objetivos.
+   Las ediciones posteriores cambian el objetivo vigente pero nunca la copia, así
+   al cerrar la obra se puede comparar contra lo que se pensaba al principio.
+   Los rubros que se agreguen después quedan sin línea base y no ensucian el desvío. */
+function lineaBaseCongelada(){ return !!Store.config.lineaBaseFecha; }
+function tieneLineaBase(p){ return !!(p && p.lb); }
+function objetivoLineaBase(p){ return tieneLineaBase(p)?((p.lb.mo||0)+(p.lb.mat||0)+(p.lb.otros||0)):0; }
+function totalLineaBase(){ return Store.presupuesto.reduce((s,p)=>s+objetivoLineaBase(p),0); }
+function congelarLineaBase(){
+  const n=Store.presupuesto.length;
+  if(!n){ toast('Cargá al menos un rubro antes de congelar',true); return; }
+  const rehacer=lineaBaseCongelada();
+  const msg=rehacer
+    ? 'Ya hay una línea base del '+fmtFecha(Store.config.lineaBaseFecha)+'.\n\n¿Reemplazarla por los valores de hoy? Se pierde la comparación contra el presupuesto original.'
+    : '¿Congelar la línea base con los '+n+' rubro(s) cargados hoy?\n\nQueda fija: podés seguir editando el presupuesto y siempre vas a poder comparar contra este punto de partida.';
+  if(!confirm(msg)) return;
+  Store.presupuesto.forEach(p=>{
+    p.lb={ mo:p.objMO||0, mat:p.objMat||0, otros:p.objOtros||0, mesDesde:p.mesDesde||'', mesHasta:p.mesHasta||'' };
+    Store.guardarPresu(p);
+  });
+  Store.config.lineaBaseFecha=hoyISO(); Store.guardarConfig();
+  renderTodo(); toast('Línea base congelada con '+n+' rubro(s)');
+}
+function renderAvisoLineaBase(){
+  const cont=document.getElementById('aviso-linea-base'); if(!cont) return;
+  const btn=document.getElementById('btn-linea-base');
+  if(!lineaBaseCongelada()){
+    if(btn) btn.textContent='Congelar línea base';
+    cont.innerHTML=Store.presupuesto.length
+      ? '<div class="aviso"><div><strong>Todavía no hay línea base.</strong> Cuando el presupuesto esté cerrado, congelalo para poder comparar al final de la obra contra lo que se pensaba al principio.</div></div>'
+      : '';
+    return;
+  }
+  if(btn) btn.textContent='Rehacer línea base';
+  const nuevos=Store.presupuesto.filter(p=>!tieneLineaBase(p)).length;
+  const lb=totalLineaBase(), ac=totalPresupuesto();
+  const acNuevos=Store.presupuesto.filter(p=>!tieneLineaBase(p)).reduce((s,p)=>s+objetivoRubro(p),0);
+  const d=(ac-acNuevos)-lb;
+  cont.innerHTML='<div class="aviso"><div><strong>Línea base del '+fmtFecha(Store.config.lineaBaseFecha)+'.</strong> '
+    +'Se congelaron '+fmtUSD(lb)+'; esos mismos rubros hoy valen '+fmtUSD(ac-acNuevos)+' ('+(d>0?'+':'')+fmtUSD(d)+').'
+    +(nuevos?' Además se agregaron '+nuevos+' rubro(s) después, por '+fmtUSD(acNuevos)+', que quedan fuera de la comparación.':'')+'</div></div>';
+}
+function renderDesvioLineaBase(){
+  const cont=document.getElementById('tabla-linea-base'); if(!cont) return;
+  const panel=document.getElementById('panel-linea-base');
+  if(!lineaBaseCongelada()){ panel.style.display='none'; cont.innerHTML=''; return; }
+  panel.style.display='';
+  const lbTot=totalLineaBase();
+  let html='<table><thead><tr><th>Rubro</th><th class="money">Línea base</th><th class="money">Vigente</th><th class="money">Desvío</th><th style="width:70px;">Var.</th><th class="money">Ejecutado</th></tr></thead><tbody>';
+  const porRubro=agrupar(Store.gastos,g=>g.rubro);
+  let tLB=0,tAC=0,tEJ=0;
+  MACRORUBROS.forEach(m=>{
+    const en=Store.presupuesto.filter(p=>macroDe(p.rubro)===m.nombre); if(!en.length)return;
+    const sLB=en.reduce((s,p)=>s+objetivoLineaBase(p),0), sAC=en.reduce((s,p)=>s+objetivoRubro(p),0),
+          sEJ=en.reduce((s,p)=>s+(porRubro[p.rubro]||0),0);
+    tLB+=sLB; tAC+=sAC; tEJ+=sEJ;
+    const sd=sAC-sLB;
+    html+='<tr class="macro-row"><td>'+esc(m.nombre)+'</td><td class="money">'+(sLB?fmtUSD(sLB):'—')+'</td><td class="money">'+fmtUSD(sAC)+'</td>'
+      +'<td class="money" style="color:'+(!sLB?'var(--n-500)':(sd>0?'#B3541E':(sd<0?'#0C6F46':'inherit')))+'">'+(sLB?((sd>0?'+':'')+fmtUSD(sd)):'—')+'</td>'
+      +'<td style="font-size:12px;color:var(--gris);">'+(sLB?((sd/sLB*100>0?'+':'')+(sd/sLB*100).toFixed(1)+'%'):'—')+'</td>'
+      +'<td class="money">'+fmtUSD(sEJ)+'</td></tr>';
+    en.sort((a,b)=>objetivoRubro(b)-objetivoRubro(a)).forEach(p=>{
+      const lb=objetivoLineaBase(p), ac=objetivoRubro(p), ej=porRubro[p.rubro]||0, d=ac-lb;
+      const nuevo=!tieneLineaBase(p);
+      html+='<tr><td>'+esc(p.rubro)+(nuevo?' <span class="tag marron">agregado después</span>':'')+'</td>'
+        +'<td class="money" style="font-weight:400;">'+(nuevo?'—':fmtUSD(lb))+'</td>'
+        +'<td class="money" style="font-weight:400;">'+fmtUSD(ac)+'</td>'
+        +'<td class="money" style="color:'+(nuevo?'var(--n-500)':(d>0?'#B3541E':(d<0?'#0C6F46':'inherit')))+'">'+(nuevo?'fuera de base':((d>0?'+':'')+fmtUSD(d)))+'</td>'
+        +'<td style="font-size:12px;color:var(--gris);">'+(nuevo||!lb?'—':((d/lb*100>0?'+':'')+(d/lb*100).toFixed(1)+'%'))+'</td>'
+        +'<td class="money" style="font-weight:400;">'+fmtUSD(ej)+'</td></tr>';
+    });
+  });
+  /* El total comparable toma solo los rubros que estaban al congelar; los nuevos
+     se muestran aparte para que el desvío no quede inflado por alcance agregado. */
+  const nuevos=Store.presupuesto.filter(p=>!tieneLineaBase(p));
+  const acNuevos=nuevos.reduce((s,p)=>s+objetivoRubro(p),0);
+  const ejNuevos=nuevos.reduce((s,p)=>s+(porRubro[p.rubro]||0),0);
+  const acComp=tAC-acNuevos, td=acComp-tLB;
+  html+='<tr class="total-row"><td>Total comparable</td><td class="money">'+fmtUSD(tLB)+'</td><td class="money">'+fmtUSD(acComp)+'</td>'
+    +'<td class="money" style="color:'+(td>0?'#B3541E':(td<0?'#0C6F46':'inherit'))+'">'+((td>0?'+':'')+fmtUSD(td))+'</td>'
+    +'<td style="font-size:12px;color:var(--gris);">'+(tLB?((td/tLB*100>0?'+':'')+(td/tLB*100).toFixed(1)+'%'):'—')+'</td>'
+    +'<td class="money">'+fmtUSD(tEJ-ejNuevos)+'</td></tr>';
+  if(nuevos.length)
+    html+='<tr><td style="color:var(--gris);">Rubros agregados después ('+nuevos.length+')</td><td class="money" style="color:var(--n-500);">—</td>'
+      +'<td class="money" style="font-weight:400;">'+fmtUSD(acNuevos)+'</td><td class="money" style="color:var(--n-500);">fuera de base</td><td></td>'
+      +'<td class="money" style="font-weight:400;">'+fmtUSD(ejNuevos)+'</td></tr>'
+      +'<tr class="total-row"><td>Presupuesto vigente</td><td class="money">—</td><td class="money">'+fmtUSD(tAC)+'</td><td colspan="2"></td><td class="money">'+fmtUSD(tEJ)+'</td></tr>';
+  html+='</tbody></table>';
+  if(lbTot===0) html+='<p class="panel-sub" style="margin-top:12px;">Ningún rubro tiene línea base: todos se agregaron después de congelar.</p>';
+  cont.innerHTML=html;
 }
 
 /* ---------- RUBROS Y PROVEEDORES ---------- */
@@ -2506,12 +2785,12 @@ function renderEstadoTasa(){
     +'Interés devengado a hoy: '+fmtUSD(interesTotalUSD())+'.</div></div>';
 }
 /* ---------- IMPORTAR / EXPORTAR ---------- */
-const COLUMNAS=['Fecha','Rubro','Tipo de costo','Proveedor','Concepto','Monto ARS','Cotizacion MEP','Condicion fiscal','Alicuota %','IVA ARS','Financiado por','Unidad','Forma de pago','Estado','Comprobante','Notas'];
+const COLUMNAS=['Fecha','Rubro','Tipo de costo','Proveedor','Concepto','Monto ARS','Descuento %','Cotizacion MEP','Condicion fiscal','Alicuota %','IVA ARS','Financiado por','Unidad','Forma de pago','Estado','Comprobante','Notas'];
 function hayXLSX(){ return typeof XLSX!=='undefined'; }
 function descargarArchivo(nombre,contenido,tipo){ const blob=contenido instanceof Blob?contenido:new Blob([contenido],{type:tipo||'text/plain;charset=utf-8'});
   const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=nombre; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),1500); }
 function descargarPlantilla(){
-  const ej=[['2026-08-01','Losas y techos alivianados','Materiales','Prevedello','Viguetas pretensadas — dúplex 1',1850000,'',FISCAL_DISCRIMINADO,21,321074.38,FONDO,'Común / toda la obra','Transferencia','Pagado','Factura A 0001-00001234','']];
+  const ej=[['2026-08-01','Losas y techos alivianados','Materiales','Prevedello','Viguetas pretensadas — dúplex 1',1850000,0,'',FISCAL_DISCRIMINADO,21,321074.38,FONDO,'Común / toda la obra','Transferencia','Pagado','Factura A 0001-00001234','']];
   if(hayXLSX()){ const ws=XLSX.utils.aoa_to_sheet([COLUMNAS].concat(ej)); ws['!cols']=COLUMNAS.map(c=>({wch:Math.max(c.length+4,14)}));
     const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Gastos'); XLSX.writeFile(wb,'Plantilla_Gastos_Rio_Colorado.xlsx'); }
   else { const csv=[COLUMNAS.join(';')].concat(ej.map(f=>f.join(';'))).join('\n'); descargarArchivo('Plantilla_Gastos_Rio_Colorado.csv','\uFEFF'+csv,'text/csv;charset=utf-8'); }
@@ -2538,8 +2817,12 @@ async function procesarImportacion(filas){
     if(!fecha){ errores.push('Fila '+linea+': fecha vacía o ilegible.'); return; }
     if(!monto){ errores.push('Fila '+linea+': monto vacío o cero.'); return; }
     if(!rubro){ errores.push('Fila '+linea+': falta el rubro.'); return; }
+    /* Si la planilla trae descuento, el monto de la columna se toma como la
+       factura bruta y se imputa el neto. Sin descuento, no cambia nada. */
+    const descP=Math.min(Math.max(normalizarNumero(buscarCampo(f,['Descuento %','Descuento']))||0,0),100);
+    const brutoF=monto, montoNeto=descP>0?Math.round(monto*(1-descP/100)*100)/100:monto;
     const fin=String(buscarCampo(f,['Financiado por','Financia','Socio'])||FONDO).trim();
-    nuevos.push({ fecha,rubro,tipo:String(buscarCampo(f,['Tipo de costo','Tipo'])||'Materiales').trim(),proveedor:proveedor||'Sin proveedor',concepto:concepto||'(sin concepto)',montoARS:monto,
+    nuevos.push({ fecha,rubro,tipo:String(buscarCampo(f,['Tipo de costo','Tipo'])||'Materiales').trim(),proveedor:proveedor||'Sin proveedor',concepto:concepto||'(sin concepto)',montoARS:montoNeto,montoBrutoARS:brutoF,descuentoPct:descP,
       cotizacion:normalizarNumero(buscarCampo(f,['Cotizacion MEP','Cotizacion','MEP','Dolar']))||null,
       financia:FINANCIA_OPC.indexOf(fin)>=0?fin:FONDO,unidad:String(buscarCampo(f,['Unidad','Destino'])||UNIDADES[0]).trim(),
       formaPago:String(buscarCampo(f,['Forma de pago','Pago'])||'').trim(),estado:String(buscarCampo(f,['Estado'])||'Pagado').trim(),
@@ -2577,17 +2860,28 @@ function importarArchivo(file){
 }
 function exportarExcel(){
   if(!Store.gastos.length&&!Store.presupuesto.length&&!Store.aportes.length){ toast('No hay nada para exportar',true); return; }
-  const fG=[COLUMNAS.concat(['Monto USD','IVA USD','Neto USD','Dias','Interes USD','Total actualizado USD','Cargado por'])]
+  const fG=[COLUMNAS.concat(['Factura ARS','Descuento ARS','Monto USD','IVA USD','Neto USD','Dias','Interes USD','Total actualizado USD','Cargado por'])]
     .concat(Store.gastos.slice().sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''))
     .map(g=>{ const ivaU=ivaUSDDeGasto(g), intU=interesGasto(g);
-      return [g.fecha,g.rubro,g.tipo,g.proveedor,g.concepto,g.montoARS,g.cotizacion||'',g.fiscal||FISCAL_SIN,g.alicuota||'',g.ivaARS||0,
+      return [g.fecha,g.rubro,g.tipo,g.proveedor,g.concepto,g.montoARS,g.descuentoPct||0,g.cotizacion||'',g.fiscal||FISCAL_SIN,g.alicuota||'',g.ivaARS||0,
         g.financia||FONDO,g.unidad||'',g.formaPago||'',g.estado||'',g.comprobante||'',g.notas||'',
+        brutoARSDe(g),Number(descuentoARSDe(g).toFixed(2)),
         g.montoUSD?Number(g.montoUSD.toFixed(2)):'',Number(ivaU.toFixed(2)),Number(((g.montoUSD||0)-ivaU).toFixed(2)),
         diasDesde(g.fecha),Number(intU.toFixed(2)),Number(((g.montoUSD||0)+intU).toFixed(2)),g.cargadoPor||'']; }));
-  const fP=[['Rubro','Macrorubro','MO USD','Materiales USD','Otros USD','Objetivo USD','Avance fisico %','Mes desde','Mes hasta','Notas']]
-    .concat(Store.presupuesto.map(p=>[p.rubro,macroDe(p.rubro),p.objMO||0,p.objMat||0,p.objOtros||0,objetivoRubro(p),p.avance||0,p.mesDesde,p.mesHasta,p.notas||'']));
-  const fA=[['Fecha','Socio','Medio','Monto ARS','Cotizacion','Monto USD','Notas']]
-    .concat(Store.aportes.map(a=>[a.fecha,a.socio,a.medio||'',a.montoARS,a.cotizacion||'',a.montoUSD?Number(a.montoUSD.toFixed(2)):'',a.notas||'']));
+  const fP=[['Rubro','Macrorubro','MO USD','Materiales USD','Otros USD','Objetivo USD',
+      'Linea base MO USD','Linea base Materiales USD','Linea base Otros USD','Linea base USD','Desvio USD','Desvio %',
+      'Avance fisico %','Mes desde','Mes hasta','Notas']]
+    .concat(Store.presupuesto.map(p=>{ const ac=objetivoRubro(p),lb=objetivoLineaBase(p),tiene=tieneLineaBase(p);
+      return [p.rubro,macroDe(p.rubro),p.objMO||0,p.objMat||0,p.objOtros||0,ac,
+        tiene?(p.lb.mo||0):'',tiene?(p.lb.mat||0):'',tiene?(p.lb.otros||0):'',tiene?lb:'',
+        tiene?Number((ac-lb).toFixed(2)):'',(tiene&&lb)?Number(((ac-lb)/lb*100).toFixed(1)):'',
+        p.avance||0,p.mesDesde,p.mesHasta,p.notas||'']; }));
+  const fA=[['Fecha','Socio','Medio','MARCATON','Pagado ARS','Reintegro ARS','Beneficio ARS','Monto ARS','Cotizacion','Monto USD','Notas']]
+    .concat(Store.aportes.map(a=>[a.fecha,a.socio,a.medio||'',a.marcaton?'Si':'No',
+      a.marcaton?brutoARSAporte(a):'',
+      a.marcaton?Number((a.reintegroARS||marcatonReintegro(brutoARSAporte(a))).toFixed(2)):'',
+      a.marcaton?Number((a.beneficioARS||marcatonBeneficio(brutoARSAporte(a))).toFixed(2)):'',
+      a.montoARS,a.cotizacion||'',a.montoUSD?Number(a.montoUSD.toFixed(2)):'',a.notas||'']));
   const fS=[['Socio','Comprometido USD','Aporte al fondo USD','Pago directo USD','Integrado USD','Interes USD','Total con interes USD','Resta USD','% del total']]
     .concat(SOCIOS.map(s=>{ const af=aportesAlFondoDe(s),pd=pagosDirectosDe(s),tot=af+pd,c=Store.compromisos[s]||0,ti=totalIntegrado();
       const inte=interesDe_socio(s);
@@ -2658,8 +2952,28 @@ function exportarExcel(){
     .concat(Store.ivamov.slice().sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''))
       .map(m=>[m.fecha,m.tipo==='vendido'?'Vendido':'Comprado',m.proyecto||'',m.ivaARS||0,Number((m.ivaUSD||0).toFixed(2)),
         m.efectivoARS||0,Number((m.efectivoUSD||0).toFixed(2)),m.comprobante||'',m.notas||'']));
+  // ---- hoja MARCATON ----
+  const mk=Store.aportes.filter(esMarcaton);
+  const fMK=[['BENEFICIO MARCATON POR SOCIO'],[''],
+    ['Socio','Cupos','Pagado ARS','Reintegro ARS','Beneficio ARS','Acreditado al fondo ARS','Acreditado USD']]
+    .concat(SOCIOS.map(so=>{ const de=mk.filter(a=>a.socio===so); if(!de.length) return null;
+      return [so,de.length,
+        Number(de.reduce((t,a)=>t+brutoARSAporte(a),0).toFixed(2)),
+        Number(de.reduce((t,a)=>t+(a.reintegroARS||marcatonReintegro(brutoARSAporte(a))),0).toFixed(2)),
+        Number(de.reduce((t,a)=>t+(a.beneficioARS||marcatonBeneficio(brutoARSAporte(a))),0).toFixed(2)),
+        Number(de.reduce((t,a)=>t+(a.montoARS||0),0).toFixed(2)),
+        Number(de.reduce((t,a)=>t+(a.montoUSD||0),0).toFixed(2))]; }).filter(Boolean))
+    .concat([['TOTAL',mk.length,
+      Number(mk.reduce((t,a)=>t+brutoARSAporte(a),0).toFixed(2)),
+      Number(mk.reduce((t,a)=>t+(a.reintegroARS||marcatonReintegro(brutoARSAporte(a))),0).toFixed(2)),
+      Number(mk.reduce((t,a)=>t+(a.beneficioARS||marcatonBeneficio(brutoARSAporte(a))),0).toFixed(2)),
+      Number(mk.reduce((t,a)=>t+(a.montoARS||0),0).toFixed(2)),
+      Number(mk.reduce((t,a)=>t+(a.montoUSD||0),0).toFixed(2))]])
+    .concat([[''],['Recargo que absorbe el proyecto',MARCATON_RECARGO+'%'],['Reintegro del banco',MARCATON_REINTEGRO+'%'],
+      ['El beneficio no es plata del proyecto: queda para quien puso el cupo.']]);
+
   if(hayXLSX()){ const wb=XLSX.utils.book_new();
-    [['Gastos',fG],['Presupuesto',fP],['Aportes',fA],['Socios',fS],['Financiero',fFIN],['IVA',fIVA],['Proveedores',fPr],['Curva',fC],['Abaucan',fAb]]
+    [['Gastos',fG],['Presupuesto',fP],['Aportes',fA],['Socios',fS],['Financiero',fFIN],['MARCATON',fMK],['IVA',fIVA],['Proveedores',fPr],['Curva',fC],['Abaucan',fAb]]
       .forEach(([n,d])=>XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(d),n));
     XLSX.writeFile(wb,'Rio_Colorado_Gestion_'+hoyISO()+'.xlsx');
   } else descargarArchivo('Rio_Colorado_Gastos_'+hoyISO()+'.csv','\uFEFF'+fG.map(f=>f.join(';')).join('\n'),'text/csv;charset=utf-8');
@@ -2816,8 +3130,8 @@ function irA(v){ document.querySelectorAll('.nav-btn').forEach(b=>b.classList.to
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   const el=document.getElementById('view-'+v); if(el)el.classList.add('active');
   menuCerrar(); window.scrollTo({top:0}); }
-function renderTodo(){ actualizarProveedores(); renderDashboard(); renderMacro(); renderSocios(); renderTablaGastos(); renderPresupuesto();
-  renderProveedoresABM(); renderCurva(); renderAnalisis(); renderIVA(); renderProyeccion(); renderAbaucan();
+function renderTodo(){ actualizarProveedores(); renderDashboard(); renderMacro(); renderSocios(); renderMarcaton(); renderTablaGastos(); renderPresupuesto();
+  renderProveedoresABM(); renderAvisoLineaBase(); renderDesvioLineaBase(); renderCurva(); renderAnalisis(); renderIVA(); renderProyeccion(); renderAbaucan();
   renderFinanciero(); renderFinSocios(); renderFinMatriz(); renderAvisoHonorarios(); renderEstadoTasa(); volcarConfig(); renderEstadoDolar(); renderEstadoIA(); renderEstadoFirebase(); }
 
 /* ---------- ARRANQUE ---------- */
@@ -2855,6 +3169,9 @@ function armarUI(){
   // gestión de rubros
   document.getElementById('btn-gestion-rubros').addEventListener('click',abrirModalRubros);
   document.getElementById('rb-cerrar').addEventListener('click',()=>document.getElementById('modal-rubros').classList.add('oculto'));
+  document.getElementById('mes-cerrar').addEventListener('click',()=>document.getElementById('modal-mes').classList.add('oculto'));
+  document.getElementById('btn-linea-base').addEventListener('click',congelarLineaBase);
+  document.getElementById('modal-mes').addEventListener('click',e=>{ if(e.target.id==='modal-mes') e.currentTarget.classList.add('oculto'); });
   document.getElementById('modal-rubros').addEventListener('click',e=>{ if(e.target.id==='modal-rubros') e.currentTarget.classList.add('oculto'); });
   document.getElementById('form-rubro-nuevo').addEventListener('submit',e=>{ e.preventDefault();
     if(agregarRubro(document.getElementById('rb-macro').value,document.getElementById('rb-nombre').value)){
@@ -2882,7 +3199,8 @@ function armarUI(){
 
   // gastos
   document.getElementById('g-fecha').addEventListener('change',e=>buscarCotizacion(e.target.value,'g-cot','g-cot-hint'));
-  document.getElementById('g-monto').addEventListener('input',()=>{ recalcularUSD(); recalcularIVA(false); });
+  document.getElementById('g-bruto').addEventListener('input',recalcularDescuento);
+  document.getElementById('g-desc').addEventListener('input',recalcularDescuento);
   document.getElementById('g-fiscal').addEventListener('change',actualizarCamposFiscales);
   document.getElementById('g-alicuota').addEventListener('change',()=>recalcularIVA(true));
   document.getElementById('g-iva').addEventListener('input',e=>{ e.target.dataset.tocado='1'; recalcularIVA(false); });
@@ -2890,14 +3208,17 @@ function armarUI(){
   document.getElementById('btn-cancelar').addEventListener('click',limpiarFormGasto);
   document.getElementById('btn-nuevo-prov').addEventListener('click',()=>abrirModalProv(null));
   document.getElementById('form-gasto').addEventListener('submit',e=>{ e.preventDefault();
+    const bruto=parseFloat(document.getElementById('g-bruto').value)||0;
+    const descPct=Math.min(Math.max(parseFloat(document.getElementById('g-desc').value)||0,0),100);
     const monto=parseFloat(document.getElementById('g-monto').value),cot=parseFloat(document.getElementById('g-cot').value);
-    if(!(monto>0)){ toast('El monto en pesos tiene que ser mayor a cero',true); return; }
+    if(!(bruto>0)){ toast('El monto de la factura tiene que ser mayor a cero',true); return; }
+    if(!(monto>0)){ toast('El monto a imputar tiene que ser mayor a cero',true); return; }
     const rubro=document.getElementById('g-rubro').value, prov=document.getElementById('g-proveedor').value;
     if(!rubro){ toast('Elegí un rubro',true); return; }
     if(!prov){ toast('Elegí un proveedor, o creá uno nuevo con el botón',true); return; }
     if(!(cot>0)){ toast('Falta la cotización del dólar para congelar el valor',true); return; }
     const g={ id:document.getElementById('g-id').value||null, fecha:document.getElementById('g-fecha').value, rubro, tipo:document.getElementById('g-tipo').value,
-      proveedor:prov, concepto:document.getElementById('g-concepto').value.trim(), montoARS:monto, cotizacion:cot, montoUSD:monto/cot,
+      proveedor:prov, concepto:document.getElementById('g-concepto').value.trim(), montoARS:monto, montoBrutoARS:bruto, descuentoPct:descPct, cotizacion:cot, montoUSD:monto/cot,
       unidad:document.getElementById('g-unidad').value, financia:document.getElementById('g-financia').value, formaPago:document.getElementById('g-pago').value,
       estado:document.getElementById('g-estado').value, cargadoPor:USUARIO?USUARIO.nombre:'—',
       comprobante:document.getElementById('g-comprobante').value.trim(), notas:document.getElementById('g-notas').value.trim(),
@@ -2920,23 +3241,31 @@ function armarUI(){
     if(mo+mat+otros<=0){ toast('Cargá al menos un objetivo mayor a cero',true); return; }
     if(h<d){ toast('El mes de fin no puede ser anterior al de inicio',true); return; }
     const av=parseFloat(document.getElementById('p-avance').value)||0;
-    Store.guardarPresu({rubro,objMO:mo,objMat:mat,objOtros:otros,mesDesde:d,mesHasta:h,avance:Math.min(Math.max(av,0),100),notas:document.getElementById('p-notas').value.trim()});
+    /* la línea base ya congelada nunca se pisa al editar el objetivo vigente */
+    const previo=Store.presupuesto.find(x=>x.rubro===rubro);
+    Store.guardarPresu({rubro,objMO:mo,objMat:mat,objOtros:otros,mesDesde:d,mesHasta:h,avance:Math.min(Math.max(av,0),100),notas:document.getElementById('p-notas').value.trim(),
+      lb:(previo&&previo.lb)?previo.lb:null});
     limpiarFormPresu(); renderTodo(); toast('Rubro guardado');
   });
 
   // aportes
   document.getElementById('a-fecha').addEventListener('change',e=>buscarCotizacion(e.target.value,'a-cot','a-cot-hint'));
-  document.getElementById('a-monto').addEventListener('input',recalcularUSDAporte);
+  document.getElementById('a-monto').addEventListener('input',actualizarMarcaton);
+  document.getElementById('a-marcaton').addEventListener('change',actualizarMarcaton);
   document.getElementById('a-cot').addEventListener('input',recalcularUSDAporte);
   document.getElementById('a-cancelar').addEventListener('click',limpiarFormAporte);
   document.getElementById('form-aporte').addEventListener('submit',e=>{ e.preventDefault();
-    const monto=parseFloat(document.getElementById('a-monto').value),socio=document.getElementById('a-socio').value,cot=parseFloat(document.getElementById('a-cot').value);
+    const bruto=parseFloat(document.getElementById('a-monto').value),socio=document.getElementById('a-socio').value,cot=parseFloat(document.getElementById('a-cot').value);
+    const mk=document.getElementById('a-marcaton').checked;
     if(!socio){ toast('Elegí un socio',true); return; }
-    if(!(monto>0)){ toast('El monto tiene que ser mayor a cero',true); return; }
+    if(!(bruto>0)){ toast('El monto tiene que ser mayor a cero',true); return; }
     if(!(cot>0)){ toast('Falta la cotización para congelar el valor en dólares',true); return; }
+    const monto=mk?marcatonNeto(bruto):bruto;
     Store.guardarAporte({ id:document.getElementById('a-id').value||null, fecha:document.getElementById('a-fecha').value, socio, montoARS:monto,
+      marcaton:mk, montoBrutoARS:mk?bruto:null,
+      reintegroARS:mk?marcatonReintegro(bruto):0, beneficioARS:mk?marcatonBeneficio(bruto):0,
       cotizacion:cot, montoUSD:monto/cot, medio:document.getElementById('a-medio').value, notas:document.getElementById('a-notas').value.trim() });
-    limpiarFormAporte(); renderTodo(); toast('Aporte guardado');
+    limpiarFormAporte(); renderTodo(); toast(mk?'Aporte MARCATON guardado: se acreditaron '+fmtARS(monto,2):'Aporte guardado');
   });
   document.getElementById('form-compromiso').addEventListener('submit',e=>{ e.preventDefault();
     const socio=document.getElementById('c-socio').value,monto=parseFloat(document.getElementById('c-monto').value);
