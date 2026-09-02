@@ -155,6 +155,13 @@ tr.macro-row:hover td{background:var(--n-050);}
 tr.fila-mes{cursor:pointer;}
 tr.fila-mes:hover td{background:var(--n-100);}
 tr.fila-mes td:first-child::after{content:'›';margin-left:7px;color:var(--gris);font-weight:700;}
+tr.carga-head{cursor:pointer;}
+tr.carga-head:hover td{background:var(--n-050);}
+tr.carga-head td:nth-child(2)::before{content:'▸';margin-right:7px;color:var(--gris);font-size:11px;display:inline-block;transition:transform .15s;}
+tr.carga-head.abierta td:nth-child(2)::before{transform:rotate(90deg);}
+tr.carga-hijo.oculta{display:none;}
+tr.carga-hijo td{background:var(--n-050);font-size:12.5px;}
+.btn.confirmando{background:#9E2B25;color:#fff;border-color:#9E2B25;}
 .campo-con-btn{display:flex;gap:8px;align-items:stretch;}
 .campo-con-btn select{flex:1;min-width:0;}
 .search-input{border:1px solid var(--n-300);border-radius:var(--r-sm);padding:9px 12px;font-size:13.5px;width:260px;max-width:100%;background:var(--blanco);font-family:'Source Sans 3',sans-serif;}
@@ -432,7 +439,7 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
               <div class="field"><label for="a-monto">Monto en pesos *</label><input type="number" id="a-monto" step="0.01" min="0" required><span class="hint" id="a-monto-hint">Lo efectivamente pagado.</span></div>
               <div class="field"><label for="a-cot">Dólar MEP del día</label><input type="number" id="a-cot" step="0.01" min="0" placeholder="Buscando…"><span class="hint" id="a-cot-hint">Se completa sola.</span></div>
               <div class="field"><label for="a-usd">Equivale a</label><input type="text" id="a-usd" readonly value="—"></div>
-              <div class="field"><label for="a-medio">Medio</label><select id="a-medio"><option>Transferencia</option><option>Efectivo</option><option>Cheque</option><option>Aporte en especie</option></select></div>
+              <div class="field"><label for="a-medio">Medio</label><select id="a-medio"><option>Transferencia</option><option>Efectivo</option><option>Cheque</option><option>Tarjeta - medio digital</option><option>Aporte en especie</option></select></div>
               <div class="field tilde col-2"><input type="checkbox" id="a-marcaton"><label for="a-marcaton">Pagado con promoción MARCATON</label></div>
               <div class="field col-2" id="a-marcaton-caja" style="display:none;"><div class="caja-calc" id="a-marcaton-detalle"></div></div>
               <div class="field col-2"><label for="a-notas">Notas</label><input type="text" id="a-notas" placeholder="Opcional"></div>
@@ -598,6 +605,7 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
             <div class="field"><label for="fa-unidad">Unidad / destino</label><select id="fa-unidad"></select></div>
             <div class="field"><label for="fa-fiscal">Condición fiscal</label><select id="fa-fiscal"></select></div>
             <div class="field"><label for="fa-iva">IVA de la factura $</label><input type="number" id="fa-iva" step="0.01" min="0" placeholder="0,00"><span class="hint">Se reparte entre los renglones.</span></div>
+            <div class="field"><label for="fa-desc">Descuento %</label><input type="number" id="fa-desc" step="0.01" min="0" max="100" placeholder="0"><span class="hint" id="fa-desc-hint">Nota de crédito o descuento pactado. Se aplica a todos los renglones y al IVA.</span></div>
           </div>
         </div>
       </div>
@@ -734,6 +742,10 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
             <input type="file" id="file-json" accept=".json" style="display:none;">
           </div>
         </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div><div class="panel-title">Papelera</div><p class="panel-sub">Registro de gastos y aportes borrados. Es solo para consultar: queda constancia de qué era, cuánto, quién lo borró y cuándo.</p></div></div>
+        <div class="table-wrap" id="tabla-papelera"></div>
       </div>
       <div class="grid-2">
         <div class="panel">
@@ -925,6 +937,21 @@ function aplicarEstructura(lista){
   lista.forEach(m=>{ if(m&&m.nombre&&Array.isArray(m.rubros)) MACRORUBROS.push({nombre:m.nombre,rubros:m.rubros.slice()}); });
   if(!MACRORUBROS.length) MACRORUBROS_BASE.forEach(m=>MACRORUBROS.push({nombre:m.nombre,rubros:m.rubros.slice()}));
   reconstruirRubros();
+  repoblarSelectsRubro();
+}
+/* Los desplegables de rubro se arman al arrancar, antes de que llegue la estructura
+   guardada en la nube. Cuando llega (o cuando se agrega/elimina un rubro) hay que
+   volver a armarlos, o se quedan con la lista de fábrica toda la sesión.
+   Se conserva lo que el usuario tenía elegido si ese rubro sigue existiendo. */
+function repoblarSelectsRubro(){
+  if(typeof document==='undefined') return;
+  [['g-rubro','Elegí un rubro'],['p-rubro','Elegí un rubro'],['ab-rubro','Elegí un rubro'],['pr-rubro','Sin rubro fijo']]
+    .forEach(([id,ph])=>{ const sel=document.getElementById(id); if(!sel||!sel.options.length) return;
+      const previo=sel.value; poblarRubrosAgrupados(sel,ph);
+      if(previo && RUBROS.indexOf(previo)>=0) sel.value=previo; });
+  const fm=document.getElementById('f-macro');
+  if(fm&&fm.options.length){ const previo=fm.value; poblarSelect(fm,MACRORUBROS.map(m=>m.nombre),'Todos los macrorubros');
+    if(previo && MACRORUBROS.some(m=>m.nombre===previo)) fm.value=previo; }
 }
 reconstruirRubros();
 
@@ -940,7 +967,7 @@ const ALICUOTAS=[21,10.5,27];
 /* Solo el comprobante con IVA discriminado genera crédito fiscal computable. */
 function ivaDeGasto(g){ return (g.fiscal===FISCAL_DISCRIMINADO)?(g.ivaARS||0):0; }
 function ivaUSDDeGasto(g){ const iva=ivaDeGasto(g); return (iva&&g.cotizacion)?iva/g.cotizacion:0; }
-const PAGOS = ['Transferencia','Efectivo','Cheque','Tarjeta','Débito automático'];
+const PAGOS = ['Transferencia','Efectivo','Cheque','Tarjeta - medio digital','Débito automático'];
 const SOCIOS = ['Mamá','Julio','Jose','Gerardo','Francisco'];
 const FONDO = 'Fondo común';
 const FINANCIA_OPC = [FONDO].concat(SOCIOS);
@@ -994,16 +1021,26 @@ function interesGasto(g,hastaISO){ return interesDe(g.montoUSD||0,g.fecha,hastaI
 function totalActualizadoGasto(g,hastaISO){ return (g.montoUSD||0)+interesGasto(g,hastaISO); }
 
 const Store = {
-  gastos:[], presupuesto:[], aportes:[], compromisos:{}, proveedores:[], abaucan:[], ivamov:[], config:Object.assign({},CFG_DEFECTO),
+  gastos:[], presupuesto:[], aportes:[], compromisos:{}, proveedores:[], abaucan:[], ivamov:[], papelera:[], config:Object.assign({},CFG_DEFECTO),
   guardarIvaMov(m){ if(m.id){ const i=this.ivamov.findIndex(x=>x.id===m.id); if(i>=0){ this.ivamov[i]=m; this._sync('ivamov',m); return m; } }
     m.id=this.nuevoId(); this.ivamov.push(m); this._sync('ivamov',m); return m; },
   borrarIvaMov(id){ this.ivamov=this.ivamov.filter(m=>m.id!==id); this._sync('ivamov',{id},true); },
   guardarEstructura(){ if(MODO_NUBE&&FB) FB.guardarDoc('config','estructura',{macrorubros:estructuraActual()}).catch(()=>{}); },
   nuevoId(){ return 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); },
+  /* Identificador de lote: los gastos guardados de una sola vez (una factura con
+     varios rubros, una carga rápida) comparten lote y se muestran como una carga. */
+  nuevoLote(){ return 'L'+Date.now().toString(36)+Math.random().toString(36).slice(2,5); },
   _sync(col,obj,borrar){ if(MODO_NUBE&&FB) FB.guardar(col,obj,borrar).catch(e=>toast('No se pudo sincronizar: '+e.message,true)); },
   guardarGasto(g){ if(g.id){ const i=this.gastos.findIndex(x=>x.id===g.id); if(i>=0){ this.gastos[i]=g; this._sync('gastos',g); return g; } }
     g.id=this.nuevoId(); this.gastos.push(g); this._sync('gastos',g); return g; },
   borrarGasto(id){ this.gastos=this.gastos.filter(g=>g.id!==id); this._sync('gastos',{id},true); },
+  /* Lo borrado se archiva antes de sacarlo: la papelera es solo de consulta,
+     queda registro de qué era, cuánto, quién lo borró y cuándo. */
+  mandarAPapelera(tipo,obj){
+    const r={ id:this.nuevoId(), tipo, borradoPor:(typeof USUARIO!=='undefined'&&USUARIO)?USUARIO.nombre:'—',
+      borradoEl:new Date().toISOString(), datos:JSON.parse(JSON.stringify(obj||{})) };
+    this.papelera.push(r); this._sync('papelera',r); return r;
+  },
   guardarPresu(p){ const i=this.presupuesto.findIndex(x=>x.rubro===p.rubro);
     if(i>=0){ p.id=this.presupuesto[i].id; this.presupuesto[i]=p; } else { p.id=this.nuevoId(); this.presupuesto.push(p); }
     this._sync('presupuesto',p); return p; },
@@ -1027,6 +1064,7 @@ const Store = {
     this.proveedores=Array.isArray(d.proveedores)?d.proveedores:[];
     this.abaucan=Array.isArray(d.abaucan)?d.abaucan:[];
     this.ivamov=Array.isArray(d.ivamov)?d.ivamov:[];
+    this.papelera=Array.isArray(d.papelera)?d.papelera:[];
     this.compromisos=(d.compromisos&&typeof d.compromisos==='object')?d.compromisos:{};
     this.config=Object.assign({},CFG_DEFECTO,d.config||{});
     if(d.macrorubros) aplicarEstructura(d.macrorubros);
@@ -1576,6 +1614,7 @@ function limpiarFactura(){
   renglones=[]; facturaFiscal=FISCAL_DISCRIMINADO; facturaIVA=0; facturaAlicuota=21;
   const sf=document.getElementById('fa-fiscal'); if(sf) sf.value=FISCAL_DISCRIMINADO;
   const si=document.getElementById('fa-iva'); if(si) si.value='';
+  const sd=document.getElementById('fa-desc'); if(sd) sd.value='';
   ['fa-fecha','fa-proveedor','fa-cuit','fa-comprobante'].forEach(id=>{ const e=document.getElementById(id); if(e)e.value=''; });
   document.getElementById('fa-fecha').value=hoyISO();
   document.getElementById('factura-preview').innerHTML='';
@@ -1596,11 +1635,16 @@ async function guardarRenglones(){
   const fiscal=(document.getElementById('fa-fiscal')||{}).value||facturaFiscal;
   const ivaTotal=fiscal===FISCAL_DISCRIMINADO?(parseFloat((document.getElementById('fa-iva')||{}).value)||facturaIVA||0):0;
   const totalFactura=validos.reduce((s,r)=>s+Number(r.monto),0);
-  validos.forEach(r=>{ const monto=Number(r.monto);
+  /* El descuento se aplica a cada renglón y también al IVA en la misma proporción:
+     una nota de crédito del 5% baja el neto y el crédito fiscal por igual. */
+  const descP=Math.min(Math.max(parseFloat((document.getElementById('fa-desc')||{}).value)||0,0),100);
+  const factor=1-descP/100;
+  const lote=Store.nuevoLote();
+  validos.forEach(r=>{ const bruto=Number(r.monto), monto=Math.round(bruto*factor*100)/100;
     // el IVA de la factura se reparte entre renglones en proporción a su monto
-    const ivaR=(ivaTotal&&totalFactura)?ivaTotal*(monto/totalFactura):0;
-    Store.guardarGasto({ fecha, rubro:r.rubro, tipo:r.tipo, proveedor:prov, concepto:r.concepto, montoARS:monto, montoBrutoARS:monto, descuentoPct:0,
-      cotizacion:c.valor, montoUSD:monto/c.valor, unidad:uni, financia:fin, formaPago:'', estado:'Pagado',
+    const ivaR=((ivaTotal&&totalFactura)?ivaTotal*(bruto/totalFactura):0)*factor;
+    Store.guardarGasto({ fecha, rubro:r.rubro, tipo:r.tipo, proveedor:prov, concepto:r.concepto, montoARS:monto, montoBrutoARS:bruto, descuentoPct:descP,
+      cotizacion:c.valor, montoUSD:monto/c.valor, unidad:uni, financia:fin, formaPago:'', estado:'Pagado', lote,
       cargadoPor:USUARIO?USUARIO.nombre:'—', comprobante:comp, notas:cuit?('CUIT '+cuit):'',
       fiscal, alicuota:fiscal===FISCAL_DISCRIMINADO?facturaAlicuota:null,
       ivaARS:Number(ivaR.toFixed(2)), ivaUSD:ivaR/c.valor }); });
@@ -1660,11 +1704,12 @@ function renderRapida(){
 async function guardarRapida(){
   const validos=rapidaFilas.filter(r=>r.monto>0);
   if(!validos.length){ toast('No hay gastos con monto',true); return; }
+  const lote=Store.nuevoLote();
   for(const r of validos){
     const c=await cotizacionMEP(r.fecha);
     asegurarProveedor(r.proveedor,'');
     Store.guardarGasto({ fecha:r.fecha, rubro:r.rubro, tipo:r.tipo, proveedor:r.proveedor, concepto:r.concepto, montoARS:r.monto, montoBrutoARS:r.monto, descuentoPct:0,
-      cotizacion:c?c.valor:null, montoUSD:c?r.monto/c.valor:null, unidad:UNIDADES[0], financia:FONDO, formaPago:'', estado:'Pagado',
+      cotizacion:c?c.valor:null, montoUSD:c?r.monto/c.valor:null, unidad:UNIDADES[0], financia:FONDO, formaPago:'', estado:'Pagado', lote,
       cargadoPor:USUARIO?USUARIO.nombre:'—', comprobante:'', notas:'Cargado por texto' });
   }
   rapidaFilas=[]; document.getElementById('rapida-texto').value=''; renderRapida(); renderTodo();
@@ -1896,13 +1941,11 @@ function recalcularUSDAporte(){ const m=montoAporteAcreditado(),c=parseFloat(doc
   const e=document.getElementById('a-usd'); if(e) e.value=(m>0&&c>0)?fmtUSD(m/c,2):'—'; }
 function renderMarcaton(){
   const cont=document.getElementById('tabla-marcaton'); if(!cont) return;
-  const panel=document.getElementById('panel-marcaton');
   const usados=Store.aportes.filter(esMarcaton);
   if(!usados.length){
-    panel.style.display='none';
-    cont.innerHTML=''; return;
+    cont.innerHTML='<div class="empty"><strong>Todavía no hay aportes MARCATON</strong>Al registrar un aporte, tildá "Pagado con promoción MARCATON" y acá vas a ver cuánto reintegro y cuánto beneficio acumuló cada socio.</div>';
+    return;
   }
-  panel.style.display='';
   const filas=SOCIOS.map(s=>{
     const de=usados.filter(a=>a.socio===s);
     return { socio:s, cupos:de.length,
@@ -1975,8 +2018,9 @@ function renderSocios(){
   det.innerHTML=h+'</tbody></table>';
   det.querySelectorAll('[data-aedit]').forEach(b=>b.addEventListener('click',()=>editarAporte(b.dataset.aedit)));
   det.querySelectorAll('[data-gedit]').forEach(b=>b.addEventListener('click',()=>editarGasto(b.dataset.gedit)));
-  det.querySelectorAll('[data-adel]').forEach(b=>b.addEventListener('click',()=>{ const a=Store.aportes.find(x=>x.id===b.dataset.adel);
-    if(a&&confirm('¿Borrar el aporte de '+a.socio+' por '+fmtUSD(a.montoUSD||0)+'?')){ Store.borrarAporte(b.dataset.adel); toast('Aporte borrado'); renderTodo(); } }));
+  det.querySelectorAll('[data-adel]').forEach(b=>b.addEventListener('click',()=>confirmarBorrado(b,()=>{
+    const a=Store.aportes.find(x=>x.id===b.dataset.adel); if(!a) return;
+    Store.mandarAPapelera('aporte',a); Store.borrarAporte(b.dataset.adel); toast('Aporte borrado'); renderTodo(); })));
 }
 function editarAporte(id){ const a=Store.aportes.find(x=>x.id===id); if(!a)return;
   document.getElementById('a-id').value=a.id; document.getElementById('a-fecha').value=a.fecha; document.getElementById('a-socio').value=a.socio;
@@ -2047,26 +2091,139 @@ function filtrarGastos(){
     return true;
   }).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
 }
+/* Cada "carga" es un conjunto de gastos guardados juntos: una factura leída con IA
+   que tocó varios rubros, una importación, o un gasto suelto cargado a mano.
+   Los gastos guardados en tanda comparten "lote"; los que no lo tienen (cargados
+   de a uno o antes de esta versión) se agrupan por proveedor + fecha + comprobante,
+   que en la práctica es la misma operación. */
+/* Borrar pide dos toques: el primero arma el botón en "¿Seguro?" y el segundo
+   ejecuta. Se desarma solo a los 4 segundos o si se toca otro botón de borrar. */
+let borradoPendiente=null;
+function resetBorrado(){
+  if(!borradoPendiente) return;
+  const b=borradoPendiente.btn;
+  if(b&&b.isConnected){ b.textContent=borradoPendiente.texto; b.dataset.paso='0'; b.classList.remove('confirmando'); }
+  clearTimeout(borradoPendiente.t); borradoPendiente=null;
+}
+function confirmarBorrado(btn,alConfirmar){
+  if(borradoPendiente&&borradoPendiente.btn===btn){
+    clearTimeout(borradoPendiente.t); borradoPendiente=null; alConfirmar(); return;
+  }
+  resetBorrado();
+  const texto=btn.textContent;
+  btn.textContent='¿Seguro?'; btn.dataset.paso='1'; btn.classList.add('confirmando');
+  borradoPendiente={btn,texto,t:setTimeout(resetBorrado,4000)};
+}
+
+function claveCarga(g){
+  if(g.lote) return 'L:'+g.lote;
+  return 'K:'+(g.proveedor||'')+'|'+(g.fecha||'')+'|'+(g.comprobante||'');
+}
+/* Numeración correlativa por orden real de creación, estable entre sesiones:
+   se numeran todas las cargas de la obra, no solo las que pasan el filtro. */
+function numerosDeCarga(){
+  const orden=Store.gastos.map((g,i)=>({g,i}))
+    .sort((a,b)=>{ const f=(a.g.fecha||'').localeCompare(b.g.fecha||''); return f!==0?f:a.i-b.i; });
+  const num={}; let n=0;
+  orden.forEach(({g})=>{ const k=claveCarga(g); if(num[k]===undefined) num[k]=++n; });
+  return num;
+}
+function agruparCargas(filas){
+  const mapa={};
+  filas.forEach(g=>{ const k=claveCarga(g);
+    if(!mapa[k]) mapa[k]={clave:k,gastos:[],fecha:g.fecha,proveedor:g.proveedor,comprobante:g.comprobante||'',
+                          financia:g.financia||FONDO,fiscal:g.fiscal,cargadoPor:g.cargadoPor||'—'};
+    mapa[k].gastos.push(g);
+  });
+  return Object.values(mapa).map(c=>{
+    c.usd=c.gastos.reduce((s,g)=>s+(g.montoUSD||0),0);
+    c.ars=c.gastos.reduce((s,g)=>s+(g.montoARS||0),0);
+    c.iva=c.gastos.reduce((s,g)=>s+ivaUSDDeGasto(g),0);
+    c.rubros=[...new Set(c.gastos.map(g=>g.rubro))];
+    c.concepto=c.gastos.length===1?c.gastos[0].concepto:(c.rubros.length+' rubros · '+c.gastos.length+' renglones');
+    return c;
+  }).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+}
+
 function renderTablaGastos(){
   const cont=document.getElementById('tabla-gastos'); const filas=filtrarGastos();
   const tUSD=filas.reduce((s,g)=>s+(g.montoUSD||0),0),tARS=filas.reduce((s,g)=>s+(g.montoARS||0),0);
-  document.getElementById('gastos-resumen').textContent=Store.gastos.length?fmtNum(filas.length)+' de '+fmtNum(Store.gastos.length)+' movimientos · '+fmtUSD(tUSD)+' · IVA '+fmtUSD(filas.reduce((a,g)=>a+ivaUSDDeGasto(g),0)):'Sin movimientos todavía';
+  const cargas=agruparCargas(filas), nums=numerosDeCarga();
+  document.getElementById('gastos-resumen').textContent=Store.gastos.length
+    ? fmtNum(cargas.length)+' carga(s) · '+fmtNum(filas.length)+' de '+fmtNum(Store.gastos.length)+' movimientos · '+fmtUSD(tUSD)+' · IVA '+fmtUSD(filas.reduce((a,g)=>a+ivaUSDDeGasto(g),0))
+    : 'Sin movimientos todavía';
   if(!filas.length){ cont.innerHTML='<div class="empty"><strong>'+(Store.gastos.length?'Ningún gasto coincide con el filtro':'Sin gastos cargados')+'</strong>'+(Store.gastos.length?'Probá otros criterios.':'Completá el formulario, usá la carga rápida o leé una factura.')+'</div>'; return; }
-  let html='<table><thead><tr><th>Fecha</th><th>Rubro</th><th>Tipo</th><th>Proveedor</th><th>Concepto</th><th>Financia</th><th class="money">USD</th><th class="money">IVA</th><th>Fiscal</th><th class="money">ARS</th><th>Carga</th><th></th></tr></thead><tbody>';
-  filas.forEach(g=>{ html+='<tr><td>'+fmtFecha(g.fecha)+'</td><td>'+esc(g.rubro)+'</td><td><span class="tag">'+esc(g.tipo||'—')+'</span></td><td>'+esc(g.proveedor)+'</td><td>'+esc(g.concepto)+'</td>'
-    +'<td><span class="tag '+(g.financia&&g.financia!==FONDO?'socio':'')+'">'+esc(g.financia||FONDO)+'</span></td>'
-    +'<td class="money">'+(g.montoUSD?fmtUSD(g.montoUSD,2):'—')+'</td>'
-    +'<td class="money" style="font-weight:400;">'+(ivaUSDDeGasto(g)?fmtUSD(ivaUSDDeGasto(g),2):'—')+'</td>'
-    +'<td>'+(g.fiscal===FISCAL_DISCRIMINADO?'<span class="tag verde">A</span>':(g.fiscal===FISCAL_INCLUIDO?'<span class="tag marron">B</span>':'<span class="tag">S/F</span>'))+'</td>'
-    +'<td class="money" style="font-weight:400;color:var(--n-500);">'+fmtARS(g.montoARS,2)+'</td>'
-    +'<td style="font-size:11.5px;color:var(--n-500);">'+esc(g.cargadoPor||'—')+'</td>'
-    +'<td style="white-space:nowrap;text-align:right;"><button class="btn btn-ghost btn-sm" data-editar="'+esc(g.id)+'">Editar</button><button class="btn btn-ghost btn-sm" data-borrar="'+esc(g.id)+'" style="color:#9E2B25;">Borrar</button></td></tr>'; });
+  let html='<table><thead><tr><th style="width:52px;">N°</th><th>Fecha</th><th>Rubro</th><th>Tipo</th><th>Proveedor</th><th>Concepto</th><th>Financia</th><th class="money">USD</th><th class="money">IVA</th><th>Fiscal</th><th class="money">ARS</th><th>Carga</th><th></th></tr></thead><tbody>';
+  const tagFiscal=f=>f===FISCAL_DISCRIMINADO?'<span class="tag verde">A</span>':(f===FISCAL_INCLUIDO?'<span class="tag marron">B</span>':'<span class="tag">S/F</span>');
+  const btns=g=>'<td style="white-space:nowrap;text-align:right;"><button class="btn btn-ghost btn-sm" data-editar="'+esc(g.id)+'">Editar</button>'
+    +'<button class="btn btn-ghost btn-sm" data-borrar="'+esc(g.id)+'" data-paso="0" style="color:#9E2B25;">Borrar</button></td>';
+  cargas.forEach(c=>{
+    const n=nums[c.clave]||'—';
+    if(c.gastos.length===1){
+      const g=c.gastos[0];
+      html+='<tr><td style="font-family:\'Montserrat\',sans-serif;font-weight:700;color:var(--gris);">'+n+'</td>'
+        +'<td>'+fmtFecha(g.fecha)+'</td><td>'+esc(g.rubro)+'</td><td><span class="tag">'+esc(g.tipo||'—')+'</span></td><td>'+esc(g.proveedor)+'</td><td>'+esc(g.concepto)+'</td>'
+        +'<td><span class="tag '+(g.financia&&g.financia!==FONDO?'socio':'')+'">'+esc(g.financia||FONDO)+'</span></td>'
+        +'<td class="money">'+(g.montoUSD?fmtUSD(g.montoUSD,2):'—')+'</td>'
+        +'<td class="money" style="font-weight:400;">'+(ivaUSDDeGasto(g)?fmtUSD(ivaUSDDeGasto(g),2):'—')+'</td>'
+        +'<td>'+tagFiscal(g.fiscal)+'</td>'
+        +'<td class="money" style="font-weight:400;color:var(--n-500);">'+fmtARS(g.montoARS,2)+'</td>'
+        +'<td style="font-size:11.5px;color:var(--n-500);">'+esc(g.cargadoPor||'—')+'</td>'+btns(g)+'</tr>';
+    } else {
+      html+='<tr class="carga-head" data-carga="'+esc(c.clave)+'"><td style="font-family:\'Montserrat\',sans-serif;font-weight:700;color:var(--gris);">'+n+'</td>'
+        +'<td>'+fmtFecha(c.fecha)+'</td><td colspan="2" style="color:var(--gris);font-size:12px;">'+esc(c.rubros.slice(0,2).join(', '))+(c.rubros.length>2?' +'+(c.rubros.length-2):'')+'</td>'
+        +'<td>'+esc(c.proveedor)+'</td><td>'+esc(c.concepto)+(c.comprobante?'<div style="font-size:11.5px;color:var(--n-500);">'+esc(c.comprobante)+'</div>':'')+'</td>'
+        +'<td><span class="tag '+(c.financia&&c.financia!==FONDO?'socio':'')+'">'+esc(c.financia||FONDO)+'</span></td>'
+        +'<td class="money">'+fmtUSD(c.usd,2)+'</td><td class="money" style="font-weight:400;">'+(c.iva?fmtUSD(c.iva,2):'—')+'</td>'
+        +'<td>'+tagFiscal(c.fiscal)+'</td>'
+        +'<td class="money" style="font-weight:400;color:var(--n-500);">'+fmtARS(c.ars,2)+'</td>'
+        +'<td style="font-size:11.5px;color:var(--n-500);">'+esc(c.cargadoPor)+'</td><td></td></tr>';
+      c.gastos.forEach(g=>{
+        html+='<tr class="carga-hijo oculta" data-hijo="'+esc(c.clave)+'"><td></td><td style="color:var(--n-500);font-size:12px;">'+fmtFecha(g.fecha)+'</td>'
+          +'<td>'+esc(g.rubro)+'</td><td><span class="tag">'+esc(g.tipo||'—')+'</span></td><td style="color:var(--n-500);">'+esc(g.proveedor)+'</td><td>'+esc(g.concepto)+'</td>'
+          +'<td><span class="tag '+(g.financia&&g.financia!==FONDO?'socio':'')+'">'+esc(g.financia||FONDO)+'</span></td>'
+          +'<td class="money" style="font-weight:400;">'+(g.montoUSD?fmtUSD(g.montoUSD,2):'—')+'</td>'
+          +'<td class="money" style="font-weight:400;">'+(ivaUSDDeGasto(g)?fmtUSD(ivaUSDDeGasto(g),2):'—')+'</td>'
+          +'<td>'+tagFiscal(g.fiscal)+'</td>'
+          +'<td class="money" style="font-weight:400;color:var(--n-500);">'+fmtARS(g.montoARS,2)+'</td>'
+          +'<td></td>'+btns(g)+'</tr>';
+      });
+    }
+  });
   const tIVA=filas.reduce((a,g)=>a+ivaUSDDeGasto(g),0);
-  html+='<tr class="total-row"><td colspan="6">Total filtrado</td><td class="money">'+fmtUSD(tUSD)+'</td><td class="money">'+fmtUSD(tIVA)+'</td><td></td><td class="money">'+fmtARS(tARS)+'</td><td colspan="2"></td></tr></tbody></table>';
+  html+='<tr class="total-row"><td colspan="7">Total filtrado</td><td class="money">'+fmtUSD(tUSD)+'</td><td class="money">'+fmtUSD(tIVA)+'</td><td></td><td class="money">'+fmtARS(tARS)+'</td><td colspan="2"></td></tr></tbody></table>';
   cont.innerHTML=html;
+  cont.querySelectorAll('[data-carga]').forEach(tr=>tr.addEventListener('click',e=>{
+    if(e.target.closest('button')) return;
+    const k=tr.dataset.carga; tr.classList.toggle('abierta');
+    cont.querySelectorAll('[data-hijo="'+CSS.escape(k)+'"]').forEach(h=>h.classList.toggle('oculta'));
+  }));
   cont.querySelectorAll('[data-editar]').forEach(b=>b.addEventListener('click',()=>editarGasto(b.dataset.editar)));
-  cont.querySelectorAll('[data-borrar]').forEach(b=>b.addEventListener('click',()=>{ const g=Store.gastos.find(x=>x.id===b.dataset.borrar);
-    if(g&&confirm('¿Borrar el gasto "'+g.concepto+'" de '+fmtUSD(g.montoUSD||0)+'?')){ Store.borrarGasto(b.dataset.borrar); toast('Gasto borrado'); renderTodo(); } }));
+  cont.querySelectorAll('[data-borrar]').forEach(b=>b.addEventListener('click',()=>confirmarBorrado(b,()=>{
+    const g=Store.gastos.find(x=>x.id===b.dataset.borrar); if(!g) return;
+    Store.mandarAPapelera('gasto',g); Store.borrarGasto(b.dataset.borrar); toast('Gasto borrado'); renderTodo();
+  })));
+}
+
+function renderPapelera(){
+  const cont=document.getElementById('tabla-papelera'); if(!cont) return;
+  const items=(Store.papelera||[]).slice().sort((a,b)=>(b.borradoEl||'').localeCompare(a.borradoEl||''));
+  if(!items.length){ cont.innerHTML='<div class="empty"><strong>La papelera está vacía</strong>Acá va quedando lo que se borre, para que no se pierda el rastro.</div>'; return; }
+  let h='<table><thead><tr><th>Borrado el</th><th>Por</th><th>Qué era</th><th>Detalle</th><th class="money">USD</th><th class="money">ARS</th></tr></thead><tbody>';
+  items.forEach(r=>{
+    const d=r.datos||{};
+    const detalle = r.tipo==='aporte'
+      ? ('Aporte de '+esc(d.socio||'—')+(d.marcaton?' (MARCATON)':'')+' del '+fmtFecha(d.fecha))
+      : (esc(d.concepto||'(sin concepto)')+' · '+esc(d.rubro||'—')+' · '+esc(d.proveedor||'—')+' del '+fmtFecha(d.fecha));
+    const fh=r.borradoEl?new Date(r.borradoEl):null;
+    h+='<tr><td style="font-size:12px;">'+(fh?fmtFecha(r.borradoEl.slice(0,10))+' '+String(fh.getHours()).padStart(2,'0')+':'+String(fh.getMinutes()).padStart(2,'0'):'—')+'</td>'
+      +'<td style="font-size:12px;color:var(--n-500);">'+esc(r.borradoPor||'—')+'</td>'
+      +'<td><span class="tag '+(r.tipo==='aporte'?'verde':'marron')+'">'+(r.tipo==='aporte'?'Aporte':'Gasto')+'</span></td>'
+      +'<td style="font-size:12.5px;">'+detalle+'</td>'
+      +'<td class="money">'+(d.montoUSD?fmtUSD(d.montoUSD,2):'—')+'</td>'
+      +'<td class="money" style="font-weight:400;color:var(--n-500);">'+(d.montoARS?fmtARS(d.montoARS,2):'—')+'</td></tr>';
+  });
+  cont.innerHTML=h+'</tbody></table>';
 }
 
 /* ---------- PROVEEDORES ---------- */
@@ -2590,7 +2747,7 @@ function agregarRubro(macro,nombre){
   if(RUBROS.some(r=>r.toLowerCase()===n.toLowerCase())){ toast('Ya existe un rubro con ese nombre',true); return false; }
   const m=MACRORUBROS.find(x=>x.nombre===macro);
   if(!m){ toast('No se encontró el macrorubro',true); return false; }
-  m.rubros.push(n); reconstruirRubros(); Store.guardarEstructura();
+  m.rubros.push(n); reconstruirRubros(); repoblarSelectsRubro(); Store.guardarEstructura();
   return true;
 }
 function eliminarRubro(r){
@@ -2602,7 +2759,7 @@ function eliminarRubro(r){
   // limpiar registros vacíos asociados
   if(p) Store.borrarPresu(p.id);
   Store.abaucan.filter(a=>a.rubro===r).forEach(a=>Store.borrarAbaucan(a.id));
-  reconstruirRubros(); Store.guardarEstructura();
+  reconstruirRubros(); repoblarSelectsRubro(); Store.guardarEstructura();
   toast('Rubro eliminado'); renderRubrosABM(); renderTodo();
 }
 
@@ -2811,6 +2968,7 @@ function buscarCampo(fila,nombres){ const claves=Object.keys(fila);
   for(const n of nombres){ const k=claves.find(c=>c.toLowerCase().indexOf(n.toLowerCase())>-1); if(k!==undefined)return fila[k]; } return ''; }
 async function procesarImportacion(filas){
   const res=document.getElementById('import-resultado'); const errores=[],nuevos=[];
+  const loteImport=Store.nuevoLote();
   filas.forEach((f,idx)=>{ const linea=idx+2;
     const fecha=normalizarFecha(buscarCampo(f,['Fecha'])),monto=normalizarNumero(buscarCampo(f,['Monto ARS','Monto','Importe','Pesos']));
     const rubro=String(buscarCampo(f,['Rubro','Partida'])||'').trim(),proveedor=String(buscarCampo(f,['Proveedor'])||'').trim(),concepto=String(buscarCampo(f,['Concepto','Detalle','Descripcion'])||'').trim();
@@ -2822,7 +2980,7 @@ async function procesarImportacion(filas){
     const descP=Math.min(Math.max(normalizarNumero(buscarCampo(f,['Descuento %','Descuento']))||0,0),100);
     const brutoF=monto, montoNeto=descP>0?Math.round(monto*(1-descP/100)*100)/100:monto;
     const fin=String(buscarCampo(f,['Financiado por','Financia','Socio'])||FONDO).trim();
-    nuevos.push({ fecha,rubro,tipo:String(buscarCampo(f,['Tipo de costo','Tipo'])||'Materiales').trim(),proveedor:proveedor||'Sin proveedor',concepto:concepto||'(sin concepto)',montoARS:montoNeto,montoBrutoARS:brutoF,descuentoPct:descP,
+    nuevos.push({ lote:loteImport, fecha,rubro,tipo:String(buscarCampo(f,['Tipo de costo','Tipo'])||'Materiales').trim(),proveedor:proveedor||'Sin proveedor',concepto:concepto||'(sin concepto)',montoARS:montoNeto,montoBrutoARS:brutoF,descuentoPct:descP,
       cotizacion:normalizarNumero(buscarCampo(f,['Cotizacion MEP','Cotizacion','MEP','Dolar']))||null,
       financia:FINANCIA_OPC.indexOf(fin)>=0?fin:FONDO,unidad:String(buscarCampo(f,['Unidad','Destino'])||UNIDADES[0]).trim(),
       formaPago:String(buscarCampo(f,['Forma de pago','Pago'])||'').trim(),estado:String(buscarCampo(f,['Estado'])||'Pagado').trim(),
@@ -2972,8 +3130,15 @@ function exportarExcel(){
     .concat([[''],['Recargo que absorbe el proyecto',MARCATON_RECARGO+'%'],['Reintegro del banco',MARCATON_REINTEGRO+'%'],
       ['El beneficio no es plata del proyecto: queda para quien puso el cupo.']]);
 
+  const fPap=[['Borrado el','Borrado por','Tipo','Fecha original','Socio / Proveedor','Rubro','Concepto','Monto ARS','Monto USD']]
+    .concat((Store.papelera||[]).slice().sort((a,b)=>(b.borradoEl||'').localeCompare(a.borradoEl||'')).map(r=>{ const d=r.datos||{};
+      return [r.borradoEl||'',r.borradoPor||'',r.tipo==='aporte'?'Aporte':'Gasto',d.fecha||'',
+        r.tipo==='aporte'?(d.socio||''):(d.proveedor||''),d.rubro||'',
+        r.tipo==='aporte'?(d.marcaton?'MARCATON':(d.medio||'')):(d.concepto||''),
+        d.montoARS||'',d.montoUSD?Number(d.montoUSD.toFixed(2)):'']; }));
+
   if(hayXLSX()){ const wb=XLSX.utils.book_new();
-    [['Gastos',fG],['Presupuesto',fP],['Aportes',fA],['Socios',fS],['Financiero',fFIN],['MARCATON',fMK],['IVA',fIVA],['Proveedores',fPr],['Curva',fC],['Abaucan',fAb]]
+    [['Gastos',fG],['Presupuesto',fP],['Aportes',fA],['Socios',fS],['Financiero',fFIN],['MARCATON',fMK],['IVA',fIVA],['Proveedores',fPr],['Curva',fC],['Abaucan',fAb],['Papelera',fPap]]
       .forEach(([n,d])=>XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(d),n));
     XLSX.writeFile(wb,'Rio_Colorado_Gestion_'+hoyISO()+'.xlsx');
   } else descargarArchivo('Rio_Colorado_Gastos_'+hoyISO()+'.csv','\uFEFF'+fG.map(f=>f.join(';')).join('\n'),'text/csv;charset=utf-8');
@@ -2981,7 +3146,7 @@ function exportarExcel(){
 }
 function exportarJSON(){ const d={proyecto:PROYECTO,exportado:new Date().toISOString(),gastos:Store.gastos,presupuesto:Store.presupuesto,
   aportes:Store.aportes,compromisos:Store.compromisos,proveedores:Store.proveedores,abaucan:Store.abaucan,
-  ivamov:Store.ivamov,macrorubros:estructuraActual(),config:Store.config};
+  ivamov:Store.ivamov,papelera:Store.papelera,macrorubros:estructuraActual(),config:Store.config};
   descargarArchivo('Respaldo_Rio_Colorado_'+hoyISO()+'.json',JSON.stringify(d,null,2),'application/json'); toast('Respaldo descargado'); }
 function restaurarJSON(file){ const r=new FileReader(); r.onload=e=>{ try{ const d=JSON.parse(String(e.target.result));
   if(!d.gastos&&!d.presupuesto&&!d.aportes)throw new Error('El archivo no tiene datos reconocibles.');
@@ -3132,7 +3297,7 @@ function irA(v){ document.querySelectorAll('.nav-btn').forEach(b=>b.classList.to
   menuCerrar(); window.scrollTo({top:0}); }
 function renderTodo(){ actualizarProveedores(); renderDashboard(); renderMacro(); renderSocios(); renderMarcaton(); renderTablaGastos(); renderPresupuesto();
   renderProveedoresABM(); renderAvisoLineaBase(); renderDesvioLineaBase(); renderCurva(); renderAnalisis(); renderIVA(); renderProyeccion(); renderAbaucan();
-  renderFinanciero(); renderFinSocios(); renderFinMatriz(); renderAvisoHonorarios(); renderEstadoTasa(); volcarConfig(); renderEstadoDolar(); renderEstadoIA(); renderEstadoFirebase(); }
+  renderFinanciero(); renderFinSocios(); renderFinMatriz(); renderPapelera(); renderAvisoHonorarios(); renderEstadoTasa(); volcarConfig(); renderEstadoDolar(); renderEstadoIA(); renderEstadoFirebase(); }
 
 /* ---------- ARRANQUE ---------- */
 function armarUI(){
@@ -3464,7 +3629,7 @@ window.arrancarApp = arrancarApp;
       catch(e){ try{ await authMod.setPersistence(auth, authMod.indexedDBLocalPersistence); }catch(e2){} }
       const db   = fsMod.getFirestore(app);
       const RAIZ = 'proyectos/rio-colorado';
-      const COLS = ['gastos','presupuesto','aportes','proveedores','abaucan','ivamov'];
+      const COLS = ['gastos','presupuesto','aportes','proveedores','abaucan','ivamov','papelera'];
 
       api = {
         entrar(){ const p=new authMod.GoogleAuthProvider(); p.setCustomParameters({prompt:'select_account'}); return authMod.signInWithPopup(auth,p); },
