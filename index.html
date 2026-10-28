@@ -605,6 +605,10 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
             <div class="field"><label for="fa-unidad">Unidad / destino</label><select id="fa-unidad"></select></div>
             <div class="field"><label for="fa-fiscal">Condición fiscal</label><select id="fa-fiscal"></select></div>
             <div class="field"><label for="fa-iva">IVA de la factura $</label><input type="number" id="fa-iva" step="0.01" min="0" placeholder="0,00"><span class="hint">Se reparte entre los renglones.</span></div>
+            <div class="field"><label for="fa-perc-iibb">Percepción IIBB $</label><input type="number" id="fa-perc-iibb" step="0.01" min="0" placeholder="0"></div>
+            <div class="field"><label for="fa-perc-iva">Percepción IVA $</label><input type="number" id="fa-perc-iva" step="0.01" min="0" placeholder="0"></div>
+            <div class="field"><label for="fa-perc-gan">Percepción Ganancias $</label><input type="number" id="fa-perc-gan" step="0.01" min="0" placeholder="0"></div>
+            <div class="field"><label for="fa-otros">Impuestos internos y otros tributos $</label><input type="number" id="fa-otros" step="0.01" min="0" placeholder="0"><span class="hint">Se reparten entre los renglones, igual que el IVA.</span></div>
             <div class="field"><label for="fa-desc">Descuento %</label><input type="number" id="fa-desc" step="0.01" min="0" max="100" placeholder="0"><span class="hint" id="fa-desc-hint">Nota de crédito o descuento pactado. Se aplica a todos los renglones y al IVA.</span></div>
           </div>
         </div>
@@ -645,6 +649,10 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
             <div class="field" id="campo-alicuota"><label for="g-alicuota">Alícuota IVA</label><select id="g-alicuota"></select></div>
             <div class="field" id="campo-iva"><label for="g-iva">IVA en pesos</label><input type="number" id="g-iva" step="0.01" min="0" placeholder="0,00"><span class="hint" id="g-iva-hint">Se calcula sola. Corregila si la factura dice otra cosa.</span></div>
             <div class="field" id="campo-neto"><label for="g-neto">Neto gravado</label><input type="text" id="g-neto" readonly value="—"></div>
+            <div class="field" id="campo-perc-iibb"><label for="g-perc-iibb">Percepción IIBB $</label><input type="number" id="g-perc-iibb" step="0.01" min="0" placeholder="0"><span class="hint">Si figura en la factura.</span></div>
+            <div class="field" id="campo-perc-iva"><label for="g-perc-iva">Percepción IVA $</label><input type="number" id="g-perc-iva" step="0.01" min="0" placeholder="0"></div>
+            <div class="field" id="campo-perc-gan"><label for="g-perc-gan">Percepción Ganancias $</label><input type="number" id="g-perc-gan" step="0.01" min="0" placeholder="0"></div>
+            <div class="field" id="campo-otros"><label for="g-otros">Impuestos internos y otros tributos $</label><input type="number" id="g-otros" step="0.01" min="0" placeholder="0"><span class="hint">Por ejemplo, el impuesto a los combustibles.</span></div>
             <div class="field"><label for="g-financia">Financiado por *</label><select id="g-financia" required></select></div>
             <div class="field"><label for="g-pago">Forma de pago</label><select id="g-pago"></select></div>
             <div class="field"><label for="g-estado">Estado</label><select id="g-estado"><option>Pagado</option><option>Comprometido</option><option>Pendiente</option></select></div>
@@ -884,6 +892,10 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
    MAGNA DESARROLLOS — Gestión de obra · Río Colorado
    Revisión 3 · Seguimiento en dólares, IA real, login Google
    y datos en Firestore.
+   Versión 6.5 · Datos fiscales completos para la contadora de
+   Magna: Factura C, CUIT del proveedor, percepciones e impuestos
+   internos en cada factura. La app de MICA los lee (solo lectura)
+   para juntar el IVA de toda Magna.
    ========================================================= */
 
 /* =========================================================
@@ -961,8 +973,15 @@ function familiaTipo(t){ return t==='Mano de obra'?'mo':(t==='Materiales'?'mat':
 /* ---------- IVA ---------- */
 const FISCAL_DISCRIMINADO='Con IVA discriminado (Factura A)';
 const FISCAL_INCLUIDO='IVA incluido sin discriminar (Factura B)';
+const FISCAL_C='Factura C (sin IVA)';
 const FISCAL_SIN='Sin IVA / sin factura';
-const CONDICIONES_FISCALES=[FISCAL_DISCRIMINADO,FISCAL_INCLUIDO,FISCAL_SIN];
+const CONDICIONES_FISCALES=[FISCAL_DISCRIMINADO,FISCAL_INCLUIDO,FISCAL_C,FISCAL_SIN];
+/* CUIT de Magna Desarrollos SRL: las facturas tienen que estar a su nombre para computar el IVA. */
+const CUIT_MAGNA='30-71864151-5';
+const soloDigitos=v=>String(v||'').replace(/\D/g,'');
+/* Percepciones e impuestos internos de la factura (en pesos). Van dentro del total pero no son IVA. */
+function impuestosExtra(g){ return (Number(g.percIIBB)||0)+(Number(g.percIVA)||0)+(Number(g.percGan)||0)+(Number(g.otrosTribARS)||0); }
+function cuitDeProveedor(nombre){ const p=Store.proveedores.find(x=>x.nombre&&nombre&&x.nombre.toLowerCase()===String(nombre).toLowerCase()); return p?(p.cuit||''):''; }
 const ALICUOTAS=[21,10.5,27];
 /* Solo el comprobante con IVA discriminado genera crédito fiscal computable. */
 function ivaDeGasto(g){ return (g.fiscal===FISCAL_DISCRIMINADO)?(g.ivaARS||0):0; }
@@ -1525,11 +1544,17 @@ async function leerFactura(file){
       : {type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}};
     const sistema='Sos un asistente de control de costos de obra en Argentina. Analizás facturas de proveedores de construcción y las imputás a los rubros de la obra. Respondés SOLO con JSON válido, sin explicaciones ni markdown.';
     const instruccion='Analizá esta factura y devolvé un JSON con esta forma exacta:\n'
-      +'{"fecha":"AAAA-MM-DD","proveedor":"","cuit":"","comprobante":"","tipo_comprobante":"A|B|C|X","total":0,"neto":0,"iva":0,"alicuota":21,"renglones":[{"concepto":"","rubro":"","tipo":"","monto":0}]}\n\n'
-      +'Reglas sobre el IVA:\n'
-      +'- "tipo_comprobante": la letra de la factura (A, B, C) tal como figura. Si no se distingue, poné "X".\n'
-      +'- Si es Factura A, el IVA viene discriminado: copiá "neto" e "iva" EXACTAMENTE como figuran en el comprobante, no los calcules. "alicuota" es el porcentaje aplicado.\n'
-      +'- Si es Factura B o C, el IVA no está discriminado: poné "iva":0 y "neto" igual al total. No lo estimes.\n'
+      +'{"fecha":"AAAA-MM-DD","proveedor":"","cuit":"","cuit_comprador":"","comprobante":"","tipo_comprobante":"A|B|C|X","total":0,"neto":0,"iva":0,"alicuota":21,"otros_tributos":0,"percepciones":{"iibb":0,"iva":0,"ganancias":0},"renglones":[{"concepto":"","rubro":"","tipo":"","monto":0}]}\n\n'
+      +'Reglas sobre el IVA y los impuestos:\n'
+      +'- "tipo_comprobante": la letra de la factura (A, B, C) tal como figura. Los tiques fiscales también la tienen: "Tique factura A" (código 081) es A, "Tique factura B" (082) es B. Si no se distingue, poné "X".\n'
+      +'- "cuit": el CUIT del que vende. "cuit_comprador": el CUIT del cliente (debería ser el de Magna Desarrollos, '+CUIT_MAGNA+').\n'
+      +'- "comprobante": el número con punto de venta, por ejemplo "0005-00012345".\n'
+      +'- Si es Factura A, el IVA viene discriminado: copiá "neto" (neto gravado) e "iva" EXACTAMENTE como figuran en el comprobante, no los calcules. "alicuota" es el porcentaje aplicado.\n'
+      +'- "percepciones": las que figuren, de Ingresos Brutos (sumadas, de cualquier provincia), de IVA y de Ganancias. Si no hay, 0.\n'
+      +'- "otros_tributos": impuestos internos, impuesto a los combustibles u otros tributos que no son IVA ni percepciones ("importe total otros tributos"). Si no hay, 0.\n'
+      +'- Los números entre corchetes o paréntesis al lado de un renglón son alícuotas o códigos, no importes.\n'
+      +'- Control: neto + iva + otros_tributos + percepciones tiene que dar el total.\n'
+      +'- Si es Factura B o C, el IVA no está discriminado: poné "iva":0 y "neto" igual al total menos percepciones y otros tributos. No lo estimes.\n'
       +'- "total" siempre es el importe final a pagar.\n\n'
       +'Reglas sobre los renglones:\n'
       +'- "rubro" debe ser exactamente uno de esta lista: '+RUBROS.join(' | ')+'\n'
@@ -1548,11 +1573,18 @@ async function leerFactura(file){
     // condición fiscal deducida del tipo de comprobante
     const letra=String(d.tipo_comprobante||'').toUpperCase().trim();
     const ivaLeido=Number(d.iva)||0;
-    facturaFiscal = (letra==='A'&&ivaLeido>0) ? FISCAL_DISCRIMINADO : (letra==='B'||letra==='C' ? FISCAL_INCLUIDO : FISCAL_SIN);
+    facturaFiscal = (letra==='A'&&ivaLeido>0) ? FISCAL_DISCRIMINADO : (letra==='B' ? FISCAL_INCLUIDO : letra==='C' ? FISCAL_C : FISCAL_SIN);
     facturaIVA = facturaFiscal===FISCAL_DISCRIMINADO ? ivaLeido : 0;
     facturaAlicuota = Number(d.alicuota)||21;
     const selF=document.getElementById('fa-fiscal'); if(selF) selF.value=facturaFiscal;
     const inpI=document.getElementById('fa-iva'); if(inpI) inpI.value=facturaIVA||'';
+    const pr=d.percepciones||{};
+    document.getElementById('fa-perc-iibb').value=Number(pr.iibb)||'';
+    document.getElementById('fa-perc-iva').value=Number(pr.iva)||'';
+    document.getElementById('fa-perc-gan').value=Number(pr.ganancias)||'';
+    document.getElementById('fa-otros').value=Number(d.otros_tributos)||'';
+    const cuitComp=soloDigitos(d.cuit_comprador);
+    const otroComprador=cuitComp.length===11&&cuitComp!==soloDigitos(CUIT_MAGNA);
     renglones=(d.renglones||[]).map(r=>({
       id:Store.nuevoId(), concepto:r.concepto||'(sin concepto)',
       rubro:RUBROS.indexOf(r.rubro)>=0?r.rubro:'Gastos generales de obra',
@@ -1565,7 +1597,8 @@ async function leerFactura(file){
     const dup=detectarDuplicado(d);
     let avisoDup='';
     if(dup.length){ avisoDup='<div class="aviso rojo" style="margin-top:12px;margin-bottom:0;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg><div><strong>Ojo, esto se parece a algo ya cargado.</strong><ul style="margin:6px 0 0;padding-left:18px;">'+dup.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div></div>'; }
-    prev.innerHTML=thumb+'<div class="aviso verde" style="margin-bottom:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C6F46" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg><div><strong>Factura leída.</strong> Se detectaron '+renglones.length+' renglón(es). Revisá la imputación de cada uno antes de guardar.</div></div>'+avisoDup;
+    const avisoComp=otroComprador?'<div class="aviso rojo" style="margin-top:12px;margin-bottom:0;"><div><strong>La factura no es a nombre de Magna.</strong> El CUIT del comprador es '+esc(d.cuit_comprador)+' y el de Magna es '+CUIT_MAGNA+': su IVA no se puede computar.</div></div>':'';
+    prev.innerHTML=thumb+'<div class="aviso verde" style="margin-bottom:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C6F46" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg><div><strong>Factura leída.</strong> Se detectaron '+renglones.length+' renglón(es). Revisá la imputación de cada uno antes de guardar.</div></div>'+avisoComp+avisoDup;
     toast('Factura leída');
   }catch(err){
     prev.innerHTML=thumb+'<div class="aviso rojo" style="margin-bottom:0;"><div><strong>No se pudo leer la factura.</strong> '+esc(err.message)+'</div></div>';
@@ -1615,7 +1648,7 @@ function limpiarFactura(){
   const sf=document.getElementById('fa-fiscal'); if(sf) sf.value=FISCAL_DISCRIMINADO;
   const si=document.getElementById('fa-iva'); if(si) si.value='';
   const sd=document.getElementById('fa-desc'); if(sd) sd.value='';
-  ['fa-fecha','fa-proveedor','fa-cuit','fa-comprobante'].forEach(id=>{ const e=document.getElementById(id); if(e)e.value=''; });
+  ['fa-fecha','fa-proveedor','fa-cuit','fa-comprobante','fa-perc-iibb','fa-perc-iva','fa-perc-gan','fa-otros'].forEach(id=>{ const e=document.getElementById(id); if(e)e.value=''; });
   document.getElementById('fa-fecha').value=hoyISO();
   document.getElementById('factura-preview').innerHTML='';
   renderRenglones();
@@ -1639,15 +1672,22 @@ async function guardarRenglones(){
      una nota de crédito del 5% baja el neto y el crédito fiscal por igual. */
   const descP=Math.min(Math.max(parseFloat((document.getElementById('fa-desc')||{}).value)||0,0),100);
   const factor=1-descP/100;
+  // Percepciones e impuestos internos: se reparten igual que el IVA (Factura C o B no tienen percepción de IVA).
+  const num=id=>Math.max(0,parseFloat((document.getElementById(id)||{}).value)||0);
+  const sinFac=fiscal===FISCAL_SIN;
+  const extraTot={ percIIBB:sinFac?0:num('fa-perc-iibb'), percIVA:fiscal===FISCAL_DISCRIMINADO?num('fa-perc-iva'):0, percGan:sinFac?0:num('fa-perc-gan'), otrosTribARS:sinFac?0:num('fa-otros') };
+  if(ivaTotal+extraTot.percIIBB+extraTot.percIVA+extraTot.percGan+extraTot.otrosTribARS>=totalFactura){ toast('El IVA, las percepciones y los impuestos internos tienen que sumar menos que el total',true); return; }
   const lote=Store.nuevoLote();
   validos.forEach(r=>{ const bruto=Number(r.monto), monto=Math.round(bruto*factor*100)/100;
     // el IVA de la factura se reparte entre renglones en proporción a su monto
     const ivaR=((ivaTotal&&totalFactura)?ivaTotal*(bruto/totalFactura):0)*factor;
+    const parte=v=>Number((((v&&totalFactura)?v*(bruto/totalFactura):0)*factor).toFixed(2));
     Store.guardarGasto({ fecha, rubro:r.rubro, tipo:r.tipo, proveedor:prov, concepto:r.concepto, montoARS:monto, montoBrutoARS:bruto, descuentoPct:descP,
       cotizacion:c.valor, montoUSD:monto/c.valor, unidad:uni, financia:fin, formaPago:'', estado:'Pagado', lote,
       cargadoPor:USUARIO?USUARIO.nombre:'—', comprobante:comp, notas:cuit?('CUIT '+cuit):'',
       fiscal, alicuota:fiscal===FISCAL_DISCRIMINADO?facturaAlicuota:null,
-      ivaARS:Number(ivaR.toFixed(2)), ivaUSD:ivaR/c.valor }); });
+      ivaARS:Number(ivaR.toFixed(2)), ivaUSD:ivaR/c.valor, cuitProveedor:cuit||cuitDeProveedor(prov),
+      percIIBB:parte(extraTot.percIIBB), percIVA:parte(extraTot.percIVA), percGan:parte(extraTot.percGan), otrosTribARS:parte(extraTot.otrosTribARS) }); });
   limpiarFactura(); renderTodo(); toast(validos.length+' gasto(s) guardados desde la factura'); irA('gastos');
 }
 
@@ -2076,6 +2116,8 @@ function editarGasto(id){ const g=Store.gastos.find(x=>x.id===id); if(!g)return;
   if(g.alicuota) document.getElementById('g-alicuota').value=g.alicuota;
   document.getElementById('g-iva').value=g.ivaARS||'';
   document.getElementById('g-iva').dataset.tocado='1';
+  document.getElementById('g-perc-iibb').value=g.percIIBB||''; document.getElementById('g-perc-iva').value=g.percIVA||'';
+  document.getElementById('g-perc-gan').value=g.percGan||''; document.getElementById('g-otros').value=g.otrosTribARS||'';
   actualizarCamposFiscales();
   document.getElementById('form-titulo').textContent='Editando un gasto'; document.getElementById('btn-guardar').textContent='Guardar cambios';
   document.getElementById('btn-cancelar').style.display='inline-flex'; recalcularUSD(); irA('gastos'); window.scrollTo({top:0,behavior:'smooth'}); }
@@ -2154,7 +2196,7 @@ function renderTablaGastos(){
     : 'Sin movimientos todavía';
   if(!filas.length){ cont.innerHTML='<div class="empty"><strong>'+(Store.gastos.length?'Ningún gasto coincide con el filtro':'Sin gastos cargados')+'</strong>'+(Store.gastos.length?'Probá otros criterios.':'Completá el formulario, usá la carga rápida o leé una factura.')+'</div>'; return; }
   let html='<table><thead><tr><th style="width:52px;">N°</th><th>Fecha</th><th>Rubro</th><th>Tipo</th><th>Proveedor</th><th>Concepto</th><th>Financia</th><th class="money">USD</th><th class="money">IVA</th><th>Fiscal</th><th class="money">ARS</th><th>Carga</th><th></th></tr></thead><tbody>';
-  const tagFiscal=f=>f===FISCAL_DISCRIMINADO?'<span class="tag verde">A</span>':(f===FISCAL_INCLUIDO?'<span class="tag marron">B</span>':'<span class="tag">S/F</span>');
+  const tagFiscal=f=>f===FISCAL_DISCRIMINADO?'<span class="tag verde">A</span>':(f===FISCAL_INCLUIDO?'<span class="tag marron">B</span>':(f===FISCAL_C?'<span class="tag marron">C</span>':'<span class="tag">S/F</span>'));
   const btns=g=>'<td style="white-space:nowrap;text-align:right;"><button class="btn btn-ghost btn-sm" data-editar="'+esc(g.id)+'">Editar</button>'
     +'<button class="btn btn-ghost btn-sm" data-borrar="'+esc(g.id)+'" data-paso="0" style="color:#9E2B25;">Borrar</button></td>';
   cargas.forEach(c=>{
@@ -2648,11 +2690,12 @@ function renderIVA(){
   const items=[
     {label:'Factura A',value:porCond[FISCAL_DISCRIMINADO],color:'#0C6F46'},
     {label:'Factura B',value:porCond[FISCAL_INCLUIDO],color:'#8B6F60'},
+    {label:'Factura C',value:porCond[FISCAL_C],color:'#B08E7C'},
     {label:'Sin factura',value:porCond[FISCAL_SIN],color:'#9A9A97'}
   ].filter(x=>x.value>0);
   const cf=document.getElementById('chart-fiscal');
   if(!items.length){ cf.innerHTML=svgVacio('Cargá gastos para ver la formalización.'); }
-  else { const conFactura=porCond[FISCAL_DISCRIMINADO]+porCond[FISCAL_INCLUIDO];
+  else { const conFactura=porCond[FISCAL_DISCRIMINADO]+porCond[FISCAL_INCLUIDO]+porCond[FISCAL_C];
     cf.innerHTML=svgDonut(items,'Ejecutado')+leyenda(items)
       +'<p class="panel-sub" style="text-align:center;margin-top:14px;">'+fmtPct(ejec?conFactura/ejec*100:0)+' de la obra está respaldada con comprobante.</p>'; }
 
@@ -2767,10 +2810,20 @@ function eliminarRubro(r){
 function actualizarCamposFiscales(){
   const cond=document.getElementById('g-fiscal').value;
   const disc=(cond===FISCAL_DISCRIMINADO);
-  ['campo-alicuota','campo-iva','campo-neto'].forEach(id=>{
+  ['campo-alicuota','campo-iva','campo-neto','campo-perc-iva'].forEach(id=>{
     const e=document.getElementById(id); if(e) e.style.display=disc?'flex':'none'; });
+  // Percepciones e impuestos internos: en cualquier factura (A, B o C), no en los gastos sin factura.
+  ['campo-perc-iibb','campo-perc-gan','campo-otros'].forEach(id=>{
+    const e=document.getElementById(id); if(e) e.style.display=cond===FISCAL_SIN?'none':'flex'; });
   if(!disc){ document.getElementById('g-iva').value=''; document.getElementById('g-neto').value='—'; }
   else recalcularIVA(true);
+}
+/* Percepciones e impuestos internos cargados en el formulario de gasto. */
+function leerExtraForm(){
+  const cond=document.getElementById('g-fiscal').value;
+  const v=id=>Math.max(0,parseFloat((document.getElementById(id)||{}).value)||0);
+  if(cond===FISCAL_SIN) return {percIIBB:0,percIVA:0,percGan:0,otrosTribARS:0};
+  return {percIIBB:v('g-perc-iibb'),percIVA:cond===FISCAL_DISCRIMINADO?v('g-perc-iva'):0,percGan:v('g-perc-gan'),otrosTribARS:v('g-otros')};
 }
 /* recalcula el IVA a partir del total y la alícuota.
    forzar = true reescribe el campo aunque el usuario lo haya tocado */
@@ -2780,12 +2833,15 @@ function recalcularIVA(forzar){
   const total=parseFloat(document.getElementById('g-monto').value)||0;
   const ali=parseFloat(document.getElementById('g-alicuota').value)||21;
   const campoIva=document.getElementById('g-iva');
+  // El IVA se calcula sobre lo gravado: sin percepciones ni impuestos internos.
+  const extra=leerExtraForm();
+  const base=total-extra.percIIBB-extra.percIVA-extra.percGan-extra.otrosTribARS;
   if(forzar||!campoIva.dataset.tocado){
-    const iva=total>0?total-(total/(1+ali/100)):0;
+    const iva=base>0?base-(base/(1+ali/100)):0;
     campoIva.value=iva>0?iva.toFixed(2):'';
   }
   const iva=parseFloat(campoIva.value)||0;
-  document.getElementById('g-neto').value=total>0?fmtARS(total-iva,2):'—';
+  document.getElementById('g-neto').value=total>0?fmtARS(base-iva,2):'—';
 }
 /* ---------- BLOQUE DE COSTO FINANCIERO Y HONORARIOS ---------- */
 function renderFinanciero(){
@@ -2988,7 +3044,10 @@ async function procesarImportacion(filas){
       fiscal:(function(){ const c=String(buscarCampo(f,['Condicion fiscal','Condicion'])||'').trim();
         return CONDICIONES_FISCALES.indexOf(c)>=0?c:FISCAL_SIN; })(),
       alicuota:normalizarNumero(buscarCampo(f,['Alicuota %','Alicuota']))||null,
-      ivaARS:normalizarNumero(buscarCampo(f,['IVA ARS','IVA'])) });
+      ivaARS:normalizarNumero(buscarCampo(f,['IVA ARS','IVA'])),
+      cuitProveedor:String(buscarCampo(f,['CUIT proveedor','CUIT'])||'').trim(),
+      percIIBB:normalizarNumero(buscarCampo(f,['Percepcion IIBB ARS','Percepcion IIBB']))||0, percIVA:normalizarNumero(buscarCampo(f,['Percepcion IVA ARS','Percepcion IVA']))||0,
+      percGan:normalizarNumero(buscarCampo(f,['Percepcion Ganancias ARS','Percepcion Ganancias']))||0, otrosTribARS:normalizarNumero(buscarCampo(f,['Impuestos internos ARS','Impuestos internos']))||0 });
   });
   res.innerHTML='<p class="panel-sub">Buscando cotizaciones faltantes…</p>';
   const sinCot=Array.from(new Set(nuevos.filter(n=>!n.cotizacion).map(n=>n.fecha)));
@@ -3018,14 +3077,15 @@ function importarArchivo(file){
 }
 function exportarExcel(){
   if(!Store.gastos.length&&!Store.presupuesto.length&&!Store.aportes.length){ toast('No hay nada para exportar',true); return; }
-  const fG=[COLUMNAS.concat(['Factura ARS','Descuento ARS','Monto USD','IVA USD','Neto USD','Dias','Interes USD','Total actualizado USD','Cargado por'])]
+  const fG=[COLUMNAS.concat(['Factura ARS','Descuento ARS','Monto USD','IVA USD','Neto USD','Dias','Interes USD','Total actualizado USD','Cargado por','CUIT proveedor','Percepcion IIBB ARS','Percepcion IVA ARS','Percepcion Ganancias ARS','Impuestos internos ARS'])]
     .concat(Store.gastos.slice().sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''))
     .map(g=>{ const ivaU=ivaUSDDeGasto(g), intU=interesGasto(g);
       return [g.fecha,g.rubro,g.tipo,g.proveedor,g.concepto,g.montoARS,g.descuentoPct||0,g.cotizacion||'',g.fiscal||FISCAL_SIN,g.alicuota||'',g.ivaARS||0,
         g.financia||FONDO,g.unidad||'',g.formaPago||'',g.estado||'',g.comprobante||'',g.notas||'',
         brutoARSDe(g),Number(descuentoARSDe(g).toFixed(2)),
         g.montoUSD?Number(g.montoUSD.toFixed(2)):'',Number(ivaU.toFixed(2)),Number(((g.montoUSD||0)-ivaU).toFixed(2)),
-        diasDesde(g.fecha),Number(intU.toFixed(2)),Number(((g.montoUSD||0)+intU).toFixed(2)),g.cargadoPor||'']; }));
+        diasDesde(g.fecha),Number(intU.toFixed(2)),Number(((g.montoUSD||0)+intU).toFixed(2)),g.cargadoPor||'',
+        g.cuitProveedor||cuitDeProveedor(g.proveedor),Number(g.percIIBB)||0,Number(g.percIVA)||0,Number(g.percGan)||0,Number(g.otrosTribARS)||0]; }));
   const fP=[['Rubro','Macrorubro','MO USD','Materiales USD','Otros USD','Objetivo USD',
       'Linea base MO USD','Linea base Materiales USD','Linea base Otros USD','Linea base USD','Desvio USD','Desvio %',
       'Avance fisico %','Mes desde','Mes hasta','Notas']]
@@ -3101,6 +3161,7 @@ function exportarExcel(){
     ['GASTO SEGUN RESPALDO DOCUMENTAL'],
     ['Con IVA discriminado (Factura A)',Number(cond[FISCAL_DISCRIMINADO].toFixed(2))],
     ['IVA incluido sin discriminar (Factura B)',Number(cond[FISCAL_INCLUIDO].toFixed(2))],
+    ['Factura C (sin IVA)',Number(cond[FISCAL_C].toFixed(2))],
     ['Sin IVA / sin factura',Number(cond[FISCAL_SIN].toFixed(2))],
     ['Total ejecutado',Number(totalEjecutado().toFixed(2))],
     [''],
@@ -3369,6 +3430,7 @@ function armarUI(){
   document.getElementById('g-fiscal').addEventListener('change',actualizarCamposFiscales);
   document.getElementById('g-alicuota').addEventListener('change',()=>recalcularIVA(true));
   document.getElementById('g-iva').addEventListener('input',e=>{ e.target.dataset.tocado='1'; recalcularIVA(false); });
+  ['g-perc-iibb','g-perc-iva','g-perc-gan','g-otros'].forEach(id=>document.getElementById(id).addEventListener('input',()=>recalcularIVA(false)));
   document.getElementById('g-cot').addEventListener('input',recalcularUSD);
   document.getElementById('btn-cancelar').addEventListener('click',limpiarFormGasto);
   document.getElementById('btn-nuevo-prov').addEventListener('click',()=>abrirModalProv(null));
@@ -3391,6 +3453,9 @@ function armarUI(){
       alicuota:document.getElementById('g-fiscal').value===FISCAL_DISCRIMINADO?(parseFloat(document.getElementById('g-alicuota').value)||21):null,
       ivaARS:document.getElementById('g-fiscal').value===FISCAL_DISCRIMINADO?(parseFloat(document.getElementById('g-iva').value)||0):0 };
     g.ivaUSD=(g.ivaARS&&cot)?g.ivaARS/cot:0;
+    Object.assign(g,leerExtraForm());
+    g.cuitProveedor=cuitDeProveedor(prov);
+    if(g.ivaARS+impuestosExtra(g)>=monto){ toast('El IVA, las percepciones y los impuestos internos tienen que sumar menos que el monto',true); return; }
     const ed=!!g.id; Store.guardarGasto(g); limpiarFormGasto(); renderTodo(); toast(ed?'Cambios guardados':'Gasto guardado');
   });
   ['f-buscar','f-macro','f-financia','f-desde','f-hasta'].forEach(id=>document.getElementById(id).addEventListener('input',renderTablaGastos));
