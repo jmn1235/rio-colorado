@@ -342,6 +342,52 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
   .resp-dias{width:100%;}
   .rest-tabla th{font-size:9.5px;letter-spacing:.3px;}
 }
+/* ---------- CÓMPUTO Y CERTIFICADOS ---------- */
+.cp-tabla{min-width:1620px;font-size:12.5px;}
+.cp-tabla th{padding:7px 4px;}
+.cp-tabla td{padding:3px 4px;vertical-align:top;}
+.cp-in{width:100%;min-width:0;border:1px solid transparent;border-radius:4px;padding:5px 6px;font-size:12.5px;background:transparent;color:var(--tinta);font-family:'Source Sans 3',sans-serif;}
+.cp-in:hover{border-color:var(--n-200);}
+.cp-in:focus{outline:2px solid var(--verde);outline-offset:-1px;background:var(--blanco);border-color:var(--verde);}
+select.cp-in{padding:4px 2px;}
+.cp-cod{width:62px;}.cp-mac{width:128px;}.cp-rub{width:160px;}.cp-desc{width:260px;}.cp-uni{width:64px;}.cp-num{width:96px;text-align:right;}.cp-ori{width:112px;}.cp-notas{width:150px;}
+.cp-err{border-color:#D9A7A3 !important;background:#FBF2F1 !important;}
+.cp-fila-err td:first-child{box-shadow:inset 3px 0 0 #9E2B25;}
+.cp-inactiva td{opacity:.55;}
+.cp-calc{font-weight:400 !important;color:var(--n-700) !important;white-space:nowrap;padding-top:9px !important;}
+.cp-exceso{color:#B3541E !important;font-weight:700 !important;}
+.cp-m{font-size:10px;color:var(--marron);margin-left:3px;}
+.cp-sub td{background:var(--n-050);font-size:12px;font-weight:600;color:var(--n-700);padding:6px;}
+.cp-acc{white-space:nowrap;text-align:right;}
+.cp-link{display:block;background:none;border:0;padding:2px 0 0;color:var(--verde);font-size:11.5px;cursor:pointer;text-decoration:underline;font-family:'Source Sans 3',sans-serif;text-align:left;}
+.cp-aviso{margin-bottom:12px;}
+.cp-div select,.cp-div input{width:100%;min-width:0;border:1px solid var(--n-300);border-radius:4px;padding:6px;font-size:13px;}
+.ct-tabla{min-width:980px;font-size:12.5px;}
+.ct-tabla td{padding:4px 5px;}
+.ct-tabla select,.ct-tabla input{border:1px solid var(--n-300);border-radius:4px;padding:5px 6px;font-size:12.5px;background:var(--blanco);color:var(--tinta);max-width:100%;}
+.ct-tabla select:disabled,.ct-tabla input:disabled{background:transparent;border-color:transparent;opacity:1;-webkit-appearance:none;appearance:none;color:var(--tinta);}
+.ct-item{width:230px;}.ct-num{width:84px;text-align:right;}.ct-avm{width:52px;}
+.ct-calc{font-weight:400 !important;color:var(--n-700) !important;white-space:nowrap;}
+.ct-neg{color:#9E2B25 !important;}
+.ct-neg-row td{background:#FDF8F7;}
+.ct-gasto{font-size:12px;min-width:210px;}
+.ct-gasto div{color:var(--n-500);}
+.ct-auto{font-weight:700;color:var(--verde);}
+.ct-pct{margin-left:3px;color:var(--n-500);}
+.ct-av{white-space:nowrap;}
+.ct-add{margin-top:12px;align-items:center;}
+.ct-add select{border:1px solid var(--n-300);border-radius:var(--r-sm);padding:8px 10px;font-size:13px;max-width:100%;background:var(--blanco);}
+.ct-errs{margin:4px 0 0;padding-left:18px;}
+.ct-sel td{background:var(--verde-claro);}
+.ct-cab{margin-top:2px;}
+.p-items.oculta{display:none;}
+.p-items td{background:var(--n-050);font-size:12px;color:var(--n-700);padding:5px 10px 5px 26px;}
+.p-auto{display:inline-block;margin-top:3px;border:0;cursor:pointer;}
+.g-tag-cert{border:0;cursor:pointer;margin-left:6px;}
+@media (max-width:860px){
+  .ct-item{width:210px;}
+  .ct-add select{width:100%;}
+}
 :focus-visible{outline:2px solid var(--verde);outline-offset:2px;}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
 </style>
@@ -383,6 +429,8 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
       <button class="nav-btn" data-view="rapida"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m13 2-9 12h7l-2 8 9-12h-7z"/></svg>Carga rápida<span class="chip-ia">IA</span></button>
       <button class="nav-btn" data-view="facturas"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg>Leer factura<span class="chip-ia">IA</span></button>
       <button class="nav-btn" data-view="gastos"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>Cargar gastos</button>
+      <button class="nav-btn" data-view="computo"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="M4 9h16M4 14h16M9 4v16"/></svg>Cómputo</button>
+      <button class="nav-btn" data-view="certificados"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6M9 11h6M9 15h3"/></svg>Certificados</button>
       <button class="nav-btn" data-view="presupuesto"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 9v11"/></svg>Presupuesto</button>
       <button class="nav-btn" data-view="proveedores"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9h18l-1.5 11h-15z"/><path d="M8 9V6a4 4 0 018 0v3"/></svg>Proveedores</button>
 
@@ -704,6 +752,7 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
             <div class="field"><label for="g-comprobante">Comprobante</label><input type="text" id="g-comprobante" placeholder="Factura A 0001-00012345"></div>
             <div class="field col-4"><label for="g-notas">Notas</label><input type="text" id="g-notas" placeholder="Opcional"></div>
           </div>
+          <div id="g-aviso-cert"></div>
           <div class="btn-row" style="margin-top:20px;">
             <button type="submit" class="btn btn-primary" id="btn-guardar">Guardar gasto</button>
             <button type="button" class="btn" id="btn-cancelar" style="display:none;">Cancelar edición</button>
@@ -718,10 +767,42 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
           <div class="field"><label for="f-financia">Financiado por</label><select id="f-financia"></select></div>
           <div class="field"><label for="f-desde">Desde</label><input type="date" id="f-desde"></div>
           <div class="field"><label for="f-hasta">Hasta</label><input type="date" id="f-hasta"></div>
+          <div class="field"><label for="f-cert">Mano de obra</label><select id="f-cert"><option value="">Todo</option><option value="sincert">Sin certificar</option><option value="cert">De certificados</option></select></div>
           <button class="btn btn-sm" id="f-limpiar" type="button">Limpiar</button>
         </div>
         <div class="table-wrap" id="tabla-gastos"></div>
       </div>
+    </section>
+
+    <!-- ===== CÓMPUTO ===== -->
+    <section id="view-computo" class="view">
+      <div class="topbar"><div><h1>Cómputo</h1><p>Ítems de la obra con sus cantidades. Cada ítem pertenece a un rubro y de ahí sale su avance físico.</p></div>
+        <div class="btn-row"><button class="btn btn-sm" id="cp-precargar">Precargar cómputo</button><button class="btn btn-sm" id="cp-importar">Importar Excel</button><button class="btn btn-sm" id="cp-exportar">Exportar Excel</button>
+          <input type="file" id="cp-file-pre" accept=".xlsx,.xls" style="display:none;"><input type="file" id="cp-file-imp" accept=".xlsx,.xls" style="display:none;"></div></div>
+      <div class="kpi-grid" id="kpi-computo"></div>
+      <div class="panel">
+        <div class="panel-head"><div><div class="panel-title">Ítems del cómputo</div><p class="panel-sub">Tab pasa a la celda siguiente y Enter en la última fila agrega otra. Podés pegar un bloque copiado de Excel con las columnas de la planilla de precarga.</p></div>
+          <div class="btn-row"><button class="btn btn-sm" id="cp-agregar">Agregar fila</button><button class="btn btn-sm" id="cp-descartar">Descartar cambios</button><button class="btn btn-primary btn-sm" id="cp-guardar">Guardar cómputo</button></div></div>
+        <div class="filter-row">
+          <div class="field"><label for="cp-f-buscar">Buscar</label><input type="text" id="cp-f-buscar" class="search-input" placeholder="Código, descripción, rubro…"></div>
+          <div class="field"><label for="cp-f-rubro">Rubro</label><select id="cp-f-rubro"></select></div>
+          <div class="field tilde" style="align-self:flex-end;padding-bottom:9px;"><input type="checkbox" id="cp-f-inactivos" checked><label for="cp-f-inactivos">Mostrar inactivos</label></div>
+        </div>
+        <div id="cp-estado"></div>
+        <div class="table-wrap" id="cp-grilla"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div><div class="panel-title">Mano de obra pagada contra avance</div><p class="panel-sub">Solo informativo: las diferencias son desvíos normales, no errores. El umbral de la señal se cambia en Datos y configuración.</p></div></div>
+        <div class="table-wrap" id="cp-contraste"></div>
+      </div>
+    </section>
+
+    <!-- ===== CERTIFICADOS ===== -->
+    <section id="view-certificados" class="view">
+      <div class="topbar"><div><h1>Certificados</h1><p>Certificados de mano de obra por contratista: cantidad ejecutada × precio</p></div>
+        <div class="btn-row"><button class="btn btn-primary btn-sm" id="ct-nuevo">Nuevo certificado</button><button class="btn btn-sm" id="ct-nuevo-hist">Nuevo certificado histórico</button></div></div>
+      <div id="ct-editor"></div>
+      <div class="panel"><div class="panel-head"><div><div class="panel-title">Certificados cargados</div><p class="panel-sub">Los borradores se ven acá pero no entran en totales, gráficos ni curva.</p></div></div><div class="table-wrap" id="ct-lista"></div></div>
     </section>
 
     <!-- ===== PRESUPUESTO ===== -->
@@ -798,6 +879,15 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
             <button class="btn" id="btn-exportar-json">Descargar respaldo JSON</button>
           </div>
         </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div><div class="panel-title">Cómputo y certificados</div><p class="panel-sub">Unidades de medida de los desplegables y señal de mano de obra pagada por delante del avance.</p></div></div>
+        <div class="form-grid">
+          <div class="field col-2"><label for="cfg-unidades">Unidades de medida</label><input type="text" id="cfg-unidades"><span class="hint">Separadas por coma.</span></div>
+          <div class="field tilde" style="align-self:flex-end;padding-bottom:9px;"><input type="checkbox" id="cfg-alerta-mo"><label for="cfg-alerta-mo">Señal "pagado por delante"</label></div>
+          <div class="field"><label for="cfg-alerta-umbral">Umbral %</label><input type="number" id="cfg-alerta-umbral" min="0" step="1"><span class="hint">Cuánto más de lo que indica el avance.</span></div>
+        </div>
+        <div class="btn-row" style="margin-top:14px;"><button class="btn btn-primary" id="btn-guardar-cfgcert">Guardar</button></div>
       </div>
       <div class="panel">
         <div class="panel-head"><div><div class="panel-title">Papelera</div><p class="panel-sub">Registro de gastos y aportes borrados. Es solo para consultar: queda constancia de qué era, cuánto, quién lo borró y cuándo.</p></div></div>
@@ -930,6 +1020,16 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
   </div>
 </div>
 
+<!-- modal del cómputo (dividir, historial) -->
+<div class="modal oculto" id="modal-cp">
+  <div class="modal-card" style="max-width:640px;">
+    <h3 id="cp-m-titulo"></h3>
+    <div id="cp-m-cuerpo"></div>
+    <div class="btn-row" style="margin-top:20px;"><button type="button" class="btn btn-primary" id="cp-m-ok">Aceptar</button><button type="button" class="btn" id="cp-m-cerrar">Cerrar</button></div>
+  </div>
+</div>
+<datalist id="cp-origenes"><option>APU</option><option>Contratista</option><option>Monto real</option><option>Dato propio</option><option>Revista</option><option>Obra referencia</option><option>Reparto</option><option>% s/obra</option><option>Presupuesto web</option></datalist>
+
 <!-- modal restaurar desde respaldo -->
 <div class="modal oculto" id="modal-restaurar">
   <div class="modal-card" style="max-width:600px;">
@@ -964,6 +1064,11 @@ footer.appfoot span{color:var(--n-300);margin:0 8px;}
    RioColorado, se conservan los últimos 10) con aviso cada 14 días
    para Julio, y "Restaurar desde respaldo" que solo agrega lo que
    falta. Se quitó el restaurar que reemplazaba todo.
+   Versión 7.0 · Cómputo por ítems y certificados de mano de obra:
+   el avance físico de los rubros con ítems sale de lo certificado,
+   cada certificado aprobado genera sus gastos (sin IVA, al MEP de su
+   fecha), certificados históricos para la MO ya cargada y número de
+   carga fijo.
    ========================================================= */
 
 /* =========================================================
@@ -1109,7 +1214,7 @@ function totalActualizadoGasto(g,hastaISO){ return (g.montoUSD||0)+interesGasto(
 
 const Store = {
   gastos:[], presupuesto:[], aportes:[], compromisos:{}, proveedores:[], abaucan:[], ivamov:[], papelera:[], config:Object.assign({},CFG_DEFECTO),
-  backup:{},
+  backup:{}, items:[], certificados:[], numeracion:{},
   /* config/backup: fecha del último respaldo y configuración, compartida entre dispositivos */
   guardarBackup(){ if(MODO_NUBE&&FB) return FB.guardarDoc('config','backup',this.backup); return Promise.resolve(); },
   guardarIvaMov(m){ if(m.id){ const i=this.ivamov.findIndex(x=>x.id===m.id); if(i>=0){ this.ivamov[i]=m; this._sync('ivamov',m); return m; } }
@@ -1121,8 +1226,13 @@ const Store = {
      varios rubros, una carga rápida) comparten lote y se muestran como una carga. */
   nuevoLote(){ return 'L'+Date.now().toString(36)+Math.random().toString(36).slice(2,5); },
   _sync(col,obj,borrar){ if(MODO_NUBE&&FB) FB.guardar(col,obj,borrar).catch(e=>toast('No se pudo sincronizar: '+e.message,true)); },
-  guardarGasto(g){ if(g.id){ const i=this.gastos.findIndex(x=>x.id===g.id); if(i>=0){ this.gastos[i]=g; this._sync('gastos',g); return g; } }
-    g.id=this.nuevoId(); this.gastos.push(g); this._sync('gastos',g); return g; },
+  /* Al editar se conservan los campos que el formulario no conoce (número de carga, lote, vínculo a certificado). */
+  guardarGasto(g){ if(g.id){ const i=this.gastos.findIndex(x=>x.id===g.id); if(i>=0){ const prev=this.gastos[i];
+      CAMPOS_META_GASTO.forEach(k=>{ if(g[k]===undefined&&prev[k]!==undefined) g[k]=prev[k]; });
+      if(g.nroCarga==null) g.nroCarga=nroCargaPara(g);
+      this.gastos[i]=g; this._sync('gastos',g); invalidarAvance(); return g; } }
+    if(g.nroCarga==null) g.nroCarga=nroCargaPara(g);
+    g.id=this.nuevoId(); this.gastos.push(g); this._sync('gastos',g); invalidarAvance(); return g; },
   borrarGasto(id){ this.gastos=this.gastos.filter(g=>g.id!==id); this._sync('gastos',{id},true); },
   /* Lo borrado se archiva antes de sacarlo: la papelera es solo de consulta,
      queda registro de qué era, cuánto, quién lo borró y cuándo. */
@@ -1484,7 +1594,7 @@ function resumenMacro(){
   Store.gastos.forEach(g=>{ const mk=macroDe(g.rubro); if(!out[mk])return; const fam=familiaTipo(g.tipo),v=g.montoUSD||0;
     out[mk].eje+=v; if(fam==='mo')out[mk].ejeMO+=v; else if(fam==='mat')out[mk].ejeMat+=v; else out[mk].ejeOtros+=v; });
   MACRORUBROS.forEach(m=>{ let pesoTot=0,avPond=0;
-    m.rubros.forEach(r=>{ const p=Store.presupuesto.find(x=>x.rubro===r); if(p){ const peso=objetivoRubro(p)||1; pesoTot+=peso; avPond+=(p.avance||0)*peso; out[m.nombre].rubros.push(r); } });
+    m.rubros.forEach(r=>{ const p=Store.presupuesto.find(x=>x.rubro===r); if(p){ const peso=objetivoRubro(p)||1; pesoTot+=peso; avPond+=avanceDe(p)*peso; out[m.nombre].rubros.push(r); } });
     out[m.nombre].avanceReal=pesoTot?avPond/pesoTot:0; });
   return MACRORUBROS.map(m=>out[m.nombre]);
 }
@@ -1888,7 +1998,7 @@ async function compararAbaucan(){
       return { rubro:a.rubro,
         abaucan_usd_m2:{ materiales:r2((a.mat||0)/supA), mano_de_obra:r2((a.mo||0)/supA), generales:r2((a.gen||0)/supA), total:r2(totalAbaucanRubro(a)/supA) },
         rio_colorado_usd_m2:{ materiales:r2(e.mat/PROYECTO.superficie), mano_de_obra:r2(e.mo/PROYECTO.superficie), generales:r2(e.gen/PROYECTO.superficie), total:r2((e.mat+e.mo+e.gen)/PROYECTO.superficie) },
-        rio_colorado_avance_fisico_pct:p?Math.round(p.avance||0):0,
+        rio_colorado_avance_fisico_pct:p?Math.round(avanceDe(p)):0,
         rio_colorado_objetivo_usd_m2:p?r2(objetivoRubro(p)/PROYECTO.superficie):null };
     });
     const totA={ materiales:r2(totalAbaucanFamilia('mat')/supA), mano_de_obra:r2(totalAbaucanFamilia('mo')/supA), generales:r2(totalAbaucanFamilia('gen')/supA) };
@@ -1980,7 +2090,7 @@ function renderMacro(){
       const ejeR=Store.gastos.filter(g=>g.rubro===r).reduce((s,g)=>s+(g.montoUSD||0),0);
       if(objR===0&&ejeR===0)return; const pr=objR?ejeR/objR*100:0;
       html+='<tr><td style="padding-left:26px;">'+esc(r)+'</td><td class="money" style="font-weight:400;">'+fmtUSD(objR)+'</td><td class="money" style="font-weight:400;">'+fmtUSD(ejeR)+'</td>'
-        +'<td style="font-size:12px;color:'+(pr>100?'#B3541E':'var(--gris)')+'">'+fmtPct(pr)+'</td><td style="font-size:12px;color:var(--gris);">'+(p?fmtPct(p.avance||0):'—')+'</td><td class="money" style="font-weight:400;">'+fmtUSD(objR-ejeR)+'</td></tr>'; });
+        +'<td style="font-size:12px;color:'+(pr>100?'#B3541E':'var(--gris)')+'">'+fmtPct(pr)+'</td><td style="font-size:12px;color:var(--gris);">'+(p?fmtPct(avanceDe(p)):'—')+'</td><td class="money" style="font-weight:400;">'+fmtUSD(objR-ejeR)+'</td></tr>'; });
   });
   if(tot.obj||tot.eje) html+='<tr class="total-row"><td>Total obra</td><td class="money">'+fmtUSD(tot.obj)+'</td><td class="money">'+fmtUSD(tot.eje)+'</td><td>'+fmtPct(tot.obj?tot.eje/tot.obj*100:0)+'</td><td></td><td class="money">'+fmtUSD(tot.obj-tot.eje)+'</td></tr>';
   document.getElementById('tabla-macro').innerHTML=(tot.obj||tot.eje)?html+'</tbody></table>':'<div class="empty"><strong>Sin datos</strong>Cargá objetivos en el presupuesto y gastos.</div>';
@@ -2160,6 +2270,7 @@ function limpiarFormGasto(){
   actualizarCamposFiscales();
   document.getElementById('form-titulo').textContent='Nuevo gasto'; document.getElementById('btn-guardar').textContent='Guardar gasto';
   document.getElementById('btn-cancelar').style.display='none'; buscarCotizacion(hoyISO(),'g-cot','g-cot-hint');
+  bloquearFormGasto(null);
 }
 function editarGasto(id){ const g=Store.gastos.find(x=>x.id===id); if(!g)return;
   asegurarProveedor(g.proveedor,'');
@@ -2178,7 +2289,7 @@ function editarGasto(id){ const g=Store.gastos.find(x=>x.id===id); if(!g)return;
   document.getElementById('g-perc-gan').value=g.percGan||''; document.getElementById('g-otros').value=g.otrosTribARS||'';
   actualizarCamposFiscales();
   document.getElementById('form-titulo').textContent='Editando un gasto'; document.getElementById('btn-guardar').textContent='Guardar cambios';
-  document.getElementById('btn-cancelar').style.display='inline-flex'; recalcularUSD(); irA('gastos'); window.scrollTo({top:0,behavior:'smooth'}); }
+  document.getElementById('btn-cancelar').style.display='inline-flex'; recalcularUSD(); bloquearFormGasto(gastoBloqueado(g)?g:null); irA('gastos'); window.scrollTo({top:0,behavior:'smooth'}); }
 function filtrarGastos(){
   const q=(document.getElementById('f-buscar').value||'').trim().toLowerCase();
   const mac=document.getElementById('f-macro').value,fin=document.getElementById('f-financia').value;
@@ -2186,6 +2297,7 @@ function filtrarGastos(){
   return Store.gastos.filter(g=>{
     if(mac&&macroDe(g.rubro)!==mac)return false;
     if(fin&&(g.financia||FONDO)!==fin)return false;
+    const fc=(document.getElementById('f-cert')||{}).value; if(fc==='sincert'&&!moSinCertificar(g))return false; if(fc==='cert'&&!g.certificadoId)return false;
     if(d&&g.fecha<d)return false; if(h&&g.fecha>h)return false;
     if(q){ const b=[g.proveedor,g.concepto,g.rubro,g.tipo,g.comprobante,g.notas,g.cargadoPor].join(' ').toLowerCase(); if(b.indexOf(q)===-1)return false; }
     return true;
@@ -2219,20 +2331,11 @@ function claveCarga(g){
   if(g.lote) return 'L:'+g.lote;
   return 'K:'+(g.proveedor||'')+'|'+(g.fecha||'')+'|'+(g.comprobante||'');
 }
-/* Numeración correlativa por orden real de creación, estable entre sesiones:
-   se numeran todas las cargas de la obra, no solo las que pasan el filtro. */
-function numerosDeCarga(){
-  const orden=Store.gastos.map((g,i)=>({g,i}))
-    .sort((a,b)=>{ const f=(a.g.fecha||'').localeCompare(b.g.fecha||''); return f!==0?f:a.i-b.i; });
-  const num={}; let n=0;
-  orden.forEach(({g})=>{ const k=claveCarga(g); if(num[k]===undefined) num[k]=++n; });
-  return num;
-}
 function agruparCargas(filas){
   const mapa={};
   filas.forEach(g=>{ const k=claveCarga(g);
     if(!mapa[k]) mapa[k]={clave:k,gastos:[],fecha:g.fecha,proveedor:g.proveedor,comprobante:g.comprobante||'',
-                          financia:g.financia||FONDO,fiscal:g.fiscal,cargadoPor:g.cargadoPor||'—'};
+                          financia:g.financia||FONDO,fiscal:g.fiscal,cargadoPor:g.cargadoPor||'—',certificadoId:g.certificadoId||''};
     mapa[k].gastos.push(g);
   });
   return Object.values(mapa).map(c=>{
@@ -2256,13 +2359,14 @@ function renderTablaGastos(){
   let html='<table><thead><tr><th style="width:52px;">N°</th><th>Fecha</th><th>Rubro</th><th>Tipo</th><th>Proveedor</th><th>Concepto</th><th>Financia</th><th class="money">USD</th><th class="money">IVA</th><th>Fiscal</th><th class="money">ARS</th><th>Carga</th><th></th></tr></thead><tbody>';
   const tagFiscal=f=>f===FISCAL_DISCRIMINADO?'<span class="tag verde">A</span>':(f===FISCAL_INCLUIDO?'<span class="tag marron">B</span>':(f===FISCAL_C?'<span class="tag marron">C</span>':'<span class="tag">S/F</span>'));
   const btns=g=>'<td style="white-space:nowrap;text-align:right;"><button class="btn btn-ghost btn-sm" data-editar="'+esc(g.id)+'">Editar</button>'
-    +'<button class="btn btn-ghost btn-sm" data-borrar="'+esc(g.id)+'" data-paso="0" style="color:#9E2B25;">Borrar</button></td>';
+    +(gastoBloqueado(g)?'<span class="tag" title="Se borra reabriendo el certificado">Desde cert.</span>':'<button class="btn btn-ghost btn-sm" data-borrar="'+esc(g.id)+'" data-paso="0" style="color:#9E2B25;">Borrar</button>')+'</td>';
+  const tagCert=g=>g&&g.certificadoId?'<button type="button" class="tag verde g-tag-cert" data-vercert="'+esc(g.certificadoId)+'" title="Abrir el certificado">'+esc(etiquetaCert(certDeGasto(g)))+'</button>':'';
   cargas.forEach(c=>{
     const n=nums[c.clave]||'—';
     if(c.gastos.length===1){
       const g=c.gastos[0];
       html+='<tr><td style="font-family:\'Montserrat\',sans-serif;font-weight:700;color:var(--gris);">'+n+'</td>'
-        +'<td>'+fmtFecha(g.fecha)+'</td><td>'+esc(g.rubro)+'</td><td><span class="tag">'+esc(g.tipo||'—')+'</span></td><td>'+esc(g.proveedor)+'</td><td>'+esc(g.concepto)+'</td>'
+        +'<td>'+fmtFecha(g.fecha)+'</td><td>'+esc(g.rubro)+'</td><td><span class="tag">'+esc(g.tipo||'—')+'</span></td><td>'+esc(g.proveedor)+'</td><td>'+esc(g.concepto)+tagCert(g)+'</td>'
         +'<td><span class="tag '+(g.financia&&g.financia!==FONDO?'socio':'')+'">'+esc(g.financia||FONDO)+'</span></td>'
         +'<td class="money">'+(g.montoUSD?fmtUSD(g.montoUSD,2):'—')+'</td>'
         +'<td class="money" style="font-weight:400;">'+(ivaUSDDeGasto(g)?fmtUSD(ivaUSDDeGasto(g),2):'—')+'</td>'
@@ -2272,7 +2376,7 @@ function renderTablaGastos(){
     } else {
       html+='<tr class="carga-head" data-carga="'+esc(c.clave)+'"><td style="font-family:\'Montserrat\',sans-serif;font-weight:700;color:var(--gris);">'+n+'</td>'
         +'<td>'+fmtFecha(c.fecha)+'</td><td colspan="2" style="color:var(--gris);font-size:12px;">'+esc(c.rubros.slice(0,2).join(', '))+(c.rubros.length>2?' +'+(c.rubros.length-2):'')+'</td>'
-        +'<td>'+esc(c.proveedor)+'</td><td>'+esc(c.concepto)+(c.comprobante?'<div style="font-size:11.5px;color:var(--n-500);">'+esc(c.comprobante)+'</div>':'')+'</td>'
+        +'<td>'+esc(c.proveedor)+'</td><td>'+esc(c.concepto)+tagCert(c.gastos.find(g=>g.certificadoId))+(c.comprobante?'<div style="font-size:11.5px;color:var(--n-500);">'+esc(c.comprobante)+'</div>':'')+'</td>'
         +'<td><span class="tag '+(c.financia&&c.financia!==FONDO?'socio':'')+'">'+esc(c.financia||FONDO)+'</span></td>'
         +'<td class="money">'+fmtUSD(c.usd,2)+'</td><td class="money" style="font-weight:400;">'+(c.iva?fmtUSD(c.iva,2):'—')+'</td>'
         +'<td>'+tagFiscal(c.fiscal)+'</td>'
@@ -2299,6 +2403,7 @@ function renderTablaGastos(){
     cont.querySelectorAll('[data-hijo="'+CSS.escape(k)+'"]').forEach(h=>h.classList.toggle('oculta'));
   }));
   cont.querySelectorAll('[data-editar]').forEach(b=>b.addEventListener('click',()=>editarGasto(b.dataset.editar)));
+  cont.querySelectorAll('[data-vercert]').forEach(b=>b.addEventListener('click',e=>{ e.stopPropagation(); abrirCertificado(b.dataset.vercert); }));
   cont.querySelectorAll('[data-borrar]').forEach(b=>b.addEventListener('click',()=>confirmarBorrado(b,()=>{
     const g=Store.gastos.find(x=>x.id===b.dataset.borrar); if(!g) return;
     Store.mandarAPapelera('gasto',g); Store.borrarGasto(b.dataset.borrar); toast('Gasto borrado'); renderTodo();
@@ -2312,13 +2417,13 @@ function renderPapelera(){
   let h='<table><thead><tr><th>Borrado el</th><th>Por</th><th>Qué era</th><th>Detalle</th><th class="money">USD</th><th class="money">ARS</th></tr></thead><tbody>';
   items.forEach(r=>{
     const d=r.datos||{};
-    const detalle = r.tipo==='aporte'
+    const detalle = r.tipo==='certificado' ? ('Certificado N° '+esc(d.numero||'—')+' de '+esc(d.contratista||'—')+' del '+fmtFecha(d.fecha)) : r.tipo==='aporte'
       ? ('Aporte de '+esc(d.socio||'—')+(d.marcaton?' (MARCATON)':'')+' del '+fmtFecha(d.fecha))
       : (esc(d.concepto||'(sin concepto)')+' · '+esc(d.rubro||'—')+' · '+esc(d.proveedor||'—')+' del '+fmtFecha(d.fecha));
     const fh=r.borradoEl?new Date(r.borradoEl):null;
     h+='<tr><td style="font-size:12px;">'+(fh?fmtFecha(r.borradoEl.slice(0,10))+' '+String(fh.getHours()).padStart(2,'0')+':'+String(fh.getMinutes()).padStart(2,'0'):'—')+'</td>'
       +'<td style="font-size:12px;color:var(--n-500);">'+esc(r.borradoPor||'—')+'</td>'
-      +'<td><span class="tag '+(r.tipo==='aporte'?'verde':'marron')+'">'+(r.tipo==='aporte'?'Aporte':'Gasto')+'</span></td>'
+      +'<td><span class="tag '+(r.tipo==='aporte'?'verde':(r.tipo==='certificado'?'':'marron'))+'">'+(r.tipo==='aporte'?'Aporte':(r.tipo==='certificado'?'Certificado':'Gasto'))+'</span></td>'
       +'<td style="font-size:12.5px;">'+detalle+'</td>'
       +'<td class="money">'+(d.montoUSD?fmtUSD(d.montoUSD,2):'—')+'</td>'
       +'<td class="money" style="font-weight:400;color:var(--n-500);">'+(d.montoARS?fmtARS(d.montoARS,2):'—')+'</td></tr>';
@@ -2377,12 +2482,12 @@ function renderProveedoresABM(){
 /* ---------- PRESUPUESTO ---------- */
 function limpiarFormPresu(){ const f=document.getElementById('form-presu'); f.reset(); document.getElementById('p-id').value='';
   document.getElementById('p-cancelar').style.display='none'; const hoy=hoyISO().slice(0,7);
-  document.getElementById('p-desde').value=hoy; document.getElementById('p-hasta').value=hoy; }
+  document.getElementById('p-desde').value=hoy; document.getElementById('p-hasta').value=hoy; actualizarCampoAvance(); }
 function editarPresu(id){ const p=Store.presupuesto.find(x=>x.id===id); if(!p)return;
   document.getElementById('p-id').value=p.id; document.getElementById('p-rubro').value=p.rubro; document.getElementById('p-mo').value=p.objMO||'';
   document.getElementById('p-mat').value=p.objMat||''; document.getElementById('p-otros').value=p.objOtros||'';
   document.getElementById('p-desde').value=p.mesDesde; document.getElementById('p-hasta').value=p.mesHasta;
-  document.getElementById('p-avance').value=p.avance||''; document.getElementById('p-notas').value=p.notas||'';
+  document.getElementById('p-avance').value=p.avance||''; document.getElementById('p-notas').value=p.notas||''; actualizarCampoAvance();
   document.getElementById('p-cancelar').style.display='inline-flex'; window.scrollTo({top:0,behavior:'smooth'}); }
 function renderPresupuesto(){
   const total=totalPresupuesto(),ejec=totalEjecutado();
@@ -2416,9 +2521,10 @@ function renderPresupuesto(){
         +'<td class="money" style="font-weight:400;">'+(p.objMO?fmtUSD(p.objMO):'—')+'</td><td class="money" style="font-weight:400;">'+(p.objMat?fmtUSD(p.objMat):'—')+'</td><td class="money" style="font-weight:400;">'+(p.objOtros?fmtUSD(p.objOtros):'—')+'</td>'
         +'<td class="money">'+fmtUSD(obj)+'</td>'
         +'<td style="font-size:12px;color:var(--gris);">'+incid(obj)+'</td>'
-        +'<td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:'+Math.min(p.avance||0,100).toFixed(0)+'%"></div></div><span style="font-size:11px;color:var(--verde);min-width:30px;text-align:right;">'+fmtPct(p.avance||0)+'</span></div></td>'
+        +'<td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:'+Math.min(avanceDe(p),100).toFixed(0)+'%"></div></div><span style="font-size:11px;color:var(--verde);min-width:30px;text-align:right;">'+fmtPct(avanceDe(p))+'</span></div>'
+          +(avanceRubroAuto(p.rubro)?'<button type="button" class="tag verde p-auto" data-pitems="'+esc(p.rubro)+'" title="Sale de los ítems del cómputo">auto ▾</button>':'')+'</td>'
         +'<td class="money">'+fmtUSD(e)+'</td><td class="money" style="color:'+(obj-e<0?'#B3541E':'inherit')+'">'+fmtUSD(obj-e)+'</td>'
-        +'<td style="white-space:nowrap;text-align:right;"><button class="btn btn-ghost btn-sm" data-pedit="'+esc(p.id)+'">Editar</button><button class="btn btn-ghost btn-sm" data-pdel="'+esc(p.id)+'" style="color:#9E2B25;">Borrar</button></td></tr>';
+        +'<td style="white-space:nowrap;text-align:right;"><button class="btn btn-ghost btn-sm" data-pedit="'+esc(p.id)+'">Editar</button><button class="btn btn-ghost btn-sm" data-pdel="'+esc(p.id)+'" style="color:#9E2B25;">Borrar</button></td></tr>'+filasItemsPresu(p);
     });
   });
   html+='<tr class="total-row"><td>Total obra</td>'
@@ -2427,6 +2533,7 @@ function renderPresupuesto(){
     +'<td class="money">'+fmtUSD(ejec)+'</td><td class="money">'+fmtUSD(total-ejec)+'</td><td></td></tr></tbody></table>';
   cont.innerHTML=html;
   cont.querySelectorAll('[data-pedit]').forEach(b=>b.addEventListener('click',()=>editarPresu(b.dataset.pedit)));
+  cont.querySelectorAll('[data-pitems]').forEach(b=>b.addEventListener('click',()=>cont.querySelectorAll('tr[data-pitrubro="'+CSS.escape(b.dataset.pitems)+'"]').forEach(tr=>tr.classList.toggle('oculta'))));
   cont.querySelectorAll('[data-pdel]').forEach(b=>b.addEventListener('click',()=>{ const p=Store.presupuesto.find(x=>x.id===b.dataset.pdel);
     if(p&&confirm('¿Borrar el rubro "'+p.rubro+'" del presupuesto?')){ Store.borrarPresu(b.dataset.pdel); toast('Rubro borrado'); renderTodo(); } }));
 }
@@ -2677,7 +2784,7 @@ function renderAbaucan(){
     tRC.mat+=e.mat; tRC.mo+=e.mo; tRC.gen+=e.gen;
     const aT=totalAbaucanRubro(a), rT=e.mat+e.mo+e.gen;
     const am=aT/supA, rc=rT/PROYECTO.superficie;
-    const p=Store.presupuesto.find(x=>x.rubro===a.rubro); const av=p?(p.avance||0):0;
+    const p=Store.presupuesto.find(x=>x.rubro===a.rubro); const av=p?avanceDe(p):0;
     const dif=rc-am; const juzgable=av>=50;
     const c=(v,sup)=>'<td class="money" style="font-weight:400;">'+(v?fmtUSD(v/sup,1):'—')+'</td>';
     html+='<tr><td>'+esc(a.rubro)+(a.notas?'<div style="font-size:11.5px;color:var(--n-500);">'+esc(a.notas)+'</div>':'')+'</td>'
@@ -2814,7 +2921,7 @@ function abrirModalIva(id){
 function usosDeRubro(r){
   return { gastos:Store.gastos.filter(g=>g.rubro===r).length,
            presu:Store.presupuesto.filter(p=>p.rubro===r&&objetivoRubro(p)>0).length,
-           abaucan:Store.abaucan.filter(a=>a.rubro===r).length };
+           abaucan:Store.abaucan.filter(a=>a.rubro===r).length, items:Store.items.filter(i=>i.rubro===r).length };
 }
 function abrirModalRubros(){
   poblarSelect(document.getElementById('rb-macro'),MACRORUBROS.map(m=>m.nombre),'Elegí un macrorubro');
@@ -2829,7 +2936,7 @@ function renderRubrosABM(){
     if(!m.rubros.length) h+='<tr><td colspan="4" style="padding-left:26px;color:var(--n-500);font-size:12.5px;">Sin rubros</td></tr>';
     m.rubros.forEach(r=>{
       const u=usosDeRubro(r); const p=Store.presupuesto.find(x=>x.rubro===r); const obj=p?objetivoRubro(p):0;
-      const bloqueado=u.gastos>0||obj>0;
+      const bloqueado=u.gastos>0||obj>0||u.items>0;
       h+='<tr><td style="padding-left:26px;">'+esc(r)+'</td>'
         +'<td style="font-size:12.5px;color:'+(u.gastos?'var(--tinta)':'var(--n-500)')+'">'+(u.gastos||'—')+'</td>'
         +'<td class="money" style="font-weight:400;">'+(obj?fmtUSD(obj):'—')+'</td>'
@@ -2855,6 +2962,7 @@ function eliminarRubro(r){
   const u=usosDeRubro(r); const p=Store.presupuesto.find(x=>x.rubro===r); const obj=p?objetivoRubro(p):0;
   if(u.gastos>0){ toast('No se puede: "'+r+'" tiene '+u.gastos+' gasto(s) cargados',true); return; }
   if(obj>0){ toast('No se puede: "'+r+'" tiene presupuesto cargado. Ponelo en cero primero.',true); return; }
+  if(u.items>0){ toast('No se puede: "'+r+'" tiene '+u.items+' ítem(s) del cómputo.',true); return; }
   if(!confirm('¿Eliminar el rubro "'+r+'"?'))return;
   MACRORUBROS.forEach(m=>{ m.rubros=m.rubros.filter(x=>x!==r); });
   // limpiar registros vacíos asociados
@@ -3151,7 +3259,7 @@ function exportarExcel(){
       return [p.rubro,macroDe(p.rubro),p.objMO||0,p.objMat||0,p.objOtros||0,ac,
         tiene?(p.lb.mo||0):'',tiene?(p.lb.mat||0):'',tiene?(p.lb.otros||0):'',tiene?lb:'',
         tiene?Number((ac-lb).toFixed(2)):'',(tiene&&lb)?Number(((ac-lb)/lb*100).toFixed(1)):'',
-        p.avance||0,p.mesDesde,p.mesHasta,p.notas||'']; }));
+        Number(avanceDe(p).toFixed(1)),p.mesDesde,p.mesHasta,p.notas||'']; }));
   const fA=[['Fecha','Socio','Medio','MARCATON','Pagado ARS','Reintegro ARS','Beneficio ARS','Monto ARS','Cotizacion','Monto USD','Notas']]
     .concat(Store.aportes.map(a=>[a.fecha,a.socio,a.medio||'',a.marcaton?'Si':'No',
       a.marcaton?brutoARSAporte(a):'',
@@ -3256,8 +3364,15 @@ function exportarExcel(){
         r.tipo==='aporte'?(d.marcaton?'MARCATON':(d.medio||'')):(d.concepto||''),
         d.montoARS||'',d.montoUSD?Number(d.montoUSD.toFixed(2)):'']; }));
 
+  const fCp=[['Codigo','Macrorubro','Rubro','Descripcion','Unidad','Cantidad computo','MO presup. ARS','MO presup. USD','Activo','Certificado acumulado','Avance %','Certificado ARS']]
+    .concat(Store.items.slice().sort((a,b)=>natCmp(a.codigo,b.codigo)).map(it=>{ const a=avanceItem(it.id);
+      return [it.codigo||'',macroDe(it.rubro),it.rubro||'',it.descripcion||'',it.unidad||'',it.cantidadComputo==null?'':it.cantidadComputo,it.moPresupARS==null?'':it.moPresupARS,
+        it.moPresupUSD==null?'':it.moPresupUSD,it.activo===false?'No':'Si',Number(a.acc.toFixed(2)),Number((a.pct*100).toFixed(1)),Number(a.acumARS.toFixed(2))]; }));
+  const fCt=[['Certificado','Contratista','Fecha','Estado','Historico','Codigo','Item','Unidad','Tipo de precio','Cantidad','Precio ARS','Monto ARS','Avance manual %']];
+  Store.certificados.slice().sort(ordenCert).forEach(c=>(c.renglones||[]).forEach(r=>{ const it=itemPorId(r.itemId);
+    fCt.push([c.numero,c.contratista,c.fecha,c.estado,c.historico?'Si':'No',it?it.codigo||'':'',it?it.descripcion:'',r.unidad||'',r.tipoPrecio||'unitario',r.cantidad==null?'':r.cantidad,r.precio==null?'':r.precio,r.montoARS||0,r.avanceManual==null?'':r.avanceManual]); }));
   if(hayXLSX()){ const wb=XLSX.utils.book_new();
-    [['Gastos',fG],['Presupuesto',fP],['Aportes',fA],['Socios',fS],['Financiero',fFIN],['MARCATON',fMK],['IVA',fIVA],['Proveedores',fPr],['Curva',fC],['Abaucan',fAb],['Papelera',fPap]]
+    [['Gastos',fG],['Presupuesto',fP],['Aportes',fA],['Socios',fS],['Financiero',fFIN],['MARCATON',fMK],['IVA',fIVA],['Proveedores',fPr],['Curva',fC],['Abaucan',fAb],['Papelera',fPap],['Computo',fCp],['Certificados',fCt]]
       .forEach(([n,d])=>XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(d),n));
     XLSX.writeFile(wb,'Rio_Colorado_Gestion_'+hoyISO()+'.xlsx');
   } else descargarArchivo('Rio_Colorado_Gastos_'+hoyISO()+'.csv','\uFEFF'+fG.map(f=>f.join(';')).join('\n'),'text/csv;charset=utf-8');
@@ -3268,7 +3383,7 @@ function exportarExcel(){
    Todo corre en el navegador: no hay servidor ni costo. */
 const RESPALDO_FORMATO='magna-rio-colorado';
 const RESPALDO_VERSION=2;
-const APP_VERSION='6.6';
+const APP_VERSION='7.0';
 const RESPALDO_CORREO='juliomonti91@gmail.com';   // solo esta cuenta respalda en Drive
 const RESPALDO_CARPETA='RioColorado';
 const RESPALDO_PREFIJO='Rio_Colorado_respaldo_';
@@ -3285,6 +3400,7 @@ function armarRespaldo(){
     proyecto:PROYECTO, exportado:new Date().toISOString(), exportadoPor:USUARIO?USUARIO.nombre:'',
     gastos:Store.gastos, presupuesto:Store.presupuesto, aportes:Store.aportes, compromisos:Store.compromisos,
     proveedores:Store.proveedores, abaucan:Store.abaucan, ivamov:Store.ivamov, papelera:Store.papelera,
+    items:Store.items, certificados:Store.certificados,
     macrorubros:estructuraActual(), config:Store.config };
 }
 function exportarJSON(){
@@ -3570,6 +3686,8 @@ function analizarRespaldo(d){
   porRubro('abaucan','Rubros de Abaucán');
   porId('ivamov','Movimientos de IVA');
   porId('papelera','Registros de la papelera');
+  porId('items','Ítems del cómputo');
+  porId('certificados','Certificados');
   // Estructura: rubros del respaldo que hoy no están
   const macrosResp=Array.isArray(d.macrorubros)?d.macrorubros.filter(m=>m&&m.nombre&&Array.isArray(m.rubros)):[];
   const rubrosHoy=new Set(RUBROS.map(normNom));
@@ -3600,7 +3718,9 @@ function detalleRestaurar(cat,lista){
     if(cat==='presupuesto'||cat==='abaucan') return esc(x.rubro||'—');
     if(cat==='proveedores') return esc(x.nombre||'—');
     if(cat==='ivamov') return fmtFecha(x.fecha)+' · '+esc(x.proyecto||'—');
-    if(cat==='papelera') return esc(x.tipo==='aporte'?'Aporte':'Gasto')+' borrado el '+fmtFecha(String(x.borradoEl||'').slice(0,10))+' por '+esc(x.borradoPor||'—');
+    if(cat==='papelera') return esc(x.tipo==='aporte'?'Aporte':(x.tipo==='certificado'?'Certificado':'Gasto'))+' borrado el '+fmtFecha(String(x.borradoEl||'').slice(0,10))+' por '+esc(x.borradoPor||'—');
+    if(cat==='items') return esc(nombreItem(x))+' <span style="color:var(--n-500);">('+esc(x.rubro||'—')+')</span>';
+    if(cat==='certificados') return 'N° '+esc(x.numero)+' · '+esc(x.contratista||'—')+' · '+fmtFecha(x.fecha)+' · '+esc(x.estado||'');
     if(cat==='rubros') return esc(x.rubro)+' <span style="color:var(--n-500);">('+esc(x.macro)+')</span>';
     if(cat==='compromisos') return esc(x.socio)+' · '+fmtARS(x.monto);
     if(cat==='config') return esc(NOMBRE_CFG[x.campo]||x.campo)+(typeof x.valor==='object'?'':': '+esc(x.valor));
@@ -3655,7 +3775,7 @@ async function aplicarRestauracion(){
   const tomar=clave=>{ const c=plan.cats.find(x=>x.clave===clave); if(!c) return [];
     return (sel[clave]?c.nuevos:[]).concat(sel.inclPapelera&&(clave==='gastos'||clave==='aportes')?c.excl:[]); };
   const copia=o=>JSON.parse(JSON.stringify(o));
-  const cambios={}; ['gastos','aportes','presupuesto','proveedores','abaucan','ivamov','papelera'].forEach(k=>{
+  const cambios={}; ['gastos','aportes','presupuesto','proveedores','abaucan','ivamov','papelera','items','certificados'].forEach(k=>{
     cambios[k]=tomar(k).map(x=>{ const y=copia(x); if(!y.id) y.id=Store.nuevoId(); return y; }); });
   // Estructura: rubros elegidos + los que necesiten los registros recuperados
   const macroDeResp=r=>{ const m=plan.macrosResp.find(mm=>mm.rubros.some(x=>normNom(x)===normNom(r))); return m?m.nombre:''; };
@@ -3731,6 +3851,996 @@ function restaurarDesdeDrive(){
   }).catch(e=>{
     document.getElementById('rest-cuerpo').innerHTML='<div class="aviso rojo" style="margin:0;"><div><strong>No se pudo abrir Drive.</strong> '+esc(e.message||String(e))+'</div></div>';
   });
+}
+
+/* =========================================================
+   CÓMPUTO Y CERTIFICADOS (v7.0) · datos y cálculo
+   Jerarquía: Macrorubro → Rubro → Ítem del cómputo.
+   Los rubros se identifican por su nombre (no se pueden renombrar).
+   ========================================================= */
+const UNIDADES_MEDIDA_BASE=['gl','un','m','m²','m³','kg','mes','día','jornal','viaje'];
+const ORIGENES_PRECIO=['APU','Contratista','Monto real','Dato propio','Revista','Obra referencia','Reparto','% s/obra','Presupuesto web'];
+const ESTADOS_PAGO=['Pendiente','Comprometido','Pagado'];
+/* Campos que el formulario de gastos no conoce y que nunca se pierden al editar */
+const CAMPOS_META_GASTO=['nroCarga','lote','honorario','origen','certificadoId','certNumero','itemId','cantidad','unidadMedida','tipoPrecio','puARS','certVinculos'];
+
+function unidadesMedida(){ const u=Store.config.unidadesMedida; return Array.isArray(u)&&u.length?u:UNIDADES_MEDIDA_BASE; }
+function cfgAlertaMO(){ const u=Store.config.alertaMOUmbral; return { activa:Store.config.alertaMOActiva!==false, umbral:(u===undefined||u===null||u==='')?15:Math.max(0,Number(u)||0) }; }
+/* Números como los escribe Excel en castellano: "1.509,95", "421,19", "1509.95" */
+function numAR(v){
+  if(v===undefined||v===null) return null;
+  if(typeof v==='number') return isFinite(v)?v:NaN;
+  let s=String(v).trim().replace(/US\$|\$|\s| /g,'');
+  if(s===''||s==='—'||s==='-') return null;
+  if(s.indexOf(',')>=0) s=s.replace(/\./g,'').replace(',','.');
+  else if(/^-?\d{1,3}(\.\d{3})+$/.test(s)) s=s.replace(/\./g,'');
+  const x=Number(s); return isFinite(x)?x:NaN;
+}
+const redondear=(x,d)=>{ const f=Math.pow(10,d===undefined?2:d); return Math.round((Number(x)||0)*f)/f; };
+const fmtCant=n=>(n===null||n===undefined||n==='')?'—':new Intl.NumberFormat('es-AR',{maximumFractionDigits:2}).format(n);
+const natCmp=(a,b)=>String(a||'').localeCompare(String(b||''),'es',{numeric:true,sensitivity:'base'});
+const sinTildes=s=>String(s||'').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ');
+/* Rubro escrito a mano o pegado → nombre exacto de la estructura (o '' si no existe) */
+function rubroCanonico(n){ const k=sinTildes(n); if(!k) return ''; return RUBROS.find(r=>sinTildes(r)===k)||''; }
+function macroCanonico(n){ const k=sinTildes(n); if(!k) return ''; const m=MACRORUBROS.find(x=>sinTildes(x.nombre)===k); return m?m.nombre:''; }
+
+function itemPorId(id){ return Store.items.find(i=>i.id===id); }
+function itemsActivos(){ return Store.items.filter(i=>i.activo!==false); }
+function nombreItem(it){ return it?((it.codigo?it.codigo+' · ':'')+(it.descripcion||'')):'(ítem borrado)'; }
+function tieneBase(it){ return !!it && Number(it.cantidadComputo)>0; }
+/* Un renglón mueve la cantidad del ítem solo si: el ítem tiene cantidad base,
+   la unidad del renglón es la del cómputo y el precio es unitario. */
+function esCompatible(it,r){ return tieneBase(it) && (r.unidad||'')===(it.unidad||'') && r.tipoPrecio!=='global'; }
+function cotDeRenglon(c,r){ return Number(r.cotizacion)||Number(c.mep)||0; }
+function ordenCert(a,b){
+  return (a.fecha||'').localeCompare(b.fecha||'') || String(a.aprobadoEl||'9999').localeCompare(String(b.aprobadoEl||'9999'))
+    || (Number(a.numero)||0)-(Number(b.numero)||0) || String(a.id||'').localeCompare(String(b.id||''));
+}
+function certsAprobados(){ return Store.certificados.filter(c=>c.estado==='aprobado').slice().sort(ordenCert); }
+
+/* ---- Avance físico: por ítem (cronológico, el último dato manda) y por rubro (ponderado por MO presupuestada) ---- */
+let MEMO_AV=null;
+function invalidarAvance(){ MEMO_AV=null; }
+function recorrerItem(e,it,c,r){
+  const cot=cotDeRenglon(c,r), m=Number(r.montoARS)||0;
+  e.renglones++; e.acumARS+=m; if(cot) e.acumUSD+=m/cot;
+  if(esCompatible(it,r)){ e.acc+=Number(r.cantidad)||0; e.pct=Math.min(1,Math.max(0,e.acc/Number(it.cantidadComputo))); e.manual=false; }
+  else if(r.avanceManual!==undefined&&r.avanceManual!==null&&r.avanceManual!==''){ e.pct=Math.min(1,Math.max(0,Number(r.avanceManual)/100)); e.manual=true; }
+  if(r.tipoPrecio!=='global'&&Number(r.cantidad)&&Number(r.precio)){ e.ultimoPU=Number(r.precio); e.ultimoPUUSD=cot?Number(r.precio)/cot:null; }
+}
+const estadoVacio=()=>({acc:0,pct:0,acumARS:0,acumUSD:0,ultimoPU:null,ultimoPUUSD:null,renglones:0,manual:false});
+function memoAvance(){
+  if(MEMO_AV) return MEMO_AV;
+  const porItem={}; Store.items.forEach(it=>{ porItem[it.id]=estadoVacio(); });
+  certsAprobados().forEach(c=>(c.renglones||[]).forEach(r=>{ const it=itemPorId(r.itemId); if(it&&porItem[it.id]) recorrerItem(porItem[it.id],it,c,r); }));
+  const grupos={}; itemsActivos().forEach(it=>{ if(it.rubro) (grupos[it.rubro]=grupos[it.rubro]||[]).push(it); });
+  const porRubro={};
+  Object.keys(grupos).forEach(r=>{ const its=grupos[r];
+    const peso=i=>Number(i.moPresupUSD)>0?Number(i.moPresupUSD):0;
+    let W=its.reduce((s,i)=>s+peso(i),0); const iguales=W<=0; if(iguales) W=its.length;
+    const pct=its.reduce((s,i)=>s+(iguales?1:peso(i))*porItem[i.id].pct,0)/W*100;
+    porRubro[r]={pct,items:its,pesosIguales:iguales&&its.length>1}; });
+  MEMO_AV={porItem,porRubro}; return MEMO_AV;
+}
+function avanceItem(id){ return memoAvance().porItem[id]||estadoVacio(); }
+function avanceRubroAuto(r){ return memoAvance().porRubro[r]||null; }
+/* Avance físico vigente de un rubro del presupuesto: de los ítems si los tiene, si no el manual. */
+function avanceDe(p){ if(!p) return 0; const a=avanceRubroAuto(p.rubro); return a?a.pct:(Number(p.avance)||0); }
+/* Estado de un ítem antes de un certificado (para "acumulado anterior") */
+function estadoItemAntes(itemId,cert){
+  const it=itemPorId(itemId), e=estadoVacio(); if(!it) return e;
+  const ref=Object.assign({},cert,{aprobadoEl:cert.estado==='aprobado'?cert.aprobadoEl:'9999'});
+  certsAprobados().forEach(c=>{ if(c.id===cert.id||ordenCert(c,ref)>=0) return; (c.renglones||[]).forEach(r=>{ if(r.itemId===itemId) recorrerItem(e,it,c,r); }); });
+  return e;
+}
+function certificacionesDeItem(id){ return Store.certificados.filter(c=>(c.renglones||[]).some(r=>r.itemId===id)).length; }
+
+/* ---- Escritura en lote (o todo o nada) ---- */
+function aplicarLocal(ops){
+  ops.forEach(o=>{
+    if(o.col==='config'){ if(o.id==='numeracion') Store.numeracion=JSON.parse(JSON.stringify(o.datos)); return; }
+    const arr=Store[o.col]; if(!Array.isArray(arr)) return; const i=arr.findIndex(x=>x.id===o.id);
+    if(o.borrar){ if(i>=0) arr.splice(i,1); return; }
+    const d=JSON.parse(JSON.stringify(o.datos)); d.id=o.id; if(i>=0) arr[i]=d; else arr.push(d);
+  });
+  invalidarAvance();
+}
+async function escribirOps(ops){
+  if(!ops.length) return;
+  ops.forEach(o=>{ if(!o.borrar&&o.datos&&o.col!=='config') o.datos.id=o.id; });
+  if(MODO_NUBE&&FB&&FB.guardarLote) await FB.guardarLote(ops);
+  aplicarLocal(ops);
+}
+const opSet=(col,obj)=>({col,id:obj.id,datos:obj});
+const opDel=(col,id)=>({col,id,borrar:true});
+function registroPapelera(tipo,obj){ return { id:Store.nuevoId(), tipo, borradoPor:USUARIO?USUARIO.nombre:'—', borradoEl:new Date().toISOString(), datos:JSON.parse(JSON.stringify(obj||{})) }; }
+
+/* ---- Número de carga fijo ----
+   Las cargas que existían antes de la 7.0 congelan el número que mostraban;
+   las nuevas toman el máximo + 1, sin importar su fecha. No se reutilizan. */
+function numerosDeCargaCalculados(){
+  const orden=Store.gastos.map((g,i)=>({g,i}))
+    .sort((a,b)=>{ const f=(a.g.fecha||'').localeCompare(b.g.fecha||''); return f!==0?f:a.i-b.i; });
+  const num={}; let n=0;
+  orden.forEach(({g})=>{ const k=claveCarga(g); if(num[k]===undefined) num[k]=++n; });
+  return num;
+}
+function numerosDeCarga(){
+  const num=numerosDeCargaCalculados();
+  const fijo={}; Store.gastos.forEach(g=>{ if(g.nroCarga!=null){ const k=claveCarga(g); if(fijo[k]===undefined) fijo[k]=Number(g.nroCarga); } });
+  return Object.assign(num,fijo);
+}
+function maxNroCarga(){
+  let m=0; const mx=v=>{ const n=Number(v); if(n>m) m=n; };
+  Store.gastos.forEach(g=>mx(g.nroCarga)); (Store.papelera||[]).forEach(r=>mx(r&&r.datos&&r.datos.nroCarga));
+  Store.certificados.forEach(c=>mx(c.nroCarga)); mx(Store.numeracion&&Store.numeracion.max);
+  Object.values(numerosDeCargaCalculados()).forEach(mx);
+  return m;
+}
+function nroCargaPara(g){
+  const k=claveCarga(g);
+  if(Store.gastos.some(x=>x!==g&&claveCarga(x)===k)) { const n=numerosDeCarga()[k]; if(n) return n; }
+  return maxNroCarga()+1;
+}
+let NUMERACION_EN_CURSO=false;
+function revisarNumeracion(){
+  if(NUMERACION_EN_CURSO) return;
+  const L=Store._listo||{};
+  if(MODO_NUBE&&!(L.gastos&&L.papelera&&L.certificados&&L.numeracion)) return;
+  const faltan=Store.gastos.filter(g=>g.nroCarga==null);
+  const congelado=!!(Store.numeracion&&Store.numeracion.congelado);
+  if(!faltan.length&&(congelado||!MODO_NUBE)) return;
+  const ops=[]; const asignado={};
+  if(!congelado){
+    const calc=numerosDeCargaCalculados();
+    faltan.forEach(g=>{ const d=Object.assign({},g,{nroCarga:calc[claveCarga(g)]}); ops.push(opSet('gastos',d)); });
+  } else {
+    let m=maxNroCarga();
+    faltan.forEach(g=>{ const k=claveCarga(g); const ya=Store.gastos.find(x=>x.nroCarga!=null&&claveCarga(x)===k);
+      const n=ya?Number(ya.nroCarga):(asignado[k]||(asignado[k]=++m)); ops.push(opSet('gastos',Object.assign({},g,{nroCarga:n}))); });
+  }
+  ops.push({col:'config',id:'numeracion',datos:Object.assign({},Store.numeracion||{},{congelado:true,
+    congeladoEl:(Store.numeracion&&Store.numeracion.congeladoEl)||new Date().toISOString(),congeladoPor:(Store.numeracion&&Store.numeracion.congeladoPor)||(USUARIO?USUARIO.nombre:'')})});
+  NUMERACION_EN_CURSO=true;
+  escribirOps(ops).then(()=>{ NUMERACION_EN_CURSO=false; if(!MODO_NUBE) renderTablaGastos(); })
+    .catch(e=>{ NUMERACION_EN_CURSO=false; console.error('Numeración de cargas',e); });
+}
+
+/* ---- Gastos que salen de un certificado ---- */
+function certDeGasto(g){ return g&&g.certificadoId?Store.certificados.find(c=>c.id===g.certificadoId):null; }
+function gastoBloqueado(g){ return !!(g&&g.certificadoId); }
+function etiquetaCert(c){ return c?'Cert. N° '+c.numero+(c.historico?' · hist.':''):'Cert.'; }
+function rubroCertificaPorItems(r){ return !!avanceRubroAuto(r); }
+function moSinCertificar(g){ return g.tipo==='Mano de obra' && !g.certificadoId && !g.honorario; }
+
+/* ---------- PANTALLA CÓMPUTO ----------
+   Se edita un borrador en memoria; "Guardar cómputo" valida y guarda todo junto. */
+const COMP={ filas:[], sucio:false, k:0, filtro:'', filtroRubro:'', verInactivos:true };
+/* Orden de columnas de la planilla de José (hoja "Cómputo"): sirve para pegar y para importar/exportar. */
+const CP_COLS=['codigo','macro','rubro','descripcion','unidad','cantidad','origen','moARS','moUSD',null,null,null,'activo',null,'notas'];
+const CP_TITULOS=['Código','Macrorubro','Rubro (web)','Descripción','Unidad','Cantidad cómputo','Origen del precio','MO presup. $','MO presup. USD','PU MO $','PU MO USD','Avance físico','Activo','Pendiente','Notas'];
+
+function filaDeItem(it){
+  return { _k:++COMP.k, id:it.id, codigo:it.codigo||'', macro:macroDe(it.rubro), rubro:it.rubro||'', descripcion:it.descripcion||'',
+    unidad:it.unidad||'', cantidad:it.cantidadComputo==null?'':String(it.cantidadComputo).replace('.',','), origen:it.origenPrecio||'',
+    moARS:it.moPresupARS==null?'':String(redondear(it.moPresupARS)).replace('.',','), moUSD:it.moPresupUSD==null?'':String(redondear(it.moPresupUSD)).replace('.',','),
+    activo:it.activo!==false, notas:it.notas||'' };
+}
+function filaNueva(){ return { _k:++COMP.k, id:null, codigo:'', macro:'', rubro:'', descripcion:'', unidad:'', cantidad:'', origen:'', moARS:'', moUSD:'', activo:true, notas:'', _nueva:true }; }
+function cargarBorradorComputo(){ COMP.filas=Store.items.slice().sort((a,b)=>natCmp(a.codigo,b.codigo)).map(filaDeItem); COMP.sucio=false; }
+function marcarSucio(){ COMP.sucio=true; const e=document.getElementById('cp-estado-sucio'); if(e) e.style.display=''; }
+
+function erroresFila(f,codigos){
+  const e={};
+  if(!String(f.descripcion||'').trim()) e.descripcion='Falta la descripción';
+  if(!f.rubro) e.rubro='Falta el rubro';
+  else if(!rubroCanonico(f.rubro)) e.rubro='El rubro "'+f.rubro+'" no existe';
+  const c=numAR(f.cantidad);
+  if(Number.isNaN(c)) e.cantidad='La cantidad no es un número'; else if(c!==null&&c<0) e.cantidad='La cantidad no puede ser negativa';
+  if(c>0&&!f.unidad) e.unidad='Con cantidad hace falta la unidad';
+  const u=numAR(f.moUSD); if(u===null) e.moUSD='Falta la MO presupuestada en USD'; else if(Number.isNaN(u)||u<0) e.moUSD='MO USD inválida';
+  const a=numAR(f.moARS); if(Number.isNaN(a)||(a!==null&&a<0)) e.moARS='MO $ inválida';
+  const cod=String(f.codigo||'').trim(); if(cod&&codigos&&codigos[cod]>1) e.codigo='Código repetido';
+  return e;
+}
+function contarCodigos(){ const o={}; COMP.filas.forEach(f=>{ if(f._borrar) return; const c=String(f.codigo||'').trim(); if(c) o[c]=(o[c]||0)+1; }); return o; }
+
+function opcionesRubro(macro,actual){
+  let h='<option value="">Elegí</option>';
+  MACRORUBROS.forEach(m=>{ if(macro&&m.nombre!==macro) return; h+='<optgroup label="'+esc(m.nombre)+'">'+m.rubros.map(r=>'<option'+(r===actual?' selected':'')+'>'+esc(r)+'</option>').join('')+'</optgroup>'; });
+  if(actual&&!rubroCanonico(actual)) h+='<option selected value="'+esc(actual)+'">'+esc(actual)+' (no existe)</option>';
+  return h;
+}
+function celdaInput(f,campo,cls,extra){ return '<input class="cp-in '+(cls||'')+'" data-k="'+f._k+'" data-f="'+campo+'" value="'+esc(f[campo])+'"'+(extra||'')+'>'; }
+
+let DIBUJANDO_CP=false;
+function renderComputo(){
+  if(DIBUJANDO_CP) return; DIBUJANDO_CP=true;
+  try{ dibujarComputo(); } finally { DIBUJANDO_CP=false; }
+}
+function dibujarComputo(){
+  const cont=document.getElementById('cp-grilla'); if(!cont) return;
+  if(!COMP.sucio) cargarBorradorComputo();
+  renderKpiComputo();
+  const q=sinTildes(COMP.filtro), fr=COMP.filtroRubro;
+  const cods=contarCodigos();
+  const vis=COMP.filas.filter(f=>!f._borrar && (COMP.verInactivos||f.activo) && (!fr||f.rubro===fr)
+    && (!q||sinTildes([f.codigo,f.descripcion,f.rubro,f.notas].join(' ')).indexOf(q)>=0));
+  const sel=document.getElementById('cp-f-rubro');
+  if(sel){ const prev=COMP.filtroRubro; const usados=[...new Set(COMP.filas.filter(f=>f.rubro).map(f=>f.rubro))].sort(natCmp);
+    sel.innerHTML='<option value="">Todos los rubros</option>'+usados.map(r=>'<option'+(r===prev?' selected':'')+'>'+esc(r)+'</option>').join(''); }
+  const est=document.getElementById('cp-estado');
+  const conError=COMP.filas.filter(f=>!f._borrar&&Object.keys(erroresFila(f,cods)).length).length;
+  if(est) est.innerHTML=(COMP.sucio?'<div class="aviso marron cp-aviso" id="cp-estado-sucio"><div><strong>Hay cambios sin guardar.</strong> Tocá "Guardar cómputo" para que queden en la nube.'+(conError?' '+conError+' fila(s) con error quedan en rojo y no se guardan hasta corregirlas.':'')+'</div></div>':'');
+  if(!COMP.filas.filter(f=>!f._borrar).length){
+    cont.innerHTML='<div class="empty"><strong>Todavía no hay ítems</strong>Usá "Precargar cómputo" con la planilla de José, pegá un bloque desde Excel o tocá "Agregar fila".</div>'
+      +'<div style="text-align:center;margin-top:-14px;"><button class="btn btn-sm" id="cp-agregar-vacio">Agregar fila</button></div>';
+    document.getElementById('cp-agregar-vacio').addEventListener('click',()=>agregarFilaComputo(true));
+    renderContrasteMO(); return;
+  }
+  let h='<table class="cp-tabla"><thead><tr><th>Código</th><th>Macrorubro</th><th>Rubro</th><th>Descripción</th><th>Unidad</th><th class="money">Cantidad</th><th>Origen</th>'
+    +'<th class="money">MO presup. $</th><th class="money">MO presup. USD</th><th title="Activo">Act.</th><th>Notas</th>'
+    +'<th class="money">PU MO USD</th><th class="money">Certificado</th><th class="money">Saldo</th><th class="money">Avance</th><th class="money">Cert. $</th><th class="money">PU últ. $</th><th></th></tr></thead><tbody>';
+  /* agrupado por macrorubro → rubro, en el orden de la estructura */
+  const ordenRubro={}; let i=0; MACRORUBROS.forEach(m=>m.rubros.forEach(r=>{ ordenRubro[r]=i++; }));
+  const grupos={}; vis.forEach(f=>{ const k=rubroCanonico(f.rubro)||''; (grupos[k]=grupos[k]||[]).push(f); });
+  const claves=Object.keys(grupos).sort((a,b)=>(a===''?1e9:ordenRubro[a])-(b===''?1e9:ordenRubro[b]));
+  let macroActual=null;
+  claves.forEach(r=>{
+    const mac=r?macroDe(r):'Sin rubro válido';
+    if(mac!==macroActual){ macroActual=mac; h+='<tr class="macro-row"><td colspan="18">'+esc(mac)+'</td></tr>'; }
+    const fs=grupos[r].sort((a,b)=>natCmp(a.codigo,b.codigo));
+    const sUSD=fs.filter(f=>f.activo).reduce((s,f)=>s+(numAR(f.moUSD)||0),0);
+    const av=r?avanceRubroAuto(r):null;
+    h+='<tr class="cp-sub"><td colspan="3">'+esc(r||'Revisá el rubro de estas filas')+'</td><td colspan="5" style="color:var(--n-500);">'+fs.length+' ítem(s)'+(av&&av.pesosIguales?' · <span class="tag marron" title="Ningún ítem tiene MO presupuestada: pesan igual">falta MO para ponderar</span>':'')+'</td>'
+      +'<td class="money">'+fmtUSD(sUSD)+'</td><td colspan="5"></td><td class="money">'+(av?fmtPct(av.pct):'—')+'</td><td colspan="3"></td></tr>';
+    fs.forEach(f=>{
+      const e=erroresFila(f,cods); const it=f.id?itemPorId(f.id):null; const a=it?avanceItem(it.id):estadoVacio();
+      const cant=numAR(f.cantidad), usd=numAR(f.moUSD); const base=cant>0;
+      const certs=it?certificacionesDeItem(it.id):0;
+      const err=c=>e[c]?' cp-err" title="'+esc(e[c]):'';
+      const pu=base&&usd>0?usd/cant:null;
+      const saldo=base&&it&&it.unidad===f.unidad?cant-a.acc:null;
+      h+='<tr class="cp-fila'+(f.activo?'':' cp-inactiva')+(Object.keys(e).length?' cp-fila-err':'')+'" data-fila="'+f._k+'">'
+        +'<td>'+celdaInput(f,'codigo','cp-cod'+err('codigo'))+'</td>'
+        +'<td><select class="cp-in cp-mac" data-k="'+f._k+'" data-f="macro"><option value="">—</option>'+MACRORUBROS.map(m=>'<option'+(m.nombre===f.macro?' selected':'')+'>'+esc(m.nombre)+'</option>').join('')+'</select></td>'
+        +'<td><select class="cp-in cp-rub'+err('rubro')+'" data-k="'+f._k+'" data-f="rubro">'+opcionesRubro(f.macro,f.rubro)+'</select>'
+          +(e.rubro&&f.rubro&&!rubroCanonico(f.rubro)?'<button type="button" class="cp-link" data-cpaddrubro="'+f._k+'">Agregar rubro</button>':'')+'</td>'
+        +'<td>'+celdaInput(f,'descripcion','cp-desc'+err('descripcion'))+'</td>'
+        +'<td><select class="cp-in cp-uni'+err('unidad')+'" data-k="'+f._k+'" data-f="unidad"><option value="">—</option>'
+          +unidadesMedida().concat(f.unidad&&unidadesMedida().indexOf(f.unidad)<0?[f.unidad]:[]).map(u=>'<option'+(u===f.unidad?' selected':'')+'>'+esc(u)+'</option>').join('')+'</select></td>'
+        +'<td>'+celdaInput(f,'cantidad','cp-num'+err('cantidad'),' inputmode="decimal"')+'</td>'
+        +'<td>'+celdaInput(f,'origen','cp-ori',' list="cp-origenes"')+'</td>'
+        +'<td>'+celdaInput(f,'moARS','cp-num'+err('moARS'),' inputmode="decimal"')+'</td>'
+        +'<td>'+celdaInput(f,'moUSD','cp-num'+err('moUSD'),' inputmode="decimal"')+'</td>'
+        +'<td style="text-align:center;"><input type="checkbox" class="cp-chk" data-k="'+f._k+'" data-f="activo"'+(f.activo?' checked':'')+' aria-label="Activo"></td>'
+        +'<td>'+celdaInput(f,'notas','cp-notas')+'</td>'
+        +'<td class="money cp-calc">'+(pu!=null?fmtUSD(pu,2):'—')+'</td>'
+        +'<td class="money cp-calc'+(base&&a.acc>cant?' cp-exceso':'')+'">'+(it&&a.renglones?fmtCant(a.acc)+(it.unidad?' '+esc(it.unidad):''):'—')+'</td>'
+        +'<td class="money cp-calc'+(saldo!=null&&saldo<0?' cp-exceso':'')+'">'+(saldo!=null&&a.renglones?fmtCant(saldo):'—')+'</td>'
+        +'<td class="money cp-calc">'+(it&&a.renglones?fmtPct(a.pct*100)+(a.manual?'<span class="cp-m" title="Avance cargado a mano">m</span>':''):'—')+'</td>'
+        +'<td class="money cp-calc">'+(a.acumARS?fmtARS(a.acumARS):'—')+'</td>'
+        +'<td class="money cp-calc" title="'+(it&&it.puPresupARS?'PU presupuesto: '+esc(fmtARS(it.puPresupARS,2)):'')+'">'+(a.ultimoPU!=null?fmtARS(a.ultimoPU,2):'—')+'</td>'
+        +'<td class="cp-acc">'
+          +(base&&!certs?'<button type="button" class="btn btn-ghost btn-sm" data-cpdiv="'+f._k+'">Dividir</button>':'')
+          +(it&&(it.historial||[]).length?'<button type="button" class="btn btn-ghost btn-sm" data-cphist="'+f._k+'">Historial</button>':'')
+          +(!certs?'<button type="button" class="btn btn-ghost btn-sm" data-cpdel="'+f._k+'" style="color:#9E2B25;">Quitar</button>':'<span class="tag" title="Tiene certificaciones: para sacarlo, destildá Activo">'+certs+' cert.</span>')
+        +'</td></tr>';
+    });
+  });
+  cont.innerHTML=h+'</tbody></table>';
+  renderContrasteMO();
+}
+function filaPorK(k){ return COMP.filas.find(f=>f._k===Number(k)); }
+function agregarFilaComputo(enfocar,base){
+  const f=filaNueva(); if(base){ f.macro=base.macro; f.rubro=base.rubro; }
+  COMP.filas.push(f); marcarSucio(); renderComputo();
+  if(enfocar){ const el=document.querySelector('#cp-grilla [data-k="'+f._k+'"][data-f="'+(base?'descripcion':'codigo')+'"]'); if(el) el.focus(); }
+  return f;
+}
+function asignarCampo(f,campo,valor){
+  let v=valor==null?'':String(valor).trim();
+  if(campo==='activo'){ f.activo=!/^(no|n|0|false|inactivo)$/i.test(v); return; }
+  if(campo==='rubro'){ const c=rubroCanonico(v); f.rubro=c||v; if(c) f.macro=macroDe(c); return; }
+  if(campo==='macro'){ const c=macroCanonico(v); f.macro=c; if(f.rubro&&rubroCanonico(f.rubro)&&macroDe(rubroCanonico(f.rubro))!==c) f.rubro=''; return; }
+  if(campo==='unidad'){ const u=unidadesMedida().find(x=>sinTildes(x)===sinTildes(v)||(sinTildes(x).replace('²','2').replace('³','3')===sinTildes(v).replace('²','2').replace('³','3'))); f.unidad=u||v; return; }
+  if(campo==='cantidad'||campo==='moARS'||campo==='moUSD'){ const n=numAR(v); f[campo]=(n===null)?'':(Number.isNaN(n)?v:String(redondear(n,4)).replace('.',',')); return; }
+  f[campo]=v;
+}
+function eventosComputo(){
+  const g=document.getElementById('cp-grilla');
+  g.addEventListener('input',e=>{ const t=e.target; if(!t.dataset||!t.dataset.f||t.tagName==='SELECT'||t.type==='checkbox') return;
+    const f=filaPorK(t.dataset.k); if(!f) return; f[t.dataset.f]=t.value; marcarSucio(); });
+  g.addEventListener('change',e=>{ const t=e.target; if(!t.dataset||!t.dataset.f) return; const f=filaPorK(t.dataset.k); if(!f) return;
+    if(t.type==='checkbox') f.activo=t.checked; else asignarCampo(f,t.dataset.f,t.value);
+    marcarSucio();
+    /* los textos no redibujan la grilla (Tab tiene que seguir a la celda siguiente) */
+    if(t.tagName==='SELECT'||t.type==='checkbox'){
+      const foco=document.activeElement&&document.activeElement.dataset?{k:document.activeElement.dataset.k,f:document.activeElement.dataset.f}:null;
+      renderComputo(); if(foco&&foco.k){ const el=g.querySelector('[data-k="'+foco.k+'"][data-f="'+foco.f+'"]'); if(el) el.focus(); } }
+    else { const tr=t.closest('tr'); if(tr){ const er=erroresFila(f,contarCodigos()); tr.classList.toggle('cp-fila-err',Object.keys(er).length>0); t.classList.toggle('cp-err',!!er[t.dataset.f]); } }
+  });
+  g.addEventListener('keydown',e=>{ if(e.key!=='Enter'||!e.target.dataset||!e.target.dataset.k) return;
+    e.preventDefault(); const filas=[...g.querySelectorAll('tr.cp-fila')]; const tr=e.target.closest('tr');
+    const i=filas.indexOf(tr); const f=filaPorK(e.target.dataset.k);
+    if(i===filas.length-1){ e.target.dispatchEvent(new Event('change',{bubbles:true})); agregarFilaComputo(true,f); }
+    else { const sig=filas[i+1].querySelector('[data-f="'+e.target.dataset.f+'"]'); if(sig) sig.focus(); } });
+  g.addEventListener('paste',e=>{
+    const t=e.target; if(!t.dataset||!t.dataset.f) return;
+    const txt=(e.clipboardData||window.clipboardData).getData('text'); if(!/[\t\n]/.test(String(txt).replace(/\r?\n$/,''))) return;
+    e.preventDefault(); pegarBloque(t.dataset.k,t.dataset.f,txt); });
+  g.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return;
+    if(b.dataset.cpdel){ const f=filaPorK(b.dataset.cpdel); if(!f) return; if(f.id) f._borrar=true; else COMP.filas=COMP.filas.filter(x=>x!==f); marcarSucio(); renderComputo(); }
+    if(b.dataset.cpdiv) abrirDividir(b.dataset.cpdiv);
+    if(b.dataset.cphist) abrirHistorialItem(b.dataset.cphist);
+    if(b.dataset.cpaddrubro){ const f=filaPorK(b.dataset.cpaddrubro); abrirModalRubros();
+      if(f){ document.getElementById('rb-nombre').value=f.rubro; if(f.macro) document.getElementById('rb-macro').value=f.macro; document.getElementById('rb-nombre').focus(); } }
+  });
+}
+/* Pegar un bloque de Excel: se reparte desde la celda donde se pega, siguiendo el orden de columnas de la planilla. */
+function pegarBloque(k,campo,txt){
+  const lineas=String(txt).replace(/\r/g,'').split('\n'); while(lineas.length&&!lineas[lineas.length-1].trim()) lineas.pop();
+  const datos=lineas.map(l=>l.split('\t')).filter(c=>!(sinTildes(c[0])==='codigo'||sinTildes(c[0])==='descripcion'));
+  const visibles=[...document.querySelectorAll('#cp-grilla tr.cp-fila')].map(tr=>filaPorK(tr.dataset.fila));
+  let i0=visibles.findIndex(f=>f&&f._k===Number(k)); if(i0<0) i0=visibles.length;
+  const slot0=CP_COLS.indexOf(campo);
+  let nuevas=0;
+  datos.forEach((celdas,i)=>{
+    let f=visibles[i0+i]; if(!f){ f=filaNueva(); COMP.filas.push(f); nuevas++; }
+    /* primero el macrorubro y después el rubro, para que no se pisen */
+    const pares=celdas.map((v,j)=>[CP_COLS[slot0+j],v]).filter(p=>p[0]);
+    pares.sort((a,b)=>(a[0]==='rubro')-(b[0]==='rubro')).forEach(([c,v])=>asignarCampo(f,c,v));
+  });
+  marcarSucio(); renderComputo();
+  toast('Se pegaron '+datos.length+' fila(s)'+(nuevas?' ('+nuevas+' nuevas)':''));
+}
+
+/* ---- Guardar ---- */
+async function guardarComputo(){
+  const cods=contarCodigos(); const ahora=new Date().toISOString(), quien=USUARIO?USUARIO.nombre:'—';
+  const ops=[]; let malas=0, cambios=0;
+  COMP.filas.forEach(f=>{
+    if(f._borrar){ if(f.id&&!certificacionesDeItem(f.id)){ ops.push(opDel('items',f.id)); cambios++; } return; }
+    if(Object.keys(erroresFila(f,cods)).length){ malas++; return; }
+    const cant=numAR(f.cantidad), usd=numAR(f.moUSD), ars=numAR(f.moARS);
+    const datos={ codigo:String(f.codigo||'').trim(), descripcion:String(f.descripcion).trim(), unidad:f.unidad||'', cantidadComputo:cant===null?null:cant,
+      rubro:rubroCanonico(f.rubro), origenPrecio:f.origen||'', moPresupUSD:usd, moPresupARS:ars===null?null:ars,
+      puPresupUSD:cant>0?usd/cant:null, puPresupARS:(cant>0&&ars!==null)?ars/cant:null, activo:!!f.activo, notas:String(f.notas||'').trim() };
+    if(f.id){ const prev=itemPorId(f.id); if(!prev) return;
+      const hist=[]; ['cantidadComputo','unidad','rubro','descripcion','moPresupUSD','moPresupARS','activo','codigo'].forEach(c=>{
+        const a=prev[c]===undefined?null:prev[c], b=datos[c]; if(JSON.stringify(a)!==JSON.stringify(b)) hist.push({fecha:ahora,por:quien,campo:c,antes:a,despues:b}); });
+      const otros=['origenPrecio','notas','puPresupUSD','puPresupARS'].some(c=>JSON.stringify(prev[c]===undefined?null:prev[c])!==JSON.stringify(datos[c]===undefined?null:datos[c]));
+      if(!hist.length&&!otros) return;
+      ops.push(opSet('items',Object.assign({},prev,datos,{historial:(prev.historial||[]).concat(hist),actualizadoEn:ahora,actualizadoPor:quien}))); cambios++;
+    } else { const id=Store.nuevoId(); f.id=id;
+      ops.push(opSet('items',Object.assign({id},datos,{historial:[],creadoPor:quien,creadoEn:ahora,actualizadoEn:ahora,actualizadoPor:quien}))); cambios++; }
+  });
+  if(!cambios&&!malas){ COMP.sucio=false; renderComputo(); toast('No hay cambios para guardar'); return; }
+  const btn=document.getElementById('cp-guardar'); btn.disabled=true;
+  try{
+    await escribirOps(ops);
+    const pendientes=COMP.filas.filter(f=>!f._borrar&&Object.keys(erroresFila(f,cods)).length);
+    cargarBorradorComputo();
+    if(pendientes.length){ pendientes.forEach(f=>{ if(!f.id) COMP.filas.push(f); }); COMP.sucio=true; }
+    renderTodo();
+    toast(cambios+' ítem(s) guardados'+(malas?' · '+malas+' con error sin guardar':''),!!malas);
+  }catch(e){ toast('No se pudo guardar el cómputo: '+e.message,true); }
+  finally{ btn.disabled=false; }
+}
+function descartarComputo(){ if(COMP.sucio&&!confirm('¿Descartar los cambios sin guardar del cómputo?')) return; COMP.sucio=false; renderComputo(); }
+
+/* ---- Dividir un ítem en varios rubros ---- */
+function abrirDividir(k){
+  const f=filaPorK(k); if(!f) return; const total=numAR(f.cantidad);
+  if(!(total>0)){ toast('Para dividir, el ítem necesita una cantidad de cómputo.',true); return; }
+  const partes=[{rubro:f.rubro,cant:'',desc:f.descripcion},{rubro:'',cant:'',desc:f.descripcion}];
+  const dibujar=()=>{
+    const suma=partes.reduce((s,p)=>s+(numAR(p.cant)||0),0), dif=redondear(total-suma,4);
+    abrirModalCP('Dividir ítem','<p class="panel-sub">'+esc(nombreItem({codigo:f.codigo,descripcion:f.descripcion}))+' · '+fmtCant(total)+' '+esc(f.unidad)+'. Cada parte queda en su rubro; la suma tiene que dar la cantidad original. La MO presupuestada se reparte en proporción.</p>'
+      +'<table class="rest-tabla cp-div"><thead><tr><th>Rubro</th><th>Descripción</th><th class="money">Cantidad</th><th></th></tr></thead><tbody>'
+      +partes.map((p,i)=>'<tr><td><select data-dv="rubro" data-i="'+i+'">'+opcionesRubro('',p.rubro)+'</select></td><td><input data-dv="desc" data-i="'+i+'" value="'+esc(p.desc)+'"></td>'
+        +'<td><input data-dv="cant" data-i="'+i+'" value="'+esc(p.cant)+'" inputmode="decimal" style="text-align:right;"></td><td>'+(partes.length>2?'<button type="button" class="btn btn-ghost btn-sm" data-dvdel="'+i+'">✕</button>':'')+'</td></tr>').join('')
+      +'</tbody></table><div class="btn-row" style="margin-top:10px;"><button type="button" class="btn btn-sm" id="dv-mas">Agregar parte</button></div>'
+      +'<p class="panel-sub" style="margin-top:12px;" id="dv-suma">Suma '+fmtCant(suma)+' de '+fmtCant(total)+(Math.abs(dif)<0.005?' ✓':' · faltan '+fmtCant(dif))+'</p>',
+      'Dividir',()=>{
+        if(partes.some(p=>!rubroCanonico(p.rubro))){ toast('Elegí el rubro de cada parte',true); return false; }
+        if(partes.some(p=>!(numAR(p.cant)>0))){ toast('Cada parte necesita una cantidad mayor a cero',true); return false; }
+        if(Math.abs(redondear(total-partes.reduce((s,p)=>s+numAR(p.cant),0),4))>=0.005){ toast('La suma de las partes tiene que dar '+fmtCant(total),true); return false; }
+        const usd=numAR(f.moUSD)||0, ars=numAR(f.moARS); const letras='abcdefghijklmnopqrstuvwxyz'; const orig=Object.assign({},f);
+        partes.forEach((p,i)=>{ const prop=numAR(p.cant)/total; const dest=i===0?f:filaNueva();
+          Object.assign(dest,{codigo:orig.codigo?orig.codigo+letras[i]:'',macro:macroDe(rubroCanonico(p.rubro)),rubro:rubroCanonico(p.rubro),descripcion:p.desc||orig.descripcion,unidad:orig.unidad,
+            cantidad:String(redondear(numAR(p.cant),4)).replace('.',','),origen:orig.origen,moUSD:String(redondear(usd*prop)).replace('.',','),
+            moARS:ars===null?'':String(redondear(ars*prop)).replace('.',','),activo:orig.activo,notas:orig.notas});
+          if(i>0) COMP.filas.push(dest); });
+        marcarSucio(); renderComputo(); toast('Ítem dividido en '+partes.length+' partes. Falta guardar el cómputo.'); return true; });
+    const m=document.getElementById('modal-cp');
+    m.querySelectorAll('[data-dv]').forEach(el=>el.addEventListener(el.tagName==='SELECT'?'change':'input',()=>{ partes[el.dataset.i][el.dataset.dv]=el.value;
+      if(el.dataset.dv==='cant'){ const s=partes.reduce((a,p)=>a+(numAR(p.cant)||0),0), d=redondear(total-s,4);
+        document.getElementById('dv-suma').textContent='Suma '+fmtCant(s)+' de '+fmtCant(total)+(Math.abs(d)<0.005?' ✓':' · faltan '+fmtCant(d)); } }));
+    m.querySelectorAll('[data-dvdel]').forEach(b=>b.addEventListener('click',()=>{ partes.splice(Number(b.dataset.dvdel),1); dibujar(); }));
+    document.getElementById('dv-mas').addEventListener('click',()=>{ partes.push({rubro:'',cant:'',desc:f.descripcion}); dibujar(); });
+  };
+  dibujar();
+}
+function abrirHistorialItem(k){
+  const f=filaPorK(k); const it=f&&f.id?itemPorId(f.id):null; if(!it) return;
+  const nom={cantidadComputo:'Cantidad',unidad:'Unidad',rubro:'Rubro',descripcion:'Descripción',moPresupUSD:'MO USD',moPresupARS:'MO $',activo:'Activo',codigo:'Código'};
+  const v=x=>x===null||x===undefined||x===''?'—':(typeof x==='boolean'?(x?'Sí':'No'):(typeof x==='number'?fmtCant(x):esc(x)));
+  abrirModalCP('Historial del ítem','<p class="panel-sub">'+esc(nombreItem(it))+'</p><table class="rest-tabla"><thead><tr><th>Cuándo</th><th>Quién</th><th>Qué</th><th>Antes</th><th>Después</th></tr></thead><tbody>'
+    +(it.historial||[]).slice().reverse().map(h=>'<tr><td style="font-size:12px;">'+esc(fmtFechaHora(h.fecha))+'</td><td>'+esc(h.por)+'</td><td>'+esc(nom[h.campo]||h.campo)+'</td><td>'+v(h.antes)+'</td><td>'+v(h.despues)+'</td></tr>').join('')+'</tbody></table>');
+}
+/* Modal genérico del módulo */
+function abrirModalCP(titulo,html,textoOk,alOk){
+  const m=document.getElementById('modal-cp');
+  document.getElementById('cp-m-titulo').textContent=titulo; document.getElementById('cp-m-cuerpo').innerHTML=html;
+  const ok=document.getElementById('cp-m-ok'); ok.style.display=alOk?'':'none'; ok.textContent=textoOk||'Aceptar';
+  ok.onclick=()=>{ if(alOk&&alOk()!==false) m.classList.add('oculto'); };
+  document.getElementById('cp-m-cerrar').textContent=alOk?'Cancelar':'Cerrar';
+  m.classList.remove('oculto');
+}
+
+/* ---- Excel: precargar, importar, exportar (mismas columnas que la planilla de José) ---- */
+function leerHojaComputo(file,alTener){
+  if(!hayXLSX()){ toast('No cargó la librería de Excel. Revisá la conexión.',true); return; }
+  const r=new FileReader();
+  r.onload=e=>{ try{
+    const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+    const nom=wb.SheetNames.find(n=>sinTildes(n)==='computo')||wb.SheetNames.find(n=>sinTildes(n).indexOf('comput')>=0)||wb.SheetNames[0];
+    const filas=XLSX.utils.sheet_to_json(wb.Sheets[nom],{header:1,defval:'',raw:true});
+    const iH=filas.findIndex(f=>f.some(c=>sinTildes(c)==='descripcion'));
+    if(iH<0) throw new Error('No encontré la fila de títulos (con la columna "Descripción").');
+    const tit=filas[iH].map(sinTildes);
+    const col=(...n)=>{ for(const x of n){ const i=tit.findIndex(t=>t===x); if(i>=0) return i; } for(const x of n){ const i=tit.findIndex(t=>t.indexOf(x)===0); if(i>=0) return i; } return -1; };
+    const idx={codigo:col('codigo'),macro:col('macrorubro'),rubro:col('rubro (web)','rubro'),descripcion:col('descripcion'),unidad:col('unidad'),
+      cantidad:col('cantidad computo','cantidad'),origen:col('origen del precio','origen'),moARS:col('mo presup. $','mo $','mano de obra $'),
+      moUSD:col('mo presup. usd','mo usd','mano de obra usd'),activo:col('activo'),notas:col('notas')};
+    const out=filas.slice(iH+1).filter(f=>f.some(c=>String(c).trim()!==''))
+      .filter(f=>sinTildes(f[idx.descripcion])!=='total'&&String(f[idx.descripcion]).trim()!=='')
+      .map(f=>{ const o={}; Object.keys(idx).forEach(k=>{ o[k]=idx[k]>=0?f[idx[k]]:''; }); return o; });
+    alTener(out,file.name);
+  }catch(err){ toast('No se pudo leer la planilla: '+err.message,true); } };
+  r.readAsArrayBuffer(file);
+}
+function filaDesdePlanilla(o){ const f=filaNueva(); f._nueva=true;
+  ['codigo','macro','rubro','descripcion','unidad','cantidad','origen','moARS','moUSD','notas'].forEach(c=>{ if(o[c]!==''&&o[c]!==undefined&&o[c]!==null) asignarCampo(f,c,o[c]); });
+  if(o.activo!==''&&o.activo!==undefined) asignarCampo(f,'activo',o.activo);
+  return f; }
+function precargarComputo(lista,nombre){
+  const hay=COMP.filas.filter(f=>!f._borrar);
+  const existentes=new Set(hay.map(f=>String(f.codigo||'').trim()).filter(Boolean));
+  const nuevas=lista.filter(o=>!existentes.has(String(o.codigo||'').trim())||!String(o.codigo||'').trim());
+  if(hay.length){ if(!confirm('Ya hay '+hay.length+' ítem(s) en el cómputo. La precarga solo agrega los '+nuevas.length+' código(s) que no están y no cambia nada de lo cargado. ¿Seguís?')) return; }
+  if(!nuevas.length){ toast('No hay ítems nuevos en la planilla: todos los códigos ya están.'); return; }
+  nuevas.forEach(o=>COMP.filas.push(filaDesdePlanilla(o)));
+  marcarSucio(); renderComputo();
+  const cods=contarCodigos(); const mal=COMP.filas.filter(f=>!f._borrar&&Object.keys(erroresFila(f,cods)).length).length;
+  toast(nuevas.length+' ítem(s) precargados de '+nombre+'. Revisalos y tocá "Guardar cómputo".'+(mal?' '+mal+' con error.':''));
+}
+function importarComputo(lista,nombre){
+  let act=0,nue=0;
+  lista.forEach(o=>{ const cod=String(o.codigo||'').trim();
+    const f=cod?COMP.filas.find(x=>!x._borrar&&String(x.codigo||'').trim()===cod):null;
+    if(!f){ COMP.filas.push(filaDesdePlanilla(o)); nue++; return; }
+    let toco=false; ['macro','rubro','descripcion','unidad','cantidad','origen','moARS','moUSD','notas','activo'].forEach(c=>{
+      if(o[c]!==''&&o[c]!==undefined&&o[c]!==null){ const antes=JSON.stringify(f); asignarCampo(f,c,o[c]); if(JSON.stringify(f)!==antes) toco=true; } });
+    if(toco) act++; });
+  if(!act&&!nue){ toast('La planilla no trae cambios.'); return; }
+  marcarSucio(); renderComputo(); toast(nombre+': '+act+' actualizado(s), '+nue+' nuevo(s). Falta guardar el cómputo.');
+}
+function exportarComputo(){
+  if(!hayXLSX()){ toast('No cargó la librería de Excel.',true); return; }
+  const filas=[CP_TITULOS].concat(Store.items.slice().sort((a,b)=>natCmp(a.codigo,b.codigo)).map(it=>{ const a=avanceItem(it.id);
+    return [it.codigo||'',macroDe(it.rubro),it.rubro||'',it.descripcion||'',it.unidad||'',it.cantidadComputo==null?'':it.cantidadComputo,it.origenPrecio||'',
+      it.moPresupARS==null?'':redondear(it.moPresupARS),it.moPresupUSD==null?'':redondear(it.moPresupUSD),
+      it.puPresupARS==null?'':redondear(it.puPresupARS),it.puPresupUSD==null?'':redondear(it.puPresupUSD),
+      a.renglones?redondear(a.pct*100,1)+'%':(it.activo===false?'—':(tieneBase(it)?'Automático':'Manual')),it.activo===false?'NO':'SI','',it.notas||'']; }));
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(filas),'Cómputo');
+  XLSX.writeFile(wb,'Computo_Rio_Colorado_'+hoyISO()+'.xlsx'); toast('Cómputo exportado');
+}
+
+/* ---- Indicadores ---- */
+function moPagadaRubroUSD(r){ return Store.gastos.filter(g=>g.rubro===r&&g.tipo==='Mano de obra').reduce((s,g)=>s+(g.montoUSD||0),0); }
+function renderKpiComputo(){
+  const k=document.getElementById('kpi-computo'); if(!k) return;
+  const act=itemsActivos(), base=act.filter(tieneBase).length;
+  const rub=Object.keys(memoAvance().porRubro).length;
+  const certUSD=Store.gastos.filter(g=>g.certificadoId).reduce((s,g)=>s+(g.montoUSD||0),0);
+  k.innerHTML='<div class="kpi acento"><div class="kpi-label">Ítems activos</div><div class="kpi-value num">'+act.length+'</div><div class="kpi-sub">'+(Store.items.length-act.length)+' inactivo(s)</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Con cantidad base</div><div class="kpi-value num">'+base+'</div><div class="kpi-sub">Avance automático por cantidad</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Rubros con ítems</div><div class="kpi-value num">'+rub+'</div><div class="kpi-sub">Su avance sale del cómputo</div></div>'
+    +'<div class="kpi"><div class="kpi-label">MO certificada</div><div class="kpi-value num">'+fmtUSD(certUSD)+'</div><div class="kpi-sub">Certificados aprobados</div></div>';
+}
+function renderContrasteMO(){
+  const cont=document.getElementById('cp-contraste'); if(!cont) return;
+  const rubros=Object.keys(memoAvance().porRubro); const al=cfgAlertaMO();
+  if(!rubros.length){ cont.innerHTML='<div class="empty"><strong>Sin rubros con ítems</strong>Cuando guardes el cómputo, acá se compara la mano de obra pagada con el avance.</div>'; return; }
+  let h='<table><thead><tr><th>Rubro</th><th class="money">MO presupuestada</th><th style="width:70px;">Avance</th><th class="money">Según avance</th><th class="money">MO pagada</th><th class="money">Diferencia</th><th>Señal</th></tr></thead><tbody>';
+  rubros.sort((a,b)=>natCmp(macroDe(a)+a,macroDe(b)+b)).forEach(r=>{
+    const p=Store.presupuesto.find(x=>x.rubro===r); const obj=p?(p.objMO||0):memoAvance().porRubro[r].items.reduce((s,i)=>s+(Number(i.moPresupUSD)||0),0);
+    const av=memoAvance().porRubro[r].pct, esp=obj*av/100, pag=moPagadaRubroUSD(r), dif=pag-esp;
+    const adelante=al.activa&&pag>esp*(1+al.umbral/100)+1;
+    h+='<tr><td>'+esc(r)+'</td><td class="money" style="font-weight:400;">'+fmtUSD(obj)+'</td><td>'+fmtPct(av)+'</td><td class="money" style="font-weight:400;">'+fmtUSD(esp)+'</td>'
+      +'<td class="money">'+fmtUSD(pag)+'</td><td class="money" style="font-weight:400;">'+(dif>=0?'+':'')+fmtUSD(dif)+'</td>'
+      +'<td>'+(adelante?'<span class="tag marron">Pagado por delante</span>':(al.activa?'<span class="tag verde">En línea</span>':'<span class="tag">—</span>'))+'</td></tr>'; });
+  cont.innerHTML=h+'</tbody></table>';
+}
+
+/* ---------- PANTALLA CERTIFICADOS ----------
+   Borrador: se edita libremente, no genera gastos ni mueve el avance.
+   Aprobado: genera los gastos de mano de obra (sin IVA) al MEP de la fecha.
+   Histórico: vincula gastos ya cargados (sin crear gastos ni tocar sus montos). */
+const CERT={ c:null, sucio:false };
+const aTexto=n=>(n===null||n===undefined||n==='')?'':String(n).replace('.',',');
+function contratistas(){
+  return Store.proveedores.slice().sort((a,b)=>((a.tipo==='Mano de obra')?0:1)-((b.tipo==='Mano de obra')?0:1)||natCmp(a.nombre,b.nombre)).map(p=>p.nombre);
+}
+const mismoContratista=(a,b)=>sinTildes(a)===sinTildes(b);
+function proximoNumeroCert(contratista,excluirId){
+  return Store.certificados.filter(x=>x.id!==excluirId&&mismoContratista(x.contratista,contratista)).reduce((m,x)=>Math.max(m,Number(x.numero)||0),0)+1;
+}
+function copiaEdicion(c){
+  const w=JSON.parse(JSON.stringify(c));
+  w.renglones=(w.renglones||[]).map(r=>Object.assign({},r,{cantidad:aTexto(r.cantidad),precio:aTexto(r.precio),montoARS:aTexto(r.montoARS),avanceManual:aTexto(r.avanceManual)}));
+  w.mep=aTexto(w.mep); return w;
+}
+function nuevoCert(historico){
+  if(!cerrarEditorCert()) return;
+  const cont=contratistas()[0]||'';
+  CERT.c={ id:null, historico:!!historico, estado:'borrador', contratista:cont, numero:String(proximoNumeroCert(cont)), fecha:hoyISO(), periodoDesde:'', periodoHasta:'',
+    mep:'', financia:FONDO, formaPago:'Transferencia', estadoPago:'Pendiente', comprobante:'', notas:'', renglones:[], _numAuto:true };
+  CERT.sucio=false;
+  if(!historico) cotizacionMEP(CERT.c.fecha).then(r=>{ if(CERT.c&&!CERT.c.mep&&r){ CERT.c.mep=aTexto(r.valor); renderEditorCert(); } });
+  irA('certificados'); renderEditorCert(); document.getElementById('ct-editor').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function abrirCertificado(id){
+  const c=Store.certificados.find(x=>x.id===id); if(!c) return;
+  if(CERT.c&&CERT.c.id===id){ irA('certificados'); return; }
+  if(!cerrarEditorCert()) return;
+  CERT.c=copiaEdicion(c); CERT.sucio=false; irA('certificados'); renderEditorCert();
+  document.getElementById('ct-editor').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function cerrarEditorCert(forzar){
+  if(!forzar&&CERT.sucio&&!confirm('El certificado tiene cambios sin guardar. ¿Descartarlos?')) return false;
+  CERT.c=null; CERT.sucio=false; const e=document.getElementById('ct-editor'); if(e) e.innerHTML=''; return true;
+}
+const nuevoRenglon=()=>({ id:'rg'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), itemId:'', unidad:'', tipoPrecio:'unitario', cantidad:'', precio:'', montoARS:'', avanceManual:'', gastoId:null });
+function ultimoPrecioItem(itemId,tipo){ let p=null;
+  certsAprobados().forEach(c=>(c.renglones||[]).forEach(r=>{ if(r.itemId===itemId&&(r.tipoPrecio||'unitario')===tipo&&Number(r.precio)) p=Number(r.precio); })); return p; }
+function prepararRenglon(r,c){
+  const it=itemPorId(r.itemId); if(!it) return;
+  r.unidad=it.unidad||(r.unidad||'gl');
+  const pu=ultimoPrecioItem(it.id,r.tipoPrecio||'unitario'); if(pu!==null&&!c.historico&&r.precio==='') r.precio=aTexto(pu);
+  const ant=estadoItemAntes(it.id,c); r.avanceManual=aTexto(redondear(ant.pct*100,1));
+}
+/* Monto de un renglón: unitario = cantidad × precio; global = precio. En los históricos se carga el monto. */
+function montoRenglon(c,r){
+  if(c.historico) return numAR(r.montoARS)||0;
+  const p=numAR(r.precio)||0; return r.tipoPrecio==='global'?p:(numAR(r.cantidad)||0)*p;
+}
+function precioRenglon(c,r){ if(!c.historico) return numAR(r.precio);
+  const m=numAR(r.montoARS)||0, q=numAR(r.cantidad); return r.tipoPrecio==='global'?m:(q?m/q:null); }
+/* Recorre los renglones con el acumulado de cada ítem */
+function analizarRenglones(c){
+  const run={}; const out={};
+  (c.renglones||[]).forEach(r=>{ const it=itemPorId(r.itemId); if(!it){ out[r.id]={it:null}; return; }
+    if(!run[it.id]) run[it.id]=estadoItemAntes(it.id,c);
+    const ant=Object.assign({},run[it.id]); const comp=esCompatible(it,r); const q=numAR(r.cantidad)||0;
+    if(comp){ run[it.id].acc+=q; run[it.id].pct=Math.min(1,Math.max(0,run[it.id].acc/Number(it.cantidadComputo))); }
+    out[r.id]={it,comp,ant,acc:run[it.id].acc,pct:comp?run[it.id].pct:(numAR(r.avanceManual)||0)/100,exceso:comp&&run[it.id].acc>Number(it.cantidadComputo)+1e-9}; });
+  return out;
+}
+function gastoDisponibleHist(g,c){ return mismoContratista(g.proveedor,c.contratista)&&(!g.certificadoId||g.certificadoId===c.id); }
+function validarCert(c,aprobar){
+  const errores=[], porR={}, avisos=[];
+  const marca=(r,campo,msg)=>{ (porR[r.id]=porR[r.id]||{})[campo]=msg; };
+  if(!c.contratista) errores.push('Elegí el contratista.');
+  const n=numAR(c.numero); if(!(n>0)||Math.round(n)!==n) errores.push('El número de certificado tiene que ser un entero mayor a cero.');
+  else if(Store.certificados.some(x=>x.id!==c.id&&mismoContratista(x.contratista,c.contratista)&&Number(x.numero)===n)) errores.push('Ya hay un certificado N° '+n+' de '+c.contratista+'.');
+  if(!c.fecha) errores.push('Falta la fecha.');
+  if(c.periodoDesde&&c.periodoHasta&&c.periodoHasta<c.periodoDesde) errores.push('El período termina antes de empezar.');
+  if(!aprobar) return {errores,porR,avisos};
+  if(!(c.renglones||[]).length) errores.push('El certificado no tiene renglones.');
+  if(!c.historico&&!(numAR(c.mep)>0)) errores.push('Falta el dólar MEP de la fecha del certificado.');
+  const vistos={}; const an=analizarRenglones(c);
+  (c.renglones||[]).forEach(r=>{ const it=itemPorId(r.itemId);
+    if(!it){ marca(r,'itemId','Elegí el ítem'); return; }
+    const clave=r.itemId+'|'+(c.historico?r.gastoId:''); if(vistos[clave]) marca(r,'itemId',c.historico?'El ítem se repite en el mismo gasto':'El ítem se repite en este certificado'); vistos[clave]=1;
+    if(!r.unidad) marca(r,'unidad','Falta la unidad');
+    const q=numAR(r.cantidad), p=numAR(r.precio), m=numAR(r.montoARS);
+    if(Number.isNaN(q)) marca(r,'cantidad','Cantidad inválida');
+    if(r.tipoPrecio!=='global'&&!q) marca(r,'cantidad','Con precio unitario la cantidad no puede ser cero');
+    if(c.historico){ if(m===null||Number.isNaN(m)) marca(r,'montoARS','Falta el monto'); if(!r.gastoId) marca(r,'gastoId','Falta el gasto'); }
+    else if(p===null||Number.isNaN(p)) marca(r,'precio','Falta el precio');
+    const a=an[r.id];
+    if(a&&a.comp&&a.acc<-1e-9) marca(r,'cantidad','El acumulado del ítem quedaría negativo');
+    if(a&&!a.comp){ const v=numAR(r.avanceManual); if(v===null||Number.isNaN(v)||v<0||v>100) marca(r,'avanceManual','Avance entre 0 y 100'); }
+    if(a&&a.exceso) avisos.push(nombreItem(it)+': el acumulado supera el cómputo (el avance se topea en 100 %).');
+  });
+  if(c.historico){
+    const porG={}; (c.renglones||[]).forEach(r=>{ if(r.gastoId) porG[r.gastoId]=(porG[r.gastoId]||0)+(numAR(r.montoARS)||0); });
+    Object.keys(porG).forEach(gid=>{ const g=Store.gastos.find(x=>x.id===gid);
+      if(!g){ errores.push('Uno de los gastos ya no existe.'); return; }
+      if(g.certificadoId&&g.certificadoId!==c.id) errores.push('La carga del '+fmtFecha(g.fecha)+' ya está vinculada a otro certificado.');
+      if(Math.abs(porG[gid]-(g.montoARS||0))>0.005) errores.push('Los montos repartidos del gasto del '+fmtFecha(g.fecha)+' suman '+fmtARS(porG[gid],2)+' y el gasto es de '+fmtARS(g.montoARS,2)+'. Tienen que dar exacto.'); });
+  } else if(Store.certificados.some(x=>x.id!==c.id&&x.estado==='aprobado'&&!x.historico&&mismoContratista(x.contratista,c.contratista)&&(x.fecha||'')>(c.fecha||'')))
+    errores.push('Hay un certificado aprobado de '+c.contratista+' con fecha posterior. No se aprueba uno con fecha anterior a otro ya aprobado.');
+  if(Object.keys(porR).length) errores.push('Hay renglones con datos faltantes o inválidos (marcados en rojo).');
+  return {errores,porR,avisos};
+}
+function totalesCert(c){
+  let ars=0,usd=0;
+  (c.renglones||[]).forEach(r=>{ const m=montoRenglon(c,r); ars+=m;
+    const cot=c.historico?((Store.gastos.find(g=>g.id===r.gastoId)||{}).cotizacion||Number(r.cotizacion)||0):(numAR(c.mep)||Number(r.cotizacion)||0);
+    if(cot) usd+=m/cot; });
+  return {ars,usd};
+}
+
+/* ---- Listado ---- */
+function renderCertificados(){
+  const cont=document.getElementById('ct-lista'); if(!cont) return;
+  const lista=Store.certificados.slice().sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')||natCmp(b.numero,a.numero));
+  if(!lista.length) cont.innerHTML='<div class="empty"><strong>Todavía no hay certificados</strong>Cargá el cómputo y después tocá "Nuevo certificado". Para la mano de obra ya cargada como gasto, usá "Nuevo certificado histórico".</div>';
+  else { let h='<table><thead><tr><th>N°</th><th>Contratista</th><th>Fecha</th><th>Período</th><th class="money">Renglones</th><th class="money">Total $</th><th class="money">Total USD</th><th>Estado</th><th></th></tr></thead><tbody>';
+    lista.forEach(c=>{ const t=totalesCert(c);
+      h+='<tr class="'+(CERT.c&&CERT.c.id===c.id?'ct-sel':'')+'"><td style="font-weight:700;font-family:\'Montserrat\',sans-serif;">'+esc(c.numero)+'</td><td>'+esc(c.contratista)+'</td><td>'+fmtFecha(c.fecha)+'</td>'
+        +'<td style="font-size:12px;color:var(--n-500);">'+(c.periodoDesde||c.periodoHasta?fmtFecha(c.periodoDesde)+' – '+fmtFecha(c.periodoHasta):'—')+'</td>'
+        +'<td class="money" style="font-weight:400;">'+(c.renglones||[]).length+'</td><td class="money'+(t.ars<0?' ct-neg':'')+'">'+fmtARS(t.ars,2)+'</td><td class="money" style="font-weight:400;">'+fmtUSD(t.usd,2)+'</td>'
+        +'<td>'+(c.estado==='aprobado'?'<span class="tag verde">Aprobado</span>':'<span class="tag marron">Borrador</span>')+(c.historico?' <span class="tag">Histórico</span>':'')+'</td>'
+        +'<td style="text-align:right;"><button class="btn btn-ghost btn-sm" data-ctabrir="'+esc(c.id)+'">Abrir</button></td></tr>'; });
+    cont.innerHTML=h+'</tbody></table>';
+    cont.querySelectorAll('[data-ctabrir]').forEach(b=>b.addEventListener('click',()=>abrirCertificado(b.dataset.ctabrir))); }
+  /* si el certificado abierto cambió en la nube y no hay cambios locales, se refresca */
+  if(CERT.c&&CERT.c.id&&!CERT.sucio){ const s=Store.certificados.find(x=>x.id===CERT.c.id); if(!s) cerrarEditorCert(true); else if(JSON.stringify(copiaEdicion(s))!==JSON.stringify(Object.assign({},CERT.c,{_numAuto:undefined}))) { CERT.c=copiaEdicion(s); renderEditorCert(); } }
+}
+
+/* ---- Editor ---- */
+function opcionesItems(actual){
+  const grupos={}; Store.items.filter(i=>i.activo!==false||i.id===actual).forEach(i=>{ (grupos[i.rubro||'Sin rubro']=grupos[i.rubro||'Sin rubro']||[]).push(i); });
+  const orden={}; let n=0; MACRORUBROS.forEach(m=>m.rubros.forEach(r=>{ orden[r]=n++; }));
+  return '<option value="">Elegí un ítem</option>'+Object.keys(grupos).sort((a,b)=>(orden[a]===undefined?1e9:orden[a])-(orden[b]===undefined?1e9:orden[b]))
+    .map(r=>'<optgroup label="'+esc(r)+'">'+grupos[r].sort((a,b)=>natCmp(a.codigo,b.codigo)).map(i=>'<option value="'+esc(i.id)+'"'+(i.id===actual?' selected':'')+'>'+esc(nombreItem(i))+'</option>').join('')+'</optgroup>').join('');
+}
+let DIBUJANDO_CERT=false;
+function renderEditorCert(validacion){
+  if(DIBUJANDO_CERT) return; DIBUJANDO_CERT=true;
+  try{ dibujarEditorCert(validacion); } finally { DIBUJANDO_CERT=false; }
+}
+function dibujarEditorCert(validacion){
+  const box=document.getElementById('ct-editor'); if(!box) return;
+  const c=CERT.c; if(!c){ box.innerHTML=''; return; }
+  const ro=c.estado==='aprobado'; const v=validacion||{errores:[],porR:{},avisos:[]};
+  const an=analizarRenglones(c); const tot=totalesCert(c);
+  const inp=(campo,tipo,extra)=>'<input type="'+(tipo||'text')+'" data-ch="'+campo+'" value="'+esc(c[campo]||'')+'"'+(ro?' disabled':'')+(extra||'')+'>';
+  const sel=(campo,ops)=>'<select data-ch="'+campo+'"'+(ro?' disabled':'')+'>'+ops.map(o=>'<option'+(o===c[campo]?' selected':'')+'>'+esc(o)+'</option>').join('')+'</select>';
+  const conts=contratistas(); if(c.contratista&&conts.indexOf(c.contratista)<0) conts.unshift(c.contratista);
+  let h='<div class="panel ct-panel"><div class="panel-head"><div><div class="panel-title">'+(c.historico?'Certificado histórico':'Certificado')+(c.id?' N° '+esc(c.numero)+' · '+esc(c.contratista):' nuevo')+'</div>'
+    +'<p class="panel-sub">'+(ro?(c.historico?'Aprobado: vincula gastos ya cargados.':'Aprobado: ya generó sus gastos de mano de obra.')+' Para cambiarlo, reabrilo.'
+      :(c.historico?'Elegí los gastos de mano de obra ya cargados de este contratista y asignales ítem y cantidad. No se crea ningún gasto.':'Mientras esté en borrador no genera gastos ni mueve el avance.'))+'</p></div>'
+    +'<div>'+(ro?'<span class="tag verde">Aprobado</span>':'<span class="tag marron">Borrador</span>')+(c.historico?' <span class="tag">Histórico</span>':'')+'</div></div>';
+  h+='<div class="form-grid ct-cab">'
+    +'<div class="field col-2"><label>Contratista *</label><select data-ch="contratista"'+(ro?' disabled':'')+'><option value="">Elegí</option>'+conts.map(o=>'<option'+(o===c.contratista?' selected':'')+'>'+esc(o)+'</option>').join('')+'</select></div>'
+    +'<div class="field"><label>N° *</label>'+inp('numero','number',' min="1" step="1"')+'</div>'
+    +'<div class="field"><label>Fecha *</label>'+inp('fecha','date')+'</div>'
+    +'<div class="field"><label>Período desde</label>'+inp('periodoDesde','date')+'</div>'
+    +'<div class="field"><label>Período hasta</label>'+inp('periodoHasta','date')+'</div>'
+    +(c.historico?'':'<div class="field"><label>Dólar MEP *</label>'+inp('mep','text',' inputmode="decimal"')+'<span class="hint">El de la fecha del certificado. Se completa solo.</span></div>'
+      +'<div class="field"><label>Financiado por</label>'+sel('financia',FINANCIA_OPC)+'</div>'
+      +'<div class="field"><label>Forma de pago</label>'+sel('formaPago',PAGOS)+'</div>'
+      +'<div class="field"><label>Estado de pago</label>'+sel('estadoPago',ESTADOS_PAGO)+'<span class="hint">Los gastos se crean así; después se marcan pagados como cualquier gasto.</span></div>'
+      +'<div class="field"><label>Comprobante</label>'+inp('comprobante')+'</div>')
+    +'<div class="field col-2"><label>Notas</label>'+inp('notas')+'</div>'
+    +'</div>';
+  if(!c.historico) h+='<p class="panel-sub" style="margin:10px 0 0;">Mano de obra sin IVA: los gastos se guardan como "'+esc(FISCAL_SIN)+'".</p>';
+  // renglones
+  const cols=c.historico?['Gasto','Ítem','Unidad','Tipo','Cantidad','Monto $','Precio $','Cómputo','Anterior','Acumulado','Avance','']:['Ítem','Unidad','Tipo','Cantidad','Precio $','Monto $','Cómputo','Anterior','Acumulado','Avance',''];
+  h+='<div class="table-wrap ct-wrap"><table class="ct-tabla"><thead><tr>'+cols.map((t,i)=>'<th'+(['Cantidad','Monto $','Precio $','Cómputo','Anterior','Acumulado'].indexOf(t)>=0?' class="money"':'')+'>'+t+'</th>').join('')+'</tr></thead><tbody>';
+  if(!(c.renglones||[]).length) h+='<tr><td colspan="'+cols.length+'" class="empty" style="padding:22px;">Sin renglones todavía.</td></tr>';
+  const nums=numerosDeCarga();
+  (c.renglones||[]).forEach(r=>{
+    const a=an[r.id]||{}; const it=a.it; const e=v.porR[r.id]||{}; const er=k=>e[k]?' class="cp-err" title="'+esc(e[k])+'"':'';
+    const monto=montoRenglon(c,r); const q=numAR(r.cantidad);
+    const etiqueta='<span class="ct-etq">'+etiquetaRenglon(monto,q)+'</span>';
+    let fila='<tr data-rg="'+esc(r.id)+'" class="'+(monto<0||q<0?'ct-neg-row':'')+'">';
+    if(c.historico){ const g=Store.gastos.find(x=>x.id===r.gastoId);
+      fila+='<td class="ct-gasto"'+er('gastoId')+'>'+(g?'<strong>N° '+(nums[claveCarga(g)]||'—')+'</strong> · '+fmtFecha(g.fecha)+'<div>'+esc(g.concepto||'')+' · '+fmtARS(g.montoARS,2)+'</div>':'—')
+        +(!ro&&g?'<button type="button" class="cp-link" data-ctrepartir="'+esc(r.id)+'">Repartir en otro ítem</button>':'')+'</td>'; }
+    fila+='<td><select data-cr="itemId"'+(ro?' disabled':'')+er('itemId')+' class="ct-item">'+opcionesItems(r.itemId)+'</select>'+etiqueta+'</td>'
+      +'<td><select data-cr="unidad"'+(ro?' disabled':'')+er('unidad')+'><option value="">—</option>'+unidadesMedida().concat(r.unidad&&unidadesMedida().indexOf(r.unidad)<0?[r.unidad]:[]).map(u=>'<option'+(u===r.unidad?' selected':'')+'>'+esc(u)+'</option>').join('')+'</select></td>'
+      +'<td><select data-cr="tipoPrecio"'+(ro?' disabled':'')+'><option value="unitario"'+(r.tipoPrecio!=='global'?' selected':'')+'>Unitario</option><option value="global"'+(r.tipoPrecio==='global'?' selected':'')+'>Global</option></select></td>'
+      +'<td><input data-cr="cantidad" class="ct-num" inputmode="decimal" value="'+esc(r.cantidad)+'"'+(ro?' disabled':'')+er('cantidad')+' placeholder="'+(r.tipoPrecio==='global'?'opcional':'')+'"></td>';
+    if(c.historico) fila+='<td><input data-cr="montoARS" class="ct-num" inputmode="decimal" value="'+esc(r.montoARS)+'"'+(ro?' disabled':'')+er('montoARS')+'></td>'
+      +'<td class="money ct-calc ct-c-pu">'+(precioRenglon(c,r)!=null?fmtARS(precioRenglon(c,r),2):'—')+'</td>';
+    else fila+='<td><input data-cr="precio" class="ct-num" inputmode="decimal" value="'+esc(r.precio)+'"'+(ro?' disabled':'')+er('precio')+'></td>'
+      +'<td class="money ct-calc ct-monto'+(monto<0?' ct-neg':'')+'">'+fmtARS(monto,2)+'</td>';
+    fila+='<td class="money ct-calc">'+(it?(tieneBase(it)?fmtCant(it.cantidadComputo)+' '+esc(it.unidad):'sin base'):'—')+'</td>'
+      +'<td class="money ct-calc ct-c-ant">'+(it&&a.comp?fmtCant(a.ant.acc):'—')+'</td>'
+      +'<td class="money ct-calc ct-c-acc'+(a.exceso?' cp-exceso':'')+'">'+(it&&a.comp?fmtCant(a.acc):'—')+'</td>'
+      +'<td class="ct-av">'+(it?(a.comp?'<span class="ct-auto" title="Sale de la cantidad">'+fmtPct(a.pct*100)+'</span>'
+        :'<input data-cr="avanceManual" class="ct-num ct-avm" inputmode="decimal" value="'+esc(r.avanceManual)+'"'+(ro?' disabled':'')+er('avanceManual')+' title="Avance físico acumulado del ítem en este certificado (%)"><span class="ct-pct">%</span>'):'—')+'</td>'
+      +'<td>'+(ro?'':'<button type="button" class="btn btn-ghost btn-sm" data-ctquitar="'+esc(r.id)+'" aria-label="Quitar renglón">✕</button>')+'</td></tr>';
+    h+=fila;
+  });
+  h+='<tr class="total-row"><td colspan="'+(c.historico?5:5)+'">Total del certificado</td><td class="money'+(tot.ars<0?' ct-neg':'')+'">'+fmtARS(tot.ars,2)+'</td><td class="money" colspan="'+(cols.length-6)+'" style="text-align:left;font-weight:400;">'+fmtUSD(tot.usd,2)+(c.historico?' (al dólar de cada gasto)':(numAR(c.mep)>0?' al MEP '+fmtARS(numAR(c.mep),2):''))+'</td></tr>';
+  h+='</tbody></table></div>';
+  if(!ro){
+    h+='<div class="btn-row ct-add">';
+    if(c.historico){ const disp=Store.gastos.filter(g=>gastoDisponibleHist(g,c)&&!(c.renglones||[]).some(r=>r.gastoId===g.id)).sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''));
+      h+='<select id="ct-gasto-sel"><option value="">'+(c.contratista?(disp.length?'Agregar un gasto de '+esc(c.contratista)+' sin certificar…':'No quedan gastos de '+esc(c.contratista)+' sin certificar'):'Elegí primero el contratista')+'</option>'
+        +disp.map(g=>'<option value="'+esc(g.id)+'">N° '+(nums[claveCarga(g)]||'—')+' · '+fmtFecha(g.fecha)+' · '+esc(g.tipo||'')+' · '+esc(g.concepto||'')+' · '+fmtARS(g.montoARS,2)+'</option>').join('')+'</select>';
+    } else {
+      const rubrosConItems=Object.keys(memoAvance().porRubro).sort(natCmp);
+      h+='<button type="button" class="btn btn-sm" id="ct-mas">Agregar renglón</button>'
+        +'<select id="ct-rubro-sel"><option value="">Agregar todos los ítems de un rubro…</option>'+rubrosConItems.map(r=>'<option>'+esc(r)+'</option>').join('')+'</select>';
+    }
+    h+='</div>';
+  }
+  if(v.errores.length) h+='<div class="aviso rojo" style="margin:14px 0 0;"><div><strong>No se puede '+(validacion&&validacion.accion||'guardar')+'.</strong><ul class="ct-errs">'+v.errores.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div></div>';
+  if(v.avisos.length) h+='<div class="aviso marron" style="margin:14px 0 0;"><div>'+v.avisos.map(esc).join('<br>')+'</div></div>';
+  if(ro&&c.aprobadoPor) h+='<p class="panel-sub" style="margin-top:12px;">Aprobado por '+esc(c.aprobadoPor)+' el '+esc(fmtFechaHora(c.aprobadoEl))+'.'+(c.nroCarga&&!c.historico?' Carga N° '+esc(c.nroCarga)+'.':'')+'</p>';
+  h+='<div class="btn-row" style="margin-top:18px;">'
+    +(ro?'<button class="btn" id="ct-reabrir">Reabrir</button>'
+      :'<button class="btn btn-primary" id="ct-aprobar">Aprobar'+(c.historico?' y vincular':'')+'</button><button class="btn" id="ct-guardar">Guardar borrador</button>'+(c.id?'<button class="btn" id="ct-borrar" style="color:#9E2B25;">Borrar</button>':''))
+    +'<button class="btn" id="ct-xlsx">Planilla Excel</button><button class="btn" id="ct-pdf">Planilla PDF</button>'
+    +'<button class="btn btn-ghost" id="ct-cerrar">Cerrar</button></div></div>';
+  box.innerHTML=h;
+}
+function eventosCertificados(){
+  const box=document.getElementById('ct-editor');
+  box.addEventListener('input',e=>{ const t=e.target; const c=CERT.c; if(!c||c.estado==='aprobado') return;
+    if(t.dataset.ch&&t.tagName!=='SELECT'&&t.type!=='date'){ c[t.dataset.ch]=t.value; if(t.dataset.ch==='numero') c._numAuto=false; CERT.sucio=true; }
+    if(t.dataset.cr&&t.tagName!=='SELECT'){ const r=c.renglones.find(x=>x.id===t.closest('tr').dataset.rg); if(r){ r[t.dataset.cr]=t.value; CERT.sucio=true; refrescarCalculosCert(); } } });
+  box.addEventListener('change',e=>{ const t=e.target; const c=CERT.c; if(!c) return;
+    if(t.id==='ct-gasto-sel'&&t.value){ const g=Store.gastos.find(x=>x.id===t.value); if(g){ const r=nuevoRenglon(); r.gastoId=g.id; r.montoARS=aTexto(g.montoARS); c.renglones.push(r); CERT.sucio=true; renderEditorCert(); } return; }
+    if(t.id==='ct-rubro-sel'&&t.value){ let n=0; memoAvance().porRubro[t.value].items.slice().sort((a,b)=>natCmp(a.codigo,b.codigo)).forEach(it=>{
+        if(c.renglones.some(r=>r.itemId===it.id)) return; const r=nuevoRenglon(); r.itemId=it.id; prepararRenglon(r,c); c.renglones.push(r); n++; });
+      CERT.sucio=true; renderEditorCert(); toast(n?n+' renglón(es) agregados':'Todos los ítems de ese rubro ya están'); return; }
+    if(c.estado==='aprobado') return;
+    if(t.dataset.ch){ const viejo=c[t.dataset.ch]; c[t.dataset.ch]=t.value; CERT.sucio=true;
+      if(t.dataset.ch==='contratista'){ if(c._numAuto) c.numero=String(proximoNumeroCert(c.contratista,c.id));
+        if(c.historico) c.renglones=c.renglones.filter(r=>{ const g=Store.gastos.find(x=>x.id===r.gastoId); return g&&mismoContratista(g.proveedor,c.contratista); });
+        renderEditorCert(); }
+      if(t.dataset.ch==='fecha'&&!c.historico&&t.value&&t.value!==viejo){ c.mep=''; renderEditorCert();
+        cotizacionMEP(t.value).then(r=>{ if(CERT.c===c&&!c.mep&&r){ c.mep=aTexto(r.valor); renderEditorCert(); } }); }
+      if(t.dataset.ch==='mep') renderEditorCert();
+      return; }
+    if(t.dataset.cr){ const r=c.renglones.find(x=>x.id===t.closest('tr').dataset.rg); if(!r) return; r[t.dataset.cr]=t.value; CERT.sucio=true;
+      if(t.dataset.cr==='itemId') prepararRenglon(r,c);
+      /* los desplegables cambian columnas y redibujan; los números se actualizan en el lugar
+         (si se redibujara al salir del campo, se perdería el clic en el botón siguiente) */
+      if(t.tagName==='SELECT'){ const foco=t.dataset.cr; renderEditorCert(); const el=box.querySelector('tr[data-rg="'+r.id+'"] [data-cr="'+foco+'"]'); if(el) el.focus(); }
+      else refrescarCalculosCert(); }
+  });
+  box.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||!CERT.c) return; const c=CERT.c;
+    if(b.id==='ct-mas'){ c.renglones.push(nuevoRenglon()); CERT.sucio=true; renderEditorCert(); const s=box.querySelectorAll('.ct-item'); if(s.length) s[s.length-1].focus(); }
+    else if(b.dataset.ctquitar){ c.renglones=c.renglones.filter(r=>r.id!==b.dataset.ctquitar); CERT.sucio=true; renderEditorCert(); }
+    else if(b.dataset.ctrepartir){ const r0=c.renglones.find(r=>r.id===b.dataset.ctrepartir); if(!r0) return; const g=Store.gastos.find(x=>x.id===r0.gastoId);
+      const usado=c.renglones.filter(r=>r.gastoId===r0.gastoId).reduce((s,r)=>s+(numAR(r.montoARS)||0),0);
+      const r=nuevoRenglon(); r.gastoId=r0.gastoId; r.montoARS=aTexto(redondear((g?g.montoARS:0)-usado)); c.renglones.splice(c.renglones.indexOf(r0)+1,0,r); CERT.sucio=true; renderEditorCert(); }
+    else if(b.id==='ct-guardar') guardarBorradorCert();
+    else if(b.id==='ct-aprobar') aprobarCert();
+    else if(b.id==='ct-reabrir') reabrirCert();
+    else if(b.id==='ct-borrar') borrarCert(b);
+    else if(b.id==='ct-xlsx') exportarPlanillaCert(c);
+    else if(b.id==='ct-pdf') imprimirPlanillaCert(c);
+    else if(b.id==='ct-cerrar') { if(cerrarEditorCert()) renderCertificados(); }
+  });
+}
+function etiquetaRenglon(monto,q){ return monto<0?'<span class="tag rojo">Descuento</span>':(q<0?'<span class="tag rojo">Corrección</span>':''); }
+function refrescarCalculosCert(){
+  const c=CERT.c; if(!c) return; const an=analizarRenglones(c);
+  document.querySelectorAll('#ct-editor tr[data-rg]').forEach(tr=>{ const r=c.renglones.find(x=>x.id===tr.dataset.rg); const a=an[tr.dataset.rg]; if(!r||!a) return;
+    actualizarCalculosRenglon(tr,r);
+    const ant=tr.querySelector('.ct-c-ant'), acc=tr.querySelector('.ct-c-acc'), au=tr.querySelector('.ct-auto');
+    if(ant) ant.textContent=a.it&&a.comp?fmtCant(a.ant.acc):'—';
+    if(acc){ acc.textContent=a.it&&a.comp?fmtCant(a.acc):'—'; acc.classList.toggle('cp-exceso',!!a.exceso); }
+    if(au) au.textContent=fmtPct(a.pct*100); });
+}
+function actualizarCalculosRenglon(tr,r){
+  const c=CERT.c; const m=montoRenglon(c,r);
+  const et=tr.querySelector('.ct-etq'); if(et) et.innerHTML=etiquetaRenglon(m,numAR(r.cantidad));
+  tr.classList.toggle('ct-neg-row',m<0||numAR(r.cantidad)<0);
+  const td=tr.querySelector('.ct-monto'); if(td){ td.textContent=fmtARS(m,2); td.classList.toggle('ct-neg',m<0); }
+  if(c.historico){ const p=precioRenglon(c,r); const cel=tr.querySelector('.ct-c-pu'); if(cel) cel.textContent=p!=null?fmtARS(p,2):'—'; }
+  const t=totalesCert(c); const tot=document.querySelector('#ct-editor .total-row');
+  if(tot){ tot.children[1].textContent=fmtARS(t.ars,2); tot.children[1].classList.toggle('ct-neg',t.ars<0); }
+}
+
+/* ---- Guardar, aprobar, reabrir, borrar ---- */
+function docCert(c,extra){
+  const d=Object.assign({},c,extra||{}); delete d._numAuto;
+  d.numero=numAR(c.numero); d.mep=c.historico?null:numAR(c.mep);
+  d.renglones=(c.renglones||[]).map(r=>({ id:r.id, itemId:r.itemId, unidad:r.unidad||'', tipoPrecio:r.tipoPrecio==='global'?'global':'unitario',
+    cantidad:numAR(r.cantidad), precio:c.historico?precioRenglon(c,r):numAR(r.precio), montoARS:redondear(montoRenglon(c,r)),
+    avanceManual:(()=>{ const it=itemPorId(r.itemId); if(it&&esCompatible(it,r)) return null; const v=numAR(r.avanceManual); return Number.isNaN(v)?null:v; })(),
+    gastoId:r.gastoId||null, cotizacion:r.cotizacion||null }));
+  const t=totalesCert(c); d.totalARS=redondear(t.ars); d.totalUSD=redondear(t.usd);
+  d.actualizadoEn=new Date().toISOString(); d.actualizadoPor=USUARIO?USUARIO.nombre:'—';
+  if(!d.creadoEn){ d.creadoEn=d.actualizadoEn; d.creadoPor=d.actualizadoPor; }
+  return d;
+}
+async function guardarBorradorCert(){
+  const c=CERT.c; const v=validarCert(c,false); if(v.errores.length){ v.accion='guardar'; renderEditorCert(v); return; }
+  if(!c.id) c.id=Store.nuevoId();
+  try{ await escribirOps([opSet('certificados',docCert(c,{estado:'borrador'}))]); CERT.c=copiaEdicion(Store.certificados.find(x=>x.id===c.id)); CERT.sucio=false;
+    renderTodo(); renderEditorCert(); toast('Borrador guardado'); }
+  catch(e){ toast('No se pudo guardar: '+e.message,true); }
+}
+async function aprobarCert(){
+  const c=CERT.c; const v=validarCert(c,true); v.accion='aprobar';
+  if(v.errores.length){ renderEditorCert(v); return; }
+  const t=totalesCert(c);
+  if(t.ars<0&&!confirm('El certificado da un total negativo ('+fmtARS(t.ars,2)+'): descuenta mano de obra. ¿Aprobarlo igual?')) return;
+  if(!c.id) c.id=Store.nuevoId();
+  const ahora=new Date().toISOString(), quien=USUARIO?USUARIO.nombre:'—'; const ops=[];
+  if(c.historico){
+    const porG={}; c.renglones.forEach(r=>{ (porG[r.gastoId]=porG[r.gastoId]||[]).push(r); });
+    Object.keys(porG).forEach(gid=>{ const g=Store.gastos.find(x=>x.id===gid);
+      porG[gid].forEach(r=>{ r.cotizacion=g.cotizacion||null; });
+      ops.push(opSet('gastos',Object.assign({},g,{ certificadoId:c.id, certNumero:numAR(c.numero),
+        certVinculos:porG[gid].map(r=>({renglonId:r.id,itemId:r.itemId,cantidad:numAR(r.cantidad),unidadMedida:r.unidad,tipoPrecio:r.tipoPrecio,montoARS:redondear(numAR(r.montoARS))})) }))); });
+  } else {
+    const mep=numAR(c.mep); c.lote=c.lote||Store.nuevoLote();
+    if(!c.nroCarga&&c.renglones.some(r=>redondear(montoRenglon(c,r)))) c.nroCarga=maxNroCarga()+1;
+    const cuit=cuitDeProveedor(c.contratista);
+    c.renglones.forEach(r=>{ r.cotizacion=mep; const m=redondear(montoRenglon(c,r)); const it=itemPorId(r.itemId);
+      if(!m){ r.gastoId=null; return; }
+      const gid=Store.nuevoId(); r.gastoId=gid;
+      ops.push(opSet('gastos',{ id:gid, fecha:c.fecha, rubro:it.rubro, tipo:'Mano de obra', proveedor:c.contratista,
+        concepto:'Cert. N° '+numAR(c.numero)+' · '+nombreItem(it)+(m<0?' (descuento)':''), montoARS:m, montoBrutoARS:m, descuentoPct:0, cotizacion:mep, montoUSD:m/mep,
+        unidad:UNIDADES[0], financia:c.financia||FONDO, formaPago:c.formaPago||'', estado:c.estadoPago||'Pendiente', cargadoPor:quien,
+        comprobante:c.comprobante||'', notas:c.notas||'', fiscal:FISCAL_SIN, alicuota:null, ivaARS:0, ivaUSD:0, cuitProveedor:cuit,
+        lote:c.lote, nroCarga:c.nroCarga, origen:'certificado', certificadoId:c.id, certNumero:numAR(c.numero), itemId:r.itemId,
+        cantidad:numAR(r.cantidad), unidadMedida:r.unidad, tipoPrecio:r.tipoPrecio==='global'?'global':'unitario', puARS:r.tipoPrecio==='global'?m:numAR(r.precio) })); });
+  }
+  ops.push(opSet('certificados',docCert(c,{estado:'aprobado',aprobadoPor:quien,aprobadoEl:ahora})));
+  const btn=document.getElementById('ct-aprobar'); if(btn){ btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Aprobando…'; }
+  try{ await escribirOps(ops); CERT.c=copiaEdicion(Store.certificados.find(x=>x.id===c.id)); CERT.sucio=false; renderTodo(); renderEditorCert();
+    const n=ops.filter(o=>o.col==='gastos').length;
+    toast(c.historico?'Certificado histórico aprobado: '+n+' gasto(s) vinculados':'Certificado aprobado: '+n+' gasto(s) de mano de obra generados'); }
+  catch(e){ toast('No se pudo aprobar: '+e.message,true); renderEditorCert(); }
+}
+function quitarVinculo(g){ const d=Object.assign({},g); delete d.certificadoId; delete d.certNumero; delete d.certVinculos; return d; }
+async function reabrirCert(){
+  const c=CERT.c; const gastos=Store.gastos.filter(g=>g.certificadoId===c.id);
+  if(!confirm(c.historico?'Se reabre el certificado y se quitan los vínculos de '+gastos.length+' gasto(s). Los gastos no cambian. ¿Seguís?'
+    :'Se reabre el certificado: sus '+gastos.length+' gasto(s) de mano de obra van a la papelera y el avance se recalcula. Al aprobarlo de nuevo se regeneran. ¿Seguís?')) return;
+  const ops=[];
+  gastos.forEach(g=>{ if(c.historico) ops.push(opSet('gastos',quitarVinculo(g)));
+    else { const p=registroPapelera('gasto',g); ops.push(opSet('papelera',p)); ops.push(opDel('gastos',g.id)); } });
+  const d=docCert(c,{estado:'borrador'}); delete d.aprobadoPor; delete d.aprobadoEl; d.reabiertoPor=USUARIO?USUARIO.nombre:'—'; d.reabiertoEl=new Date().toISOString();
+  d.renglones.forEach(r=>{ if(!c.historico) r.gastoId=null; });
+  ops.push(opSet('certificados',d));
+  try{ await escribirOps(ops); CERT.c=copiaEdicion(Store.certificados.find(x=>x.id===c.id)); CERT.sucio=false; renderTodo(); renderEditorCert(); toast('Certificado reabierto'); }
+  catch(e){ toast('No se pudo reabrir: '+e.message,true); }
+}
+function borrarCert(btn){
+  const c=CERT.c; if(c.estado==='aprobado'){ toast('Solo se borran certificados en borrador',true); return; }
+  confirmarBorrado(btn,async ()=>{
+    const ops=[opSet('papelera',registroPapelera('certificado',Store.certificados.find(x=>x.id===c.id)||docCert(c))),opDel('certificados',c.id)];
+    Store.gastos.filter(g=>g.certificadoId===c.id).forEach(g=>ops.push(opSet('gastos',quitarVinculo(g))));
+    try{ await escribirOps(ops); cerrarEditorCert(true); renderTodo(); toast('Certificado borrado'); }catch(e){ toast('No se pudo borrar: '+e.message,true); } });
+}
+
+/* ---- Planilla del certificado: anterior / presente / acumulado ---- */
+function filasPlanilla(c){
+  const an=analizarRenglones(c);
+  return (c.renglones||[]).map(r=>{ const a=an[r.id]||{}; const it=a.it; const q=numAR(r.cantidad);
+    return { codigo:it?it.codigo||'':'', descripcion:it?it.descripcion:'(sin ítem)', unidad:r.unidad||'', computo:it&&tieneBase(it)?Number(it.cantidadComputo):null, unidadComputo:it?it.unidad||'':'',
+      anterior:a.comp?a.ant.acc:null, presente:q, acumulado:a.comp?a.acc:null, avance:it?a.pct*100:null, tipo:r.tipoPrecio==='global'?'Global':'Unitario',
+      precio:precioRenglon(c,r), monto:montoRenglon(c,r), exceso:!!a.exceso, gasto:c.historico?(Store.gastos.find(g=>g.id===r.gastoId)||null):null }; });
+}
+function exportarPlanillaCert(c){
+  if(!hayXLSX()){ toast('No cargó la librería de Excel.',true); return; }
+  const f=filasPlanilla(c), t=totalesCert(c), R=x=>x===null||x===undefined||Number.isNaN(x)?'':redondear(x,2);
+  const aoa=[['MAGNA DESARROLLOS'],['Obra Río Colorado · Certificado de mano de obra'+(c.historico?' (histórico)':'')],[],
+    ['Certificado N°',numAR(c.numero),'','Contratista',c.contratista],['Fecha',c.fecha,'','Período',(c.periodoDesde||'')+' a '+(c.periodoHasta||'')],
+    ['Estado',c.estado==='aprobado'?'Aprobado':'Borrador','','Dólar MEP',c.historico?'Al de cada gasto':R(numAR(c.mep))],[],
+    ['Código','Ítem','Unidad','Cantidad cómputo','Acumulado anterior','Presente','Acumulado actual','% avance','Tipo de precio','Precio unitario $','Monto presente $']];
+  f.forEach(x=>aoa.push([x.codigo,x.descripcion,x.unidad,x.computo===null?'':R(x.computo),R(x.anterior),R(x.presente),R(x.acumulado),x.avance===null?'':redondear(x.avance,1),x.tipo,R(x.precio),R(x.monto)]));
+  aoa.push([],['','Total del certificado $','','','','','','','','',R(t.ars)],['','Total USD','','','','','','','','',R(t.usd)]);
+  if(f.some(x=>x.exceso)) aoa.push([],['Nota: hay ítems cuyo acumulado supera el cómputo (el avance se topea en 100 %).']);
+  const ws=XLSX.utils.aoa_to_sheet(aoa); ws['!cols']=[{wch:8},{wch:44},{wch:8},{wch:12},{wch:12},{wch:10},{wch:12},{wch:9},{wch:11},{wch:14},{wch:16}];
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Certificado');
+  XLSX.writeFile(wb,'Certificado_'+String(c.contratista||'').replace(/[^\wáéíóúñÁÉÍÓÚÑ]+/g,'_')+'_N'+numAR(c.numero)+'.xlsx'); toast('Planilla exportada');
+}
+function imprimirPlanillaCert(c){
+  const f=filasPlanilla(c), t=totalesCert(c); const logo=(document.querySelector('.login-card img')||{}).src||'';
+  const n=x=>x===null||x===undefined||Number.isNaN(x)?'—':fmtCant(x);
+  const html='<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Certificado N° '+esc(c.numero)+' · '+esc(c.contratista)+'</title>'
+    +'<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">'
+    +'<style>@page{size:A4 landscape;margin:14mm}body{font-family:"Source Sans 3",Calibri,sans-serif;color:#303038;font-size:11px;margin:0}'
+    +'h1{font-family:Montserrat,sans-serif;font-size:16px;margin:0}header{display:flex;align-items:center;gap:16px;border-bottom:2px solid #0C6F46;padding-bottom:10px;margin-bottom:12px}'
+    +'header img{width:54px}.sub{color:#7B7B79;font-size:11px;margin-top:2px}.cab{display:grid;grid-template-columns:repeat(4,auto);gap:4px 18px;margin-bottom:12px;width:max-content}'
+    +'.cab b{font-family:Montserrat,sans-serif;font-size:9px;letter-spacing:.6px;text-transform:uppercase;color:#7B7B79;font-weight:700}'
+    +'table{width:100%;border-collapse:collapse}th{font-family:Montserrat,sans-serif;font-size:8.5px;letter-spacing:.4px;text-transform:uppercase;color:#7B7B79;text-align:left;border-bottom:1.5px solid #D2D2CF;padding:5px 4px}'
+    +'td{border-bottom:1px solid #F2F2F1;padding:5px 4px}.r{text-align:right;font-variant-numeric:tabular-nums}.neg{color:#9E2B25}.ex{color:#B3541E;font-weight:600}'
+    +'tfoot td{font-family:Montserrat,sans-serif;font-weight:700;border-top:1.5px solid #303038;border-bottom:0}.firmas{display:flex;gap:60px;margin-top:46px}.firmas div{border-top:1px solid #303038;padding-top:5px;width:220px;text-align:center;color:#5C5C5E}'
+    +'.pie{margin-top:18px;color:#9A9A97;font-size:9px}</style></head><body>'
+    +'<header>'+(logo?'<img src="'+logo+'" alt="Magna Desarrollos">':'')+'<div><h1>Certificado de mano de obra N° '+esc(c.numero)+(c.historico?' (histórico)':'')+'</h1><div class="sub">Magna Desarrollos · Obra Río Colorado</div></div></header>'
+    +'<div class="cab"><b>Contratista</b><span>'+esc(c.contratista)+'</span><b>Fecha</b><span>'+fmtFecha(c.fecha)+'</span>'
+    +'<b>Período</b><span>'+(c.periodoDesde||c.periodoHasta?fmtFecha(c.periodoDesde)+' a '+fmtFecha(c.periodoHasta):'—')+'</span><b>Estado</b><span>'+(c.estado==='aprobado'?'Aprobado':'Borrador')+'</span>'
+    +(c.historico?'':'<b>Dólar MEP</b><span>'+fmtARS(numAR(c.mep),2)+'</span>')+'</div>'
+    +'<table><thead><tr><th>Código</th><th>Ítem</th><th>Un.</th><th class="r">Cómputo</th><th class="r">Acum. anterior</th><th class="r">Presente</th><th class="r">Acum. actual</th><th class="r">% avance</th><th>Precio</th><th class="r">P. unitario</th><th class="r">Monto presente</th></tr></thead><tbody>'
+    +f.map(x=>'<tr><td>'+esc(x.codigo)+'</td><td>'+esc(x.descripcion)+'</td><td>'+esc(x.unidad)+'</td><td class="r">'+n(x.computo)+'</td><td class="r">'+n(x.anterior)+'</td><td class="r'+(x.presente<0?' neg':'')+'">'+n(x.presente)+'</td>'
+      +'<td class="r'+(x.exceso?' ex':'')+'">'+n(x.acumulado)+'</td><td class="r">'+(x.avance===null?'—':fmtPct(x.avance))+'</td><td>'+x.tipo+'</td><td class="r">'+(x.precio==null||Number.isNaN(x.precio)?'—':fmtARS(x.precio,2))+'</td><td class="r'+(x.monto<0?' neg':'')+'">'+fmtARS(x.monto,2)+'</td></tr>').join('')
+    +'</tbody><tfoot><tr><td colspan="10">Total del certificado</td><td class="r'+(t.ars<0?' neg':'')+'">'+fmtARS(t.ars,2)+'</td></tr><tr><td colspan="10" style="font-weight:500;">Equivalente en dólares</td><td class="r">'+fmtUSD(t.usd,2)+'</td></tr></tfoot></table>'
+    +(f.some(x=>x.exceso)?'<p class="ex">Hay ítems cuyo acumulado supera el cómputo; el avance se topea en 100 %.</p>':'')
+    +'<div class="firmas"><div>Contratista</div><div>Dirección de obra</div></div><div class="pie">Generado el '+esc(fmtFechaHora(new Date().toISOString()))+' · Mano de obra sin IVA</div>'
+    +'<script>window.onload=function(){setTimeout(function(){window.print();},300);}<\/script></body></html>';
+  const w=window.open('','_blank'); if(!w){ toast('El navegador bloqueó la ventana de la planilla. Permití ventanas emergentes para este sitio.',true); return; }
+  w.document.open(); w.document.write(html); w.document.close();
+}
+
+/* ---------- Integración con las pantallas existentes ---------- */
+function puedeSalirDeVista(v){
+  const act=document.querySelector('.view.active'); const id=act?act.id:'';
+  if(id==='view-computo'&&v!=='computo'&&COMP.sucio&&!confirm('Hay cambios sin guardar en el cómputo. ¿Salir igual? (Quedan en pantalla hasta que recargues.)')) return false;
+  if(id==='view-certificados'&&v!=='certificados'&&CERT.sucio&&!confirm('El certificado tiene cambios sin guardar. ¿Salir igual? (Quedan en pantalla hasta que recargues.)')) return false;
+  return true;
+}
+const CAMPOS_GASTO_BLOQUEO=['g-fecha','g-rubro','g-tipo','g-proveedor','btn-nuevo-prov','g-concepto','g-bruto','g-desc','g-monto','g-cot','g-unidad','g-fiscal','g-alicuota','g-iva','g-perc-iibb','g-perc-iva','g-perc-gan','g-otros','g-financia'];
+function bloquearFormGasto(g){
+  CAMPOS_GASTO_BLOQUEO.forEach(id=>{ const el=document.getElementById(id); if(el) el.disabled=!!g; });
+  const box=document.getElementById('g-aviso-cert'); if(!box) return;
+  if(g){ const c=certDeGasto(g);
+    box.innerHTML='<div class="aviso" style="margin:16px 0 0;"><div><strong>Este gasto viene del '+esc(etiquetaCert(c))+'.</strong> El monto, el rubro y el contratista se cambian desde el certificado. Acá solo se edita la forma de pago, el estado, el comprobante y las notas.</div></div>';
+    box.dataset.bloq='1'; }
+  else { box.dataset.bloq=''; box.innerHTML=''; avisoCertGasto(); }
+}
+/* Aviso (no bloquea) al cargar a mano mano de obra en un rubro que se certifica por ítems */
+function avisoCertGasto(){
+  const box=document.getElementById('g-aviso-cert'); if(!box||box.dataset.bloq==='1') return;
+  const r=(document.getElementById('g-rubro')||{}).value, t=(document.getElementById('g-tipo')||{}).value;
+  if(t==='Mano de obra'&&r&&rubroCertificaPorItems(r)){
+    if(box.dataset.rubro===r&&box.innerHTML) return; box.dataset.rubro=r;
+    box.innerHTML='<div class="aviso marron" style="margin:16px 0 0;"><div>Este rubro se certifica por ítems. ¿Querés cargar un certificado? Si es otra cosa, podés guardar el gasto igual. <button type="button" class="btn btn-sm" id="g-ir-cert" style="margin-left:6px;">Cargar un certificado</button></div></div>';
+    document.getElementById('g-ir-cert').addEventListener('click',()=>nuevoCert(false));
+  } else { box.dataset.rubro=''; box.innerHTML=''; }
+}
+function actualizarCampoAvance(){
+  const r=(document.getElementById('p-rubro')||{}).value; const inp=document.getElementById('p-avance'); if(!inp) return;
+  const a=r?avanceRubroAuto(r):null; inp.readOnly=!!a;
+  const lab=inp.parentElement.querySelector('.hint'); if(lab) lab.remove();
+  if(a){ inp.value=Math.round(a.pct); inp.insertAdjacentHTML('afterend','<span class="hint">Sale de los ítems del cómputo.</span>'); }
+}
+function filasItemsPresu(p){
+  const a=avanceRubroAuto(p.rubro); if(!a) return '';
+  return a.items.slice().sort((x,y)=>natCmp(x.codigo,y.codigo)).map(it=>{ const e=avanceItem(it.id);
+    return '<tr class="p-items oculta" data-pitrubro="'+esc(p.rubro)+'"><td colspan="10">'+esc(nombreItem(it))+' · <strong>'+fmtPct(e.pct*100)+'</strong>'
+      +(tieneBase(it)?' · '+fmtCant(e.acc)+' de '+fmtCant(it.cantidadComputo)+' '+esc(it.unidad):' · sin cantidad base'+(e.manual?' (avance cargado a mano)':''))
+      +(Number(it.moPresupUSD)>0?' · pesa '+fmtUSD(it.moPresupUSD):'')+'</td></tr>'; }).join('');
+}
+function renderCfgCertificados(){
+  const u=document.getElementById('cfg-unidades'); if(!u) return; const a=cfgAlertaMO();
+  if(document.activeElement!==u) u.value=unidadesMedida().join(', ');
+  const ch=document.getElementById('cfg-alerta-mo'); if(document.activeElement!==ch) ch.checked=a.activa;
+  const um=document.getElementById('cfg-alerta-umbral'); if(document.activeElement!==um) um.value=a.umbral;
+}
+function armarComputoYCertificados(){
+  eventosComputo(); eventosCertificados();
+  document.getElementById('cp-agregar').addEventListener('click',()=>agregarFilaComputo(true));
+  document.getElementById('cp-guardar').addEventListener('click',guardarComputo);
+  document.getElementById('cp-descartar').addEventListener('click',descartarComputo);
+  document.getElementById('cp-precargar').addEventListener('click',()=>document.getElementById('cp-file-pre').click());
+  document.getElementById('cp-importar').addEventListener('click',()=>document.getElementById('cp-file-imp').click());
+  document.getElementById('cp-exportar').addEventListener('click',exportarComputo);
+  document.getElementById('cp-file-pre').addEventListener('change',e=>{ if(e.target.files[0]) leerHojaComputo(e.target.files[0],precargarComputo); e.target.value=''; });
+  document.getElementById('cp-file-imp').addEventListener('change',e=>{ if(e.target.files[0]) leerHojaComputo(e.target.files[0],importarComputo); e.target.value=''; });
+  document.getElementById('cp-f-buscar').addEventListener('input',e=>{ COMP.filtro=e.target.value; renderComputo(); document.getElementById('cp-f-buscar').focus(); });
+  document.getElementById('cp-f-rubro').addEventListener('change',e=>{ COMP.filtroRubro=e.target.value; renderComputo(); });
+  document.getElementById('cp-f-inactivos').addEventListener('change',e=>{ COMP.verInactivos=e.target.checked; renderComputo(); });
+  document.getElementById('cp-m-cerrar').addEventListener('click',()=>document.getElementById('modal-cp').classList.add('oculto'));
+  document.getElementById('ct-nuevo').addEventListener('click',()=>nuevoCert(false));
+  document.getElementById('ct-nuevo-hist').addEventListener('click',()=>nuevoCert(true));
+  document.getElementById('p-rubro').addEventListener('change',actualizarCampoAvance);
+  document.getElementById('btn-guardar-cfgcert').addEventListener('click',()=>{
+    const lista=document.getElementById('cfg-unidades').value.split(',').map(x=>x.trim()).filter(Boolean);
+    const um=Number(document.getElementById('cfg-alerta-umbral').value);
+    if(!lista.length){ toast('Poné al menos una unidad',true); return; }
+    if(!(um>=0)){ toast('El umbral tiene que ser 0 o más',true); return; }
+    Store.config.unidadesMedida=[...new Set(lista)]; Store.config.alertaMOActiva=document.getElementById('cfg-alerta-mo').checked; Store.config.alertaMOUmbral=um;
+    Store.guardarConfig(); renderTodo(); toast('Configuración guardada'); });
+  window.addEventListener('beforeunload',e=>{ if(COMP.sucio||CERT.sucio){ e.preventDefault(); e.returnValue=''; } });
 }
 
 /* ---------- PLANTILLAS Y CARGA MASIVA ---------- */
@@ -3871,14 +4981,14 @@ function volcarConfig(){
 /* ---------- NAVEGACIÓN ---------- */
 function menuAbrir(){ document.getElementById('sidebar').classList.add('abierto'); document.getElementById('velo').classList.add('visible'); }
 function menuCerrar(){ document.getElementById('sidebar').classList.remove('abierto'); document.getElementById('velo').classList.remove('visible'); }
-function irA(v){ document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
+function irA(v){ if(!puedeSalirDeVista(v)) return; document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   const el=document.getElementById('view-'+v); if(el)el.classList.add('active');
   menuCerrar(); window.scrollTo({top:0}); }
-function renderTodo(){ actualizarProveedores(); renderDashboard(); renderMacro(); renderSocios(); renderMarcaton(); renderTablaGastos(); renderPresupuesto();
+function renderTodo(){ invalidarAvance(); actualizarProveedores(); renderDashboard(); renderMacro(); renderSocios(); renderMarcaton(); renderTablaGastos(); renderPresupuesto();
   renderProveedoresABM(); renderAvisoLineaBase(); renderDesvioLineaBase(); renderCurva(); renderAnalisis(); renderIVA(); renderProyeccion(); renderAbaucan();
   renderFinanciero(); renderFinSocios(); renderFinMatriz(); renderPapelera(); renderAvisoHonorarios(); renderEstadoTasa(); volcarConfig(); renderEstadoDolar(); renderEstadoIA(); renderEstadoFirebase();
-  renderAvisoRespaldo(); renderPanelRespaldo(); }
+  renderAvisoRespaldo(); renderPanelRespaldo(); renderComputo(); renderCertificados(); renderCfgCertificados(); avisoCertGasto(); revisarNumeracion(); }
 
 /* ---------- ARRANQUE ---------- */
 function armarUI(){
@@ -3941,7 +5051,7 @@ function armarUI(){
       comprobante:document.getElementById('iv-comprobante').value.trim(), notas:document.getElementById('iv-notas').value.trim(),
       cargadoPor:USUARIO?USUARIO.nombre:'—' });
     document.getElementById('modal-iva').classList.add('oculto'); renderTodo(); toast('Movimiento guardado'); });
-  document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ menuCerrar(); ['modal-prov','modal-rubros','modal-iva'].forEach(id=>document.getElementById(id).classList.add('oculto')); } });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ menuCerrar(); ['modal-prov','modal-rubros','modal-iva','modal-cp'].forEach(id=>document.getElementById(id).classList.add('oculto')); } });
 
   // gastos
   document.getElementById('g-fecha').addEventListener('change',e=>buscarCotizacion(e.target.value,'g-cot','g-cot-hint'));
@@ -3954,7 +5064,13 @@ function armarUI(){
   document.getElementById('g-cot').addEventListener('input',recalcularUSD);
   document.getElementById('btn-cancelar').addEventListener('click',limpiarFormGasto);
   document.getElementById('btn-nuevo-prov').addEventListener('click',()=>abrirModalProv(null));
+  ['g-rubro','g-tipo'].forEach(id=>document.getElementById(id).addEventListener('change',avisoCertGasto));
   document.getElementById('form-gasto').addEventListener('submit',e=>{ e.preventDefault();
+    { const idEd=document.getElementById('g-id').value; const prevG=idEd?Store.gastos.find(x=>x.id===idEd):null;
+      /* gasto de un certificado: solo se cambian pago, estado, comprobante y notas */
+      if(prevG&&gastoBloqueado(prevG)){ Store.guardarGasto(Object.assign({},prevG,{ formaPago:document.getElementById('g-pago').value, estado:document.getElementById('g-estado').value,
+        comprobante:document.getElementById('g-comprobante').value.trim(), notas:document.getElementById('g-notas').value.trim() }));
+        limpiarFormGasto(); renderTodo(); toast('Cambios guardados'); return; } }
     const bruto=parseFloat(document.getElementById('g-bruto').value)||0;
     const descPct=Math.min(Math.max(parseFloat(document.getElementById('g-desc').value)||0,0),100);
     const monto=parseFloat(document.getElementById('g-monto').value),cot=parseFloat(document.getElementById('g-cot').value);
@@ -3978,8 +5094,8 @@ function armarUI(){
     if(g.ivaARS+impuestosExtra(g)>=monto){ toast('El IVA, las percepciones y los impuestos internos tienen que sumar menos que el monto',true); return; }
     const ed=!!g.id; Store.guardarGasto(g); limpiarFormGasto(); renderTodo(); toast(ed?'Cambios guardados':'Gasto guardado');
   });
-  ['f-buscar','f-macro','f-financia','f-desde','f-hasta'].forEach(id=>document.getElementById(id).addEventListener('input',renderTablaGastos));
-  document.getElementById('f-limpiar').addEventListener('click',()=>{ ['f-buscar','f-macro','f-financia','f-desde','f-hasta'].forEach(id=>document.getElementById(id).value=''); renderTablaGastos(); });
+  ['f-buscar','f-macro','f-financia','f-desde','f-hasta','f-cert'].forEach(id=>document.getElementById(id).addEventListener('input',renderTablaGastos));
+  document.getElementById('f-limpiar').addEventListener('click',()=>{ ['f-buscar','f-macro','f-financia','f-desde','f-hasta','f-cert'].forEach(id=>document.getElementById(id).value=''); renderTablaGastos(); });
 
   // presupuesto
   document.getElementById('p-cancelar').addEventListener('click',limpiarFormPresu);
@@ -3990,7 +5106,8 @@ function armarUI(){
     const d=document.getElementById('p-desde').value,h=document.getElementById('p-hasta').value;
     if(mo+mat+otros<=0){ toast('Cargá al menos un objetivo mayor a cero',true); return; }
     if(h<d){ toast('El mes de fin no puede ser anterior al de inicio',true); return; }
-    const av=parseFloat(document.getElementById('p-avance').value)||0;
+    /* en los rubros con ítems el avance sale del cómputo: se conserva el manual que había */
+    const av=rubroCertificaPorItems(rubro)?(Number((Store.presupuesto.find(x=>x.rubro===rubro)||{}).avance)||0):(parseFloat(document.getElementById('p-avance').value)||0);
     /* la línea base ya congelada nunca se pisa al editar el objetivo vigente */
     const previo=Store.presupuesto.find(x=>x.rubro===rubro);
     Store.guardarPresu({rubro,objMO:mo,objMat:mat,objOtros:otros,mesDesde:d,mesHasta:h,avance:Math.min(Math.max(av,0),100),notas:document.getElementById('p-notas').value.trim(),
@@ -4127,6 +5244,7 @@ function armarUI(){
 
   window.addEventListener('beforeunload',e=>{ if(!MODO_NUBE&&(Store.gastos.length||Store.presupuesto.length||Store.aportes.length)){ e.preventDefault(); e.returnValue=''; } });
 
+  armarComputoYCertificados();
   limpiarFormGasto(); limpiarFormPresu(); limpiarFormAporte(); limpiarFactura(); cargarClave(); registrarManifiesto(); renderTodo();
 }
 
@@ -4216,7 +5334,7 @@ window.arrancarApp = arrancarApp;
       catch(e){ try{ await authMod.setPersistence(auth, authMod.indexedDBLocalPersistence); }catch(e2){} }
       const db   = fsMod.getFirestore(app);
       const RAIZ = 'proyectos/rio-colorado';
-      const COLS = ['gastos','presupuesto','aportes','proveedores','abaucan','ivamov','papelera'];
+      const COLS = ['gastos','presupuesto','aportes','proveedores','abaucan','ivamov','papelera','items','certificados'];
 
       /* Permiso de Drive con el alcance mínimo: la app solo ve los archivos que ella crea. */
       const ALCANCE_DRIVE = 'https://www.googleapis.com/auth/drive.file';
@@ -4239,7 +5357,8 @@ window.arrancarApp = arrancarApp;
         async guardarLote(ops){
           for(let i=0;i<ops.length;i+=400){
             const b=fsMod.writeBatch(db);
-            ops.slice(i,i+400).forEach(o=>b.set(fsMod.doc(db,RAIZ+'/'+o.col,o.id),JSON.parse(JSON.stringify(o.datos))));
+            ops.slice(i,i+400).forEach(o=>{ const ref=fsMod.doc(db,RAIZ+'/'+o.col,o.id);
+              if(o.borrar) b.delete(ref); else b.set(ref,JSON.parse(JSON.stringify(o.datos))); });
             await b.commit();
           }
         },
@@ -4259,6 +5378,7 @@ window.arrancarApp = arrancarApp;
           COLS.forEach(col=>{
             fsMod.onSnapshot(fsMod.collection(db,RAIZ+'/'+col),snap=>{
               Store[col]=snap.docs.map(d=>Object.assign({id:d.id},d.data()));
+              (Store._listo=Store._listo||{})[col]=true;
               alCambiar();
             },err=>console.error('Error escuchando '+col,err));
           });
@@ -4267,6 +5387,9 @@ window.arrancarApp = arrancarApp;
           },()=>{});
           fsMod.onSnapshot(fsMod.doc(db,RAIZ+'/config','general'),d=>{
             if(d.exists()) Store.config=Object.assign(Store.config||{},d.data()); alCambiar();
+          },()=>{});
+          fsMod.onSnapshot(fsMod.doc(db,RAIZ+'/config','numeracion'),d=>{
+            Store.numeracion=d.exists()?d.data():{}; (Store._listo=Store._listo||{}).numeracion=true; alCambiar();
           },()=>{});
           fsMod.onSnapshot(fsMod.doc(db,RAIZ+'/config','backup'),d=>{
             Store.backup=d.exists()?d.data():{}; alCambiar();
