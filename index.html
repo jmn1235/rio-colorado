@@ -1072,6 +1072,11 @@ select.cp-in{padding:4px 2px;}
    Versión 7.1 · En los certificados nuevos se puede repetir un ítem
    (mismo ítem con precios distintos): cada renglón genera su gasto y
    el avance manual del ítem se carga en su último renglón.
+   Versión 7.2 · Leer factura: la IA copia el importe de cada renglón
+   tal como figura y la app lo ajusta al total de la factura (sirve con
+   renglones con o sin IVA); aviso si el total no cierra con neto + IVA
+   + percepciones. Fondo disponible también en pesos. MARCATON propone
+   "Tarjeta - medio digital".
    ========================================================= */
 
 /* =========================================================
@@ -1570,6 +1575,13 @@ function honorariosPorRol(rol){ return Store.gastos.filter(g=>esHonorario(g)&&g.
 /* Plata efectivamente disponible en la caja común.
    Incluye el efectivo neto de los movimientos de IVA entre proyectos.
    Los honorarios no mueven caja: no son un pago real. */
+/* Fondo en pesos nominales: lo cargado en pesos, sin actualizar por interés ni por dólar */
+function fondoDisponibleARS(){
+  const ap=Store.aportes.reduce((s,a)=>s+(Number(a.montoARS)||0),0);
+  const ga=Store.gastos.filter(g=>(g.financia||FONDO)===FONDO&&!esHonorario(g)).reduce((s,g)=>s+(Number(g.montoARS)||0),0);
+  const iv=Store.ivamov.reduce((s,m)=>s+((m.tipo==='vendido'?1:-1)*(Number(m.efectivoARS)||0)),0);
+  return ap-ga+iv;
+}
 function fondoDisponible(){
   const gastosCaja=Store.gastos.filter(g=>(g.financia||FONDO)===FONDO&&!esHonorario(g)).reduce((s,g)=>s+(g.montoUSD||0),0);
   return aportesAlFondo()-gastosCaja+efectivoIvaUSD();
@@ -1695,6 +1707,19 @@ function contextoObra(){
 /* ---------- LECTURA DE FACTURAS (multi-rubro) ---------- */
 let renglones = [];
 let facturaFiscal = FISCAL_DISCRIMINADO, facturaIVA = 0, facturaAlicuota = 21;
+/* Total de la factura con el que se ajustan los renglones (0 = sin factura leída) */
+let facturaTotal = 0, facturaTotales = null;
+/* Reparte un total entre los renglones en proporción a su importe. Así da igual si la
+   factura trae los renglones con IVA o sin IVA: siempre suman exactamente el total. */
+function ajustarRenglonesAlTotal(total){
+  const suma=renglones.reduce((a,r)=>a+(Number(r.monto)||0),0);
+  if(!(total>0)||!(suma>0)) return 1;
+  const f=total/suma;
+  renglones.forEach(r=>{ r.monto=Math.round((Number(r.monto)||0)*f*100)/100; });
+  const dif=Math.round((total-renglones.reduce((a,r)=>a+r.monto,0))*100)/100;
+  if(dif){ const mayor=renglones.reduce((m,r)=>Math.abs(r.monto)>Math.abs(m.monto)?r:m,renglones[0]); mayor.monto=Math.round((mayor.monto+dif)*100)/100; }
+  return f;
+}
 
 function archivoABase64(file){
   return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.onerror=()=>rej(new Error('No se pudo leer el archivo.')); r.readAsDataURL(file); });
@@ -1730,7 +1755,8 @@ async function leerFactura(file){
       +'Reglas sobre los renglones:\n'
       +'- "rubro" debe ser exactamente uno de esta lista: '+RUBROS.join(' | ')+'\n'
       +'- "tipo" debe ser exactamente uno de: '+TIPOS.join(' | ')+'\n'
-      +'- Si la factura tiene ítems de rubros distintos, generá un renglón por cada rubro y repartí los montos. La suma de los renglones debe dar el total de la factura (IVA incluido, prorrateado si hace falta).\n'
+      +'- Generá un renglón por cada ítem de la factura. "monto" es el importe de ese ítem COPIADO TAL CUAL figura en la columna de importe o total del renglón: no le sumes ni le restes IVA ni percepciones, no prorratees y no ajustes nada para que cierre con el total (algunas facturas traen los renglones con IVA y otras sin IVA; el reparto lo hace la app).\n'
+      +'- "total" y "neto" (subtotal neto gravado) copialos con cuidado, dígito por dígito; si figura el importe en letras ("Son: pesos ..."), usalo para confirmar el total.\n'
       +'- Si un ítem no encaja claramente en ningún rubro, usá "Gastos generales de obra".\n'
       +'- Los montos van en pesos argentinos, como números sin separadores ni símbolos.\n'
       +'- Si un dato no aparece en la factura, dejá el campo como cadena vacía.';
@@ -1763,13 +1789,31 @@ async function leerFactura(file){
       monto:Number(r.monto)||0
     }));
     if(!renglones.length && d.total) renglones=[{id:Store.nuevoId(),concepto:'Total de la factura',rubro:'Gastos generales de obra',tipo:'Materiales',monto:Number(d.total)||0}];
+    /* Total de control: neto + IVA + percepciones + otros tributos, que la IA copia tal cual.
+       Si no coincide con el total leído, se usa el de control y se avisa con los dos números. */
+    const r2=v=>Math.round((Number(v)||0)*100)/100;
+    const totalLeido=r2(d.total);
+    const sumaPerc=(Number(pr.iibb)||0)+(Number(pr.iva)||0)+(Number(pr.ganancias)||0)+(Number(d.otros_tributos)||0);
+    const totalCtrl=(Number(d.neto)>0)?r2(Number(d.neto)+ivaLeido+sumaPerc):0;
+    facturaTotales={leido:totalLeido,control:totalCtrl,difieren:!!(totalLeido&&totalCtrl&&Math.abs(totalLeido-totalCtrl)>1)};
+    facturaTotal=facturaTotales.difieren?totalCtrl:(totalLeido||totalCtrl);
+    const sumaLeida=renglones.reduce((a,r)=>a+(Number(r.monto)||0),0);
+    const factorAj=ajustarRenglonesAlTotal(facturaTotal);
+    facturaTotales.renglones=r2(sumaLeida); facturaTotales.factor=factorAj;
     renderRenglones();
 
     const dup=detectarDuplicado(d);
     let avisoDup='';
     if(dup.length){ avisoDup='<div class="aviso rojo" style="margin-top:12px;margin-bottom:0;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg><div><strong>Ojo, esto se parece a algo ya cargado.</strong><ul style="margin:6px 0 0;padding-left:18px;">'+dup.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div></div>'; }
     const avisoComp=otroComprador?'<div class="aviso rojo" style="margin-top:12px;margin-bottom:0;"><div><strong>La factura no es a nombre de Magna.</strong> El CUIT del comprador es '+esc(d.cuit_comprador)+' y el de Magna es '+CUIT_MAGNA+': su IVA no se puede computar.</div></div>':'';
-    prev.innerHTML=thumb+'<div class="aviso verde" style="margin-bottom:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C6F46" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg><div><strong>Factura leída.</strong> Se detectaron '+renglones.length+' renglón(es). Revisá la imputación de cada uno antes de guardar.</div></div>'+avisoComp+avisoDup;
+    const t=facturaTotales;
+    const avisoTot=t.difieren?'<div class="aviso rojo" style="margin-top:12px;margin-bottom:0;"><div><strong>El total no cierra.</strong> La IA leyó un total de '+fmtARS(t.leido,2)
+        +', pero neto + IVA + percepciones da '+fmtARS(t.control,2)+'. Se usó '+fmtARS(t.control,2)+'. Comparalo con la factura y, si corresponde, usá el otro:'
+        +'<div class="btn-row" style="margin-top:8px;"><button type="button" class="btn btn-sm" data-fatot="'+t.control+'">Usar '+fmtARS(t.control,2)+'</button><button type="button" class="btn btn-sm" data-fatot="'+t.leido+'">Usar '+fmtARS(t.leido,2)+'</button></div></div></div>':'';
+    const avisoAj=(t.factor&&Math.abs(t.factor-1)>0.005)?'<div class="aviso" style="margin-top:12px;margin-bottom:0;"><div>Los renglones de la factura suman '+fmtARS(t.renglones,2)
+        +': se ajustaron al total de '+fmtARS(facturaTotal,2)+' (el IVA y las percepciones quedan repartidos en proporción).'+((t.factor<0.8||t.factor>1.5)?' <strong>El ajuste es grande: revisá los montos.</strong>':'')+'</div></div>':'';
+    prev.innerHTML=thumb+'<div class="aviso verde" style="margin-bottom:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C6F46" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg><div><strong>Factura leída.</strong> Se detectaron '+renglones.length+' renglón(es). Revisá la imputación de cada uno antes de guardar.</div></div>'+avisoTot+avisoAj+avisoComp+avisoDup;
+    prev.querySelectorAll('[data-fatot]').forEach(b=>b.addEventListener('click',()=>{ facturaTotal=Number(b.dataset.fatot); ajustarRenglonesAlTotal(facturaTotal); renderRenglones(); toast('Renglones ajustados a '+fmtARS(facturaTotal,2)); }));
     toast('Factura leída');
   }catch(err){
     prev.innerHTML=thumb+'<div class="aviso rojo" style="margin-bottom:0;"><div><strong>No se pudo leer la factura.</strong> '+esc(err.message)+'</div></div>';
@@ -1805,17 +1849,31 @@ function renderRenglones(){
       +'<td><input type="number" step="0.01" data-rm="'+r.id+'" value="'+(Number(r.monto)||0)+'" style="width:100%;border:1px solid var(--n-200);border-radius:6px;padding:6px 8px;font-size:13px;text-align:right;font-family:Montserrat,sans-serif;"></td>'
       +'<td style="text-align:right;"><button class="btn btn-ghost btn-sm" data-rx="'+r.id+'" style="color:#9E2B25;">Quitar</button></td></tr>';
   });
-  html+='<tr class="total-row"><td colspan="3">Total de la factura</td><td class="money">'+fmtARS(total,2)+'</td><td></td></tr></tbody></table>';
+  html+='<tr class="total-row"><td colspan="3">Total de los renglones</td><td class="money" id="fa-suma">'+fmtARS(total,2)+'</td><td></td></tr>';
+  if(facturaTotal>0) html+='<tr><td colspan="3" style="font-weight:600;">Total según la factura</td><td class="money">'+fmtARS(facturaTotal,2)+'</td><td></td></tr>'
+    +'<tr id="fa-dif-fila"><td colspan="5" id="fa-dif"></td></tr>';
+  html+='</tbody></table>';
   cont.innerHTML=html;
   cont.querySelectorAll('[data-rc]').forEach(i=>i.addEventListener('input',()=>{ const r=renglones.find(x=>x.id===i.dataset.rc); if(r)r.concepto=i.value; }));
   cont.querySelectorAll('[data-rr]').forEach(i=>i.addEventListener('change',()=>{ const r=renglones.find(x=>x.id===i.dataset.rr); if(r)r.rubro=i.value; }));
   cont.querySelectorAll('[data-rt]').forEach(i=>i.addEventListener('change',()=>{ const r=renglones.find(x=>x.id===i.dataset.rt); if(r)r.tipo=i.value; }));
-  cont.querySelectorAll('[data-rm]').forEach(i=>i.addEventListener('input',()=>{ const r=renglones.find(x=>x.id===i.dataset.rm); if(r){ r.monto=parseFloat(i.value)||0; const t=renglones.reduce((s,x)=>s+(Number(x.monto)||0),0); const tr=cont.querySelector('tr.total-row td.money'); if(tr)tr.textContent=fmtARS(t,2); } }));
+  cont.querySelectorAll('[data-rm]').forEach(i=>i.addEventListener('input',()=>{ const r=renglones.find(x=>x.id===i.dataset.rm); if(r){ r.monto=parseFloat(i.value)||0; const t=renglones.reduce((s,x)=>s+(Number(x.monto)||0),0); const tr=cont.querySelector('tr.total-row td.money'); if(tr)tr.textContent=fmtARS(t,2); marcarDiferenciaFactura(); } }));
   cont.querySelectorAll('[data-rx]').forEach(b=>b.addEventListener('click',()=>{ renglones=renglones.filter(x=>x.id!==b.dataset.rx); renderRenglones(); }));
   document.getElementById('fa-guardar').disabled=false;
+  marcarDiferenciaFactura();
+}
+/* Si al editar los montos los renglones dejan de sumar el total de la factura, se avisa y se ofrece ajustar. */
+function marcarDiferenciaFactura(){
+  const celda=document.getElementById('fa-dif'); if(!celda) return;
+  const suma=renglones.reduce((s,x)=>s+(Number(x.monto)||0),0), dif=Math.round((facturaTotal-suma)*100)/100;
+  if(Math.abs(dif)<0.01){ celda.innerHTML=''; celda.parentElement.style.display='none'; return; }
+  celda.parentElement.style.display='';
+  celda.innerHTML='<div class="aviso rojo" style="margin:4px 0;"><div>Los renglones no suman el total de la factura: '+(dif>0?'faltan ':'sobran ')+fmtARS(Math.abs(dif),2)+'. '
+    +'<button type="button" class="btn btn-sm" id="fa-ajustar" style="margin-left:6px;">Ajustar al total</button></div></div>';
+  document.getElementById('fa-ajustar').addEventListener('click',()=>{ ajustarRenglonesAlTotal(facturaTotal); renderRenglones(); });
 }
 function limpiarFactura(){
-  renglones=[]; facturaFiscal=FISCAL_DISCRIMINADO; facturaIVA=0; facturaAlicuota=21;
+  renglones=[]; facturaFiscal=FISCAL_DISCRIMINADO; facturaIVA=0; facturaAlicuota=21; facturaTotal=0; facturaTotales=null;
   const sf=document.getElementById('fa-fiscal'); if(sf) sf.value=FISCAL_DISCRIMINADO;
   const si=document.getElementById('fa-iva'); if(si) si.value='';
   const sd=document.getElementById('fa-desc'); if(sd) sd.value='';
@@ -2191,7 +2249,7 @@ function renderSocios(){
     '<div class="kpi acento"><div class="kpi-label">Total integrado</div><div class="kpi-value num">'+fmtUSD(integrado)+'</div><div class="kpi-sub">Al fondo '+fmtEje(aportesAlFondo())+' · directo '+fmtEje(directos)+'</div></div>'
     +'<div class="kpi"><div class="kpi-label">Total comprometido</div><div class="kpi-value num">'+fmtUSD(comp)+'</div><div class="kpi-sub">'+(comp?fmtPct(integrado/comp*100)+' integrado':'Cargá los compromisos')+'</div></div>'
     +'<div class="kpi"><div class="kpi-label">Resta integrar</div><div class="kpi-value num">'+fmtUSD(Math.max(comp-integrado,0))+'</div><div class="kpi-sub">Para llegar a lo comprometido</div></div>'
-    +'<div class="kpi '+(fondo<0?'acento-m':'')+'"><div class="kpi-label">Fondo disponible en caja</div><div class="kpi-value num">'+fmtUSD(fondo)+'</div><div class="kpi-sub">Aportes al fondo − gastos del fondo</div></div>';
+    +'<div class="kpi '+(fondo<0?'acento-m':'')+'"><div class="kpi-label">Fondo disponible en caja</div><div class="kpi-value num">'+fmtUSD(fondo)+'</div><div class="kpi-sub" style="font-weight:600;">'+fmtARS(fondoDisponibleARS())+' en pesos (sin actualizar)</div><div class="kpi-sub" style="margin-top:2px;">Aportes al fondo − gastos del fondo</div></div>';
 
   const conInteres=tasaAnual()>0;
   let html='<table><thead><tr><th>Socio</th><th class="money">Comprometido</th><th class="money">Al fondo</th><th class="money">Pago directo</th><th class="money">Integrado</th>'
@@ -3386,7 +3444,7 @@ function exportarExcel(){
    Todo corre en el navegador: no hay servidor ni costo. */
 const RESPALDO_FORMATO='magna-rio-colorado';
 const RESPALDO_VERSION=2;
-const APP_VERSION='7.1';
+const APP_VERSION='7.2';
 const RESPALDO_CORREO='juliomonti91@gmail.com';   // solo esta cuenta respalda en Drive
 const RESPALDO_CARPETA='RioColorado';
 const RESPALDO_PREFIJO='Rio_Colorado_respaldo_';
@@ -5126,6 +5184,8 @@ function armarUI(){
   document.getElementById('a-fecha').addEventListener('change',e=>buscarCotizacion(e.target.value,'a-cot','a-cot-hint'));
   document.getElementById('a-monto').addEventListener('input',actualizarMarcaton);
   document.getElementById('a-marcaton').addEventListener('change',actualizarMarcaton);
+  /* con MARCATON se propone la tarjeta; se puede cambiar después */
+  document.getElementById('a-marcaton').addEventListener('change',e=>{ if(e.target.checked) document.getElementById('a-medio').value='Tarjeta - medio digital'; });
   document.getElementById('a-cot').addEventListener('input',recalcularUSDAporte);
   document.getElementById('a-cancelar').addEventListener('click',limpiarFormAporte);
   document.getElementById('form-aporte').addEventListener('submit',e=>{ e.preventDefault();
