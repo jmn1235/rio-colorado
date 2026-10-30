@@ -400,6 +400,19 @@ select.cp-in{padding:4px 2px;}
 .perc-sale td{color:#9E2B25;text-decoration:line-through;}
 .perc-sale td .tag{text-decoration:none;}
 .fa-perc-aviso td{padding-top:0;}
+/* ---------- PESTAÑAS DE SUBSECCIONES ---------- */
+.subtabs{display:flex;gap:2px;border-bottom:1px solid var(--n-200);margin:0 0 22px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;min-width:0;}
+.subtabs::-webkit-scrollbar{display:none;}
+.subtab{flex:none;display:inline-flex;align-items:center;gap:7px;background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:10px 14px 11px;
+  font-family:'Montserrat',sans-serif;font-weight:600;font-size:13.5px;color:var(--n-700);cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s;}
+.subtab:hover{color:var(--tinta);}
+.subtab.activa{color:var(--tinta);border-bottom-color:var(--verde);}
+.subtab-n{font-size:11px;font-weight:700;background:var(--n-100);color:var(--n-700);border-radius:20px;padding:1px 7px;}
+.subtab-n:empty{display:none;}
+.subtab.activa .subtab-n{background:var(--verde-claro);color:var(--verde);}
+.subvista{display:none;}
+.subvista.activa{display:block;}
+@media (max-width:860px){ .subtabs{margin-bottom:16px;} .subtab{padding:9px 11px 10px;font-size:13px;} }
 :focus-visible{outline:2px solid var(--verde);outline-offset:2px;}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
 </style>
@@ -1097,6 +1110,10 @@ select.cp-in{padding:4px 2px;}
    se cargaron como renglón de factura (con vista previa; el total y el
    IVA de la factura no cambian). Aviso al leer o cargar un renglón que
    parece percepción. Tabla de aportes con el monto en pesos.
+   Versión 7.4 · Subsecciones con pestañas en Cargar gastos, Cómputo,
+   Presupuesto, Macrorubros, Socios y aportes, Rubros y proveedores,
+   Intereses e IVA, Abaucán y Datos y configuración. No cambia ningún
+   cálculo ni dato: solo dónde se ve cada cosa.
    ========================================================= */
 
 /* =========================================================
@@ -1942,7 +1959,7 @@ async function guardarRenglones(){
       fiscal, alicuota:fiscal===FISCAL_DISCRIMINADO?facturaAlicuota:null,
       ivaARS:Number(ivaR.toFixed(2)), ivaUSD:ivaR/c.valor, cuitProveedor:cuit||cuitDeProveedor(prov),
       percIIBB:parte(extraTot.percIIBB), percIVA:parte(extraTot.percIVA), percGan:parte(extraTot.percGan), otrosTribARS:parte(extraTot.otrosTribARS) }); });
-  limpiarFactura(); renderTodo(); toast(validos.length+' gasto(s) guardados desde la factura'); irA('gastos');
+  limpiarFactura(); renderTodo(); toast(validos.length+' gasto(s) guardados desde la factura'); irA('gastos','lista');
 }
 
 /* ---------- CARGA RÁPIDA POR TEXTO ---------- */
@@ -2007,7 +2024,7 @@ async function guardarRapida(){
       cargadoPor:USUARIO?USUARIO.nombre:'—', comprobante:'', notas:'Cargado por texto' });
   }
   rapidaFilas=[]; document.getElementById('rapida-texto').value=''; renderRapida(); renderTodo();
-  toast(validos.length+' gasto(s) guardados'); irA('gastos');
+  toast(validos.length+' gasto(s) guardados'); irA('gastos','lista');
 }
 
 /* ---------- ALERTAS Y DESVÍOS ---------- */
@@ -2323,7 +2340,7 @@ function editarAporte(id){ const a=Store.aportes.find(x=>x.id===id); if(!a)retur
   document.getElementById('a-marcaton').checked=!!a.marcaton;
   document.getElementById('a-monto').value=brutoARSAporte(a); document.getElementById('a-cot').value=a.cotizacion||'';
   document.getElementById('a-medio').value=a.medio||'Transferencia'; document.getElementById('a-notas').value=a.notas||'';
-  document.getElementById('a-cancelar').style.display='inline-flex'; actualizarMarcaton(); window.scrollTo({top:0,behavior:'smooth'}); }
+  document.getElementById('a-cancelar').style.display='inline-flex'; actualizarMarcaton(); irA('socios','aportes'); window.scrollTo({top:0,behavior:'smooth'}); }
 function limpiarFormAporte(){ const f=document.getElementById('form-aporte'); f.reset();
   document.getElementById('a-id').value=''; document.getElementById('a-fecha').value=hoyISO(); document.getElementById('a-usd').value='—';
   document.getElementById('a-cancelar').style.display='none'; actualizarMarcaton(); buscarCotizacion(hoyISO(),'a-cot','a-cot-hint'); }
@@ -2377,7 +2394,7 @@ function editarGasto(id){ const g=Store.gastos.find(x=>x.id===id); if(!g)return;
   document.getElementById('g-perc-gan').value=g.percGan||''; document.getElementById('g-otros').value=g.otrosTribARS||'';
   actualizarCamposFiscales();
   document.getElementById('form-titulo').textContent='Editando un gasto'; document.getElementById('btn-guardar').textContent='Guardar cambios';
-  document.getElementById('btn-cancelar').style.display='inline-flex'; recalcularUSD(); bloquearFormGasto(gastoBloqueado(g)?g:null); avisoConceptoGasto(); irA('gastos'); window.scrollTo({top:0,behavior:'smooth'}); }
+  document.getElementById('btn-cancelar').style.display='inline-flex'; recalcularUSD(); bloquearFormGasto(gastoBloqueado(g)?g:null); avisoConceptoGasto(); irA('gastos','nuevo'); window.scrollTo({top:0,behavior:'smooth'}); }
 function filtrarGastos(){
   const q=(document.getElementById('f-buscar').value||'').trim().toLowerCase();
   const mac=document.getElementById('f-macro').value,fin=document.getElementById('f-financia').value;
@@ -2576,7 +2593,7 @@ function editarPresu(id){ const p=Store.presupuesto.find(x=>x.id===id); if(!p)re
   document.getElementById('p-mat').value=p.objMat||''; document.getElementById('p-otros').value=p.objOtros||'';
   document.getElementById('p-desde').value=p.mesDesde; document.getElementById('p-hasta').value=p.mesHasta;
   document.getElementById('p-avance').value=p.avance||''; document.getElementById('p-notas').value=p.notas||''; actualizarCampoAvance();
-  document.getElementById('p-cancelar').style.display='inline-flex'; window.scrollTo({top:0,behavior:'smooth'}); }
+  document.getElementById('p-cancelar').style.display='inline-flex'; mostrarSub('presupuesto','editar'); window.scrollTo({top:0,behavior:'smooth'}); }
 function renderPresupuesto(){
   const total=totalPresupuesto(),ejec=totalEjecutado();
   document.getElementById('kpi-presupuesto').innerHTML=
@@ -3471,7 +3488,7 @@ function exportarExcel(){
    Todo corre en el navegador: no hay servidor ni costo. */
 const RESPALDO_FORMATO='magna-rio-colorado';
 const RESPALDO_VERSION=2;
-const APP_VERSION='7.3';
+const APP_VERSION='7.4';
 const RESPALDO_CORREO='juliomonti91@gmail.com';   // solo esta cuenta respalda en Drive
 const RESPALDO_CARPETA='RioColorado';
 const RESPALDO_PREFIJO='Rio_Colorado_respaldo_';
@@ -5079,6 +5096,78 @@ function avisoConceptoGasto(){
   h.textContent=c?TEXTO_AVISO_PERC+' En el gasto de esa factura usá el campo "'+CAMPOS_PERC[c]+'".':'';
 }
 
+/* ---------- SUBSECCIONES CON PESTAÑAS (v7.4) ----------
+   Al arrancar se reubica cada panel existente en su pestaña: no cambia ningún id,
+   cálculo ni evento. "fijos" quedan arriba de las pestañas (indicadores).
+   Un par [a,b] se muestra lado a lado; {par:[a,b],ancho:true} usa la grilla ancha. */
+const SUBVISTAS={
+  gastos:{ tabs:[ ['nuevo','Nuevo gasto',['T:Nuevo gasto']], ['lista','Gastos registrados',['T:Gastos registrados']] ] },
+  computo:{ fijos:['#kpi-computo'], tabs:[ ['items','Ítems',['T:Ítems del cómputo']], ['contraste','Pagado contra avance',['T:Mano de obra pagada contra avance']] ] },
+  presupuesto:{ fijos:['#kpi-presupuesto'], tabs:[ ['rubros','Por rubro',['T:Presupuesto por rubro']], ['editar','Agregar o editar',['T:Agregar o editar un rubro']],
+    ['lineabase','Línea base',['#aviso-linea-base','#panel-linea-base']] ] },
+  macro:{ tabs:[ ['resumen','Resumen',['#chart-macro-barras','T:Objetivo y ejecución por macrorubro']], ['mo','Mano de obra',['T:Mano de obra por macrorubro']], ['mat','Materiales',['T:Materiales por macrorubro']] ] },
+  socios:{ fijos:['#kpi-socios'], tabs:[ ['resumen','Resumen',[{par:['T:Aportado contra comprometido','T:Participación en aportes'],ancho:true}]],
+    ['aportes','Aportes',['T:Registrar un aporte']], ['compromisos','Compromisos',['T:Compromiso de cada socio']], ['marcaton','MARCATON',['#panel-marcaton']] ] },
+  analisis:{ tabs:[ ['rubro','Por rubro',['T:Gasto por rubro']], ['proveedor','Por proveedor',[{par:['T:Proveedores principales','T:Detalle por proveedor'],ancho:false}]] ] },
+  finiva:{ tabs:[ ['intereses','Intereses',['#bloque-financiero',{par:['T:Costo por socio','T:Peso de cada socio']},'T:Interés devengado mes a mes por socio']],
+    ['iva','IVA',['#kpi-iva',{par:['T:IVA por rubro','T:Formalización del gasto']},'T:IVA por proveedor']],
+    ['movimientos','Movimientos de IVA',['T:Movimientos de IVA entre proyectos']] ],
+    alArmar(sec){ /* el botón del encabezado de IVA pasa al panel de movimientos y ese encabezado se quita */
+      const b=document.getElementById('btn-iva-nuevo'), p=buscarPanelSub(sec,'T:Movimientos de IVA entre proyectos');
+      if(b&&p){ const head=p.querySelector('.panel-head'); head.appendChild(b); }
+      const tops=sec.querySelectorAll(':scope > .topbar'); if(tops.length>1) tops[1].remove(); } },
+  abaucan:{ fijos:[':scope > .aviso','#kpi-abaucan'], tabs:[ ['comparacion','Comparación',['T:Costo por m²: Abaucán contra Río Colorado','T:Lectura de la comparación']], ['cargar','Cargar rubros de Abaucán',['T:Cargar un rubro de Abaucán']] ] },
+  datos:{ tabs:[ ['config','Configuración',['T:Clave de la API de Claude',{par:['T:Tasa de interés en dólares','T:Honorarios de dirección y gerenciamiento']},'T:Cómputo y certificados','T:Cotización de referencia']],
+    ['respaldo','Respaldo',['T:Respaldo en Google Drive','T:Exportar']],
+    ['importar','Importar',['T:Importar gastos',{par:['T:Presupuesto por Excel','T:Abaucán por Excel']}]],
+    ['correcciones','Correcciones',['T:Percepciones cargadas como renglón']],
+    ['papelera','Papelera',['T:Papelera']] ] }
+};
+const TAB_ACTIVA=(()=>{ try{ return JSON.parse(localStorage.getItem('rc-subvistas')||'{}')||{}; }catch(e){ return {}; } })();
+function buscarPanelSub(sec,ref){
+  if(ref.indexOf('#')===0) return sec.querySelector(ref);
+  const t=ref.slice(2); return [...sec.querySelectorAll('.panel')].find(p=>{ const x=p.querySelector('.panel-title'); return x&&x.textContent.trim()===t; })||null;
+}
+function armarSubvistas(){
+  Object.keys(SUBVISTAS).forEach(v=>{
+    const sec=document.getElementById('view-'+v); if(!sec||sec.dataset.subvistas) return;
+    const cfg=SUBVISTAS[v]; sec.dataset.subvistas='1';
+    let ancla=sec.querySelector(':scope > .topbar');
+    (cfg.fijos||[]).forEach(f=>{ const el=sec.querySelector(f); if(el){ ancla.after(el); ancla=el; } });
+    const barra=document.createElement('div'); barra.className='subtabs'; barra.setAttribute('role','tablist'); barra.dataset.vista=v;
+    ancla.after(barra);
+    let prev=barra;
+    cfg.tabs.forEach(([k,etq,items])=>{
+      const b=document.createElement('button'); b.type='button'; b.className='subtab'; b.dataset.sub=k; b.setAttribute('role','tab');
+      b.innerHTML='<span>'+esc(etq)+'</span><span class="subtab-n" data-subn="'+v+':'+k+'"></span>'; b.addEventListener('click',()=>mostrarSub(v,k)); barra.appendChild(b);
+      const box=document.createElement('div'); box.className='subvista'; box.dataset.sub=k; box.setAttribute('role','tabpanel');
+      items.forEach(it=>{
+        if(typeof it==='string'){ const el=buscarPanelSub(sec,it); if(el) box.appendChild(el); return; }
+        const g=document.createElement('div'); g.className=it.ancho?'grid-2-wide':'grid-2';
+        it.par.forEach(r=>{ const el=buscarPanelSub(sec,r); if(el) g.appendChild(el); });
+        if(g.children.length) box.appendChild(g); });
+      prev.after(box); prev=box; });
+    if(cfg.alArmar) cfg.alArmar(sec);
+    /* quedan vacías las grillas originales: se sacan */
+    [...sec.children].forEach(el=>{ if((el.classList.contains('grid-2')||el.classList.contains('grid-2-wide'))&&!el.children.length) el.remove(); });
+    const guardada=TAB_ACTIVA[v]; mostrarSub(v,cfg.tabs.some(t=>t[0]===guardada)?guardada:cfg.tabs[0][0],true);
+  });
+}
+function mostrarSub(v,k,sinGuardar){
+  const sec=document.getElementById('view-'+v); if(!sec||!SUBVISTAS[v]) return;
+  sec.querySelectorAll(':scope > .subvista').forEach(x=>x.classList.toggle('activa',x.dataset.sub===k));
+  sec.querySelectorAll(':scope > .subtabs .subtab').forEach(x=>{ const a=x.dataset.sub===k; x.classList.toggle('activa',a); x.setAttribute('aria-selected',a?'true':'false');
+    if(a&&x.scrollIntoView&&x.parentElement.scrollWidth>x.parentElement.clientWidth) x.parentElement.scrollLeft=Math.max(0,x.offsetLeft-x.parentElement.offsetLeft-24); });
+  TAB_ACTIVA[v]=k; if(!sinGuardar){ try{ localStorage.setItem('rc-subvistas',JSON.stringify(TAB_ACTIVA)); }catch(e){} }
+}
+function actualizarContadoresSub(){
+  const pon=(clave,n)=>{ const el=document.querySelector('[data-subn="'+clave+'"]'); if(el) el.textContent=n?String(n):''; };
+  pon('gastos:lista',Store.gastos.length);
+  pon('datos:papelera',(Store.papelera||[]).length);
+  pon('datos:correcciones',typeof candidatosPerc==='function'?candidatosPerc().length:0);
+  pon('computo:items',Store.items.filter(i=>i.activo!==false).length);
+}
+
 /* ---------- PLANTILLAS Y CARGA MASIVA ---------- */
 const COL_PRESU=['Rubro','Macrorubro','Mano de obra USD','Materiales USD','Otros USD','Mes desde (AAAA-MM)','Mes hasta (AAAA-MM)','Avance fisico %','Notas'];
 const COL_ABAUCAN=['Rubro','Materiales USD','Mano de obra USD','Generales USD','Notas'];
@@ -5217,14 +5306,14 @@ function volcarConfig(){
 /* ---------- NAVEGACIÓN ---------- */
 function menuAbrir(){ document.getElementById('sidebar').classList.add('abierto'); document.getElementById('velo').classList.add('visible'); }
 function menuCerrar(){ document.getElementById('sidebar').classList.remove('abierto'); document.getElementById('velo').classList.remove('visible'); }
-function irA(v){ if(!puedeSalirDeVista(v)) return; document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
+function irA(v,sub){ if(!puedeSalirDeVista(v)) return; if(sub) mostrarSub(v,sub); document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   const el=document.getElementById('view-'+v); if(el)el.classList.add('active');
   menuCerrar(); window.scrollTo({top:0}); }
 function renderTodo(){ invalidarAvance(); actualizarProveedores(); renderDashboard(); renderMacro(); renderSocios(); renderMarcaton(); renderTablaGastos(); renderPresupuesto();
   renderProveedoresABM(); renderAvisoLineaBase(); renderDesvioLineaBase(); renderCurva(); renderAnalisis(); renderIVA(); renderProyeccion(); renderAbaucan();
   renderFinanciero(); renderFinSocios(); renderFinMatriz(); renderPapelera(); renderAvisoHonorarios(); renderEstadoTasa(); volcarConfig(); renderEstadoDolar(); renderEstadoIA(); renderEstadoFirebase();
-  renderAvisoRespaldo(); renderPanelRespaldo(); renderComputo(); renderCertificados(); renderCfgCertificados(); avisoCertGasto(); renderPanelPerc(); revisarNumeracion(); }
+  renderAvisoRespaldo(); renderPanelRespaldo(); renderComputo(); renderCertificados(); renderCfgCertificados(); avisoCertGasto(); renderPanelPerc(); actualizarContadoresSub(); revisarNumeracion(); }
 
 /* ---------- ARRANQUE ---------- */
 function armarUI(){
@@ -5251,7 +5340,7 @@ function armarUI(){
   volcarConfig();
 
   document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>irA(b.dataset.view)));
-  document.getElementById('btn-ir-carga').addEventListener('click',()=>irA('gastos'));
+  document.getElementById('btn-ir-carga').addEventListener('click',()=>irA('gastos','nuevo'));
   document.getElementById('btn-menu').addEventListener('click',()=>{
     const abierto=document.getElementById('sidebar').classList.contains('abierto');
     if(abierto) menuCerrar(); else menuAbrir();
@@ -5262,7 +5351,7 @@ function armarUI(){
   document.getElementById('btn-gestion-rubros').addEventListener('click',abrirModalRubros);
   document.getElementById('rb-cerrar').addEventListener('click',()=>document.getElementById('modal-rubros').classList.add('oculto'));
   document.getElementById('mes-cerrar').addEventListener('click',()=>document.getElementById('modal-mes').classList.add('oculto'));
-  document.getElementById('btn-linea-base').addEventListener('click',congelarLineaBase);
+  document.getElementById('btn-linea-base').addEventListener('click',()=>{ mostrarSub('presupuesto','lineabase'); congelarLineaBase(); });
   document.getElementById('modal-mes').addEventListener('click',e=>{ if(e.target.id==='modal-mes') e.currentTarget.classList.add('oculto'); });
   document.getElementById('modal-rubros').addEventListener('click',e=>{ if(e.target.id==='modal-rubros') e.currentTarget.classList.add('oculto'); });
   document.getElementById('form-rubro-nuevo').addEventListener('submit',e=>{ e.preventDefault();
@@ -5298,7 +5387,7 @@ function armarUI(){
   document.getElementById('g-iva').addEventListener('input',e=>{ e.target.dataset.tocado='1'; recalcularIVA(false); });
   ['g-perc-iibb','g-perc-iva','g-perc-gan','g-otros'].forEach(id=>document.getElementById(id).addEventListener('input',()=>recalcularIVA(false)));
   document.getElementById('g-cot').addEventListener('input',recalcularUSD);
-  document.getElementById('btn-cancelar').addEventListener('click',limpiarFormGasto);
+  document.getElementById('btn-cancelar').addEventListener('click',()=>{ limpiarFormGasto(); mostrarSub('gastos','lista'); });
   document.getElementById('btn-nuevo-prov').addEventListener('click',()=>abrirModalProv(null));
   ['g-rubro','g-tipo'].forEach(id=>document.getElementById(id).addEventListener('change',avisoCertGasto));
   document.getElementById('g-concepto').addEventListener('input',avisoConceptoGasto);
@@ -5307,7 +5396,7 @@ function armarUI(){
       /* gasto de un certificado: solo se cambian pago, estado, comprobante y notas */
       if(prevG&&gastoBloqueado(prevG)){ Store.guardarGasto(Object.assign({},prevG,{ formaPago:document.getElementById('g-pago').value, estado:document.getElementById('g-estado').value,
         comprobante:document.getElementById('g-comprobante').value.trim(), notas:document.getElementById('g-notas').value.trim() }));
-        limpiarFormGasto(); renderTodo(); toast('Cambios guardados'); return; } }
+        limpiarFormGasto(); renderTodo(); toast('Cambios guardados'); mostrarSub('gastos','lista'); return; } }
     const bruto=parseFloat(document.getElementById('g-bruto').value)||0;
     const descPct=Math.min(Math.max(parseFloat(document.getElementById('g-desc').value)||0,0),100);
     const monto=parseFloat(document.getElementById('g-monto').value),cot=parseFloat(document.getElementById('g-cot').value);
@@ -5329,13 +5418,13 @@ function armarUI(){
     Object.assign(g,leerExtraForm());
     g.cuitProveedor=cuitDeProveedor(prov);
     if(g.ivaARS+impuestosExtra(g)>=monto){ toast('El IVA, las percepciones y los impuestos internos tienen que sumar menos que el monto',true); return; }
-    const ed=!!g.id; Store.guardarGasto(g); limpiarFormGasto(); renderTodo(); toast(ed?'Cambios guardados':'Gasto guardado');
+    const ed=!!g.id; Store.guardarGasto(g); limpiarFormGasto(); renderTodo(); toast(ed?'Cambios guardados':'Gasto guardado'); if(ed) mostrarSub('gastos','lista');
   });
   ['f-buscar','f-macro','f-financia','f-desde','f-hasta','f-cert'].forEach(id=>document.getElementById(id).addEventListener('input',renderTablaGastos));
   document.getElementById('f-limpiar').addEventListener('click',()=>{ ['f-buscar','f-macro','f-financia','f-desde','f-hasta','f-cert'].forEach(id=>document.getElementById(id).value=''); renderTablaGastos(); });
 
   // presupuesto
-  document.getElementById('p-cancelar').addEventListener('click',limpiarFormPresu);
+  document.getElementById('p-cancelar').addEventListener('click',()=>{ limpiarFormPresu(); mostrarSub('presupuesto','rubros'); });
   document.getElementById('form-presu').addEventListener('submit',e=>{ e.preventDefault();
     const rubro=document.getElementById('p-rubro').value;
     if(!rubro){ toast('Elegí un rubro',true); return; }
@@ -5349,7 +5438,7 @@ function armarUI(){
     const previo=Store.presupuesto.find(x=>x.rubro===rubro);
     Store.guardarPresu({rubro,objMO:mo,objMat:mat,objOtros:otros,mesDesde:d,mesHasta:h,avance:Math.min(Math.max(av,0),100),notas:document.getElementById('p-notas').value.trim(),
       lb:(previo&&previo.lb)?previo.lb:null});
-    limpiarFormPresu(); renderTodo(); toast('Rubro guardado');
+    limpiarFormPresu(); renderTodo(); toast('Rubro guardado'); mostrarSub('presupuesto','rubros');
   });
 
   // aportes
@@ -5413,7 +5502,7 @@ function armarUI(){
   document.getElementById('btn-rapida-limpiar').addEventListener('click',()=>{ document.getElementById('rapida-texto').value=''; rapidaFilas=[]; renderRapida(); });
   document.getElementById('btn-analizar').addEventListener('click',analizarObra);
   document.getElementById('btn-informe').addEventListener('click',generarInforme);
-  document.getElementById('btn-comparar').addEventListener('click',compararAbaucan);
+  document.getElementById('btn-comparar').addEventListener('click',()=>{ mostrarSub('abaucan','comparacion'); compararAbaucan(); });
   document.getElementById('btn-copiar-informe').addEventListener('click',()=>{
     if(!textoInforme)return;
     if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(textoInforme).then(()=>toast('Texto copiado')).catch(()=>toast('No se pudo copiar',true)); }
@@ -5483,7 +5572,7 @@ function armarUI(){
 
   window.addEventListener('beforeunload',e=>{ if(!MODO_NUBE&&(Store.gastos.length||Store.presupuesto.length||Store.aportes.length)){ e.preventDefault(); e.returnValue=''; } });
 
-  armarComputoYCertificados();
+  armarSubvistas(); armarComputoYCertificados();
   limpiarFormGasto(); limpiarFormPresu(); limpiarFormAporte(); limpiarFactura(); cargarClave(); registrarManifiesto(); renderTodo();
 }
 
