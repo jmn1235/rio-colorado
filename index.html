@@ -388,6 +388,18 @@ select.cp-in{padding:4px 2px;}
   .ct-item{width:210px;}
   .ct-add select{width:100%;}
 }
+/* ---------- PERCEPCIONES ---------- */
+.perc-tabla td{vertical-align:top;}
+.perc-tabla select,.fa-perc-aviso select{border:1px solid var(--n-300);border-radius:4px;padding:5px 6px;font-size:12.5px;background:var(--blanco);max-width:100%;}
+.modal-card.perc-modal{max-width:900px !important;}
+.perc-fac{margin-top:16px;}
+.perc-fac-tit{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;margin-bottom:6px;}
+.perc-prev{font-size:12.5px;min-width:640px;}
+.perc-prev td,.perc-prev th{padding:6px 7px;}
+.perc-cambio{color:var(--verde) !important;}
+.perc-sale td{color:#9E2B25;text-decoration:line-through;}
+.perc-sale td .tag{text-decoration:none;}
+.fa-perc-aviso td{padding-top:0;}
 :focus-visible{outline:2px solid var(--verde);outline-offset:2px;}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
 </style>
@@ -730,7 +742,7 @@ select.cp-in{padding:4px 2px;}
             <div class="field"><label for="g-tipo">Tipo de costo *</label><select id="g-tipo" required></select></div>
             <div class="field col-2"><label for="g-proveedor">Proveedor *</label>
               <div class="campo-con-btn"><select id="g-proveedor" required></select><button type="button" class="btn btn-sm" id="btn-nuevo-prov">Nuevo</button></div></div>
-            <div class="field col-2"><label for="g-concepto">Concepto *</label><input type="text" id="g-concepto" placeholder="Ej. Viguetas pretensadas — losa PA" required></div>
+            <div class="field col-2"><label for="g-concepto">Concepto *</label><input type="text" id="g-concepto" placeholder="Ej. Viguetas pretensadas — losa PA" required><span class="hint warn" id="g-concepto-perc"></span></div>
             <div class="field"><label for="g-bruto">Monto de la factura $ *</label><input type="number" id="g-bruto" step="0.01" min="0" placeholder="0,00" required><span class="hint">Lo que dice la factura, IVA incluido.</span></div>
             <div class="field"><label for="g-desc">Descuento %</label><input type="number" id="g-desc" step="0.01" min="0" max="100" placeholder="0"><span class="hint">Nota de crédito o descuento pactado.</span></div>
             <div class="field"><label for="g-monto">Monto a imputar $</label><input type="number" id="g-monto" step="0.01" min="0" placeholder="0,00" readonly tabindex="-1"><span class="hint" id="g-desc-hint">La factura menos el descuento. Es el monto que usa toda la app.</span></div>
@@ -888,6 +900,10 @@ select.cp-in{padding:4px 2px;}
           <div class="field"><label for="cfg-alerta-umbral">Umbral %</label><input type="number" id="cfg-alerta-umbral" min="0" step="1"><span class="hint">Cuánto más de lo que indica el avance.</span></div>
         </div>
         <div class="btn-row" style="margin-top:14px;"><button class="btn btn-primary" id="btn-guardar-cfgcert">Guardar</button></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div><div class="panel-title">Percepciones cargadas como renglón</div><p class="panel-sub">Gastos cuyo concepto parece una percepción o un impuesto (IIBB, percepción IVA, Ganancias, impuestos internos). Al corregirlos, el monto pasa al campo que corresponde de los otros renglones de la misma factura y el renglón va a la papelera. El total y el IVA de la factura no cambian.</p></div></div>
+        <div class="table-wrap" id="panel-perc"></div>
       </div>
       <div class="panel">
         <div class="panel-head"><div><div class="panel-title">Papelera</div><p class="panel-sub">Registro de gastos y aportes borrados. Es solo para consultar: queda constancia de qué era, cuánto, quién lo borró y cuándo.</p></div></div>
@@ -1077,6 +1093,10 @@ select.cp-in{padding:4px 2px;}
    renglones con o sin IVA); aviso si el total no cierra con neto + IVA
    + percepciones. Fondo disponible también en pesos. MARCATON propone
    "Tarjeta - medio digital".
+   Versión 7.3 · Herramienta para pasar a su campo las percepciones que
+   se cargaron como renglón de factura (con vista previa; el total y el
+   IVA de la factura no cambian). Aviso al leer o cargar un renglón que
+   parece percepción. Tabla de aportes con el monto en pesos.
    ========================================================= */
 
 /* =========================================================
@@ -1794,7 +1814,9 @@ async function leerFactura(file){
     const r2=v=>Math.round((Number(v)||0)*100)/100;
     const totalLeido=r2(d.total);
     const sumaPerc=(Number(pr.iibb)||0)+(Number(pr.iva)||0)+(Number(pr.ganancias)||0)+(Number(d.otros_tributos)||0);
-    const totalCtrl=(Number(d.neto)>0)?r2(Number(d.neto)+ivaLeido+sumaPerc):0;
+    const campoIA={percIIBB:Number(pr.iibb)||0,percIVA:Number(pr.iva)||0,percGan:Number(pr.ganancias)||0,otrosTribARS:Number(d.otros_tributos)||0};
+    const percEnRenglones=renglones.reduce((s,r)=>{ const c=pareceImpuesto(r.concepto); return s+((c&&!campoIA[c])?(Number(r.monto)||0):0); },0);
+    const totalCtrl=(Number(d.neto)>0)?r2(Number(d.neto)+ivaLeido+sumaPerc+percEnRenglones):0;
     facturaTotales={leido:totalLeido,control:totalCtrl,difieren:!!(totalLeido&&totalCtrl&&Math.abs(totalLeido-totalCtrl)>1)};
     facturaTotal=facturaTotales.difieren?totalCtrl:(totalLeido||totalCtrl);
     const sumaLeida=renglones.reduce((a,r)=>a+(Number(r.monto)||0),0);
@@ -1847,14 +1869,17 @@ function renderRenglones(){
       +'<td><select data-rt="'+r.id+'" style="width:100%;border:1px solid var(--n-200);border-radius:6px;padding:6px 8px;font-size:12.5px;font-family:inherit;">'
       +TIPOS.map(t=>'<option'+(t===r.tipo?' selected':'')+'>'+esc(t)+'</option>').join('')+'</select></td>'
       +'<td><input type="number" step="0.01" data-rm="'+r.id+'" value="'+(Number(r.monto)||0)+'" style="width:100%;border:1px solid var(--n-200);border-radius:6px;padding:6px 8px;font-size:13px;text-align:right;font-family:Montserrat,sans-serif;"></td>'
-      +'<td style="text-align:right;"><button class="btn btn-ghost btn-sm" data-rx="'+r.id+'" style="color:#9E2B25;">Quitar</button></td></tr>';
+      +'<td style="text-align:right;"><button class="btn btn-ghost btn-sm" data-rx="'+r.id+'" style="color:#9E2B25;">Quitar</button></td></tr>'+filaAvisoPerc(r);
   });
   html+='<tr class="total-row"><td colspan="3">Total de los renglones</td><td class="money" id="fa-suma">'+fmtARS(total,2)+'</td><td></td></tr>';
   if(facturaTotal>0) html+='<tr><td colspan="3" style="font-weight:600;">Total según la factura</td><td class="money">'+fmtARS(facturaTotal,2)+'</td><td></td></tr>'
     +'<tr id="fa-dif-fila"><td colspan="5" id="fa-dif"></td></tr>';
   html+='</tbody></table>';
   cont.innerHTML=html;
-  cont.querySelectorAll('[data-rc]').forEach(i=>i.addEventListener('input',()=>{ const r=renglones.find(x=>x.id===i.dataset.rc); if(r)r.concepto=i.value; }));
+  cont.querySelectorAll('[data-rc]').forEach(i=>i.addEventListener('input',()=>{ const r=renglones.find(x=>x.id===i.dataset.rc); if(r)r.concepto=i.value;
+    const fila=cont.querySelector('tr[data-avperc="'+i.dataset.rc+'"]'); const c=pareceImpuesto(i.value);
+    if(fila){ fila.style.display=c?'':'none'; if(c) fila.querySelector('select').value=c; } }));
+  cont.querySelectorAll('[data-avpasar]').forEach(b=>b.addEventListener('click',()=>pasarRenglonAPercepcion(b.dataset.avpasar,cont.querySelector('[data-avtipo="'+b.dataset.avpasar+'"]').value)));
   cont.querySelectorAll('[data-rr]').forEach(i=>i.addEventListener('change',()=>{ const r=renglones.find(x=>x.id===i.dataset.rr); if(r)r.rubro=i.value; }));
   cont.querySelectorAll('[data-rt]').forEach(i=>i.addEventListener('change',()=>{ const r=renglones.find(x=>x.id===i.dataset.rt); if(r)r.tipo=i.value; }));
   cont.querySelectorAll('[data-rm]').forEach(i=>i.addEventListener('input',()=>{ const r=renglones.find(x=>x.id===i.dataset.rm); if(r){ r.monto=parseFloat(i.value)||0; const t=renglones.reduce((s,x)=>s+(Number(x.monto)||0),0); const tr=cont.querySelector('tr.total-row td.money'); if(tr)tr.textContent=fmtARS(t,2); marcarDiferenciaFactura(); } }));
@@ -2279,10 +2304,12 @@ function renderSocios(){
   const ap=Store.aportes.slice().sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
   const pagos=Store.gastos.filter(g=>g.financia&&g.financia!==FONDO).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
   if(!ap.length&&!pagos.length){ det.innerHTML='<div class="empty"><strong>Sin movimientos de socios</strong>Registrá un aporte al fondo, o cargá un gasto indicando qué socio lo pagó.</div>'; return; }
-  let h='<table><thead><tr><th>Fecha</th><th>Socio</th><th>Origen</th><th class="money">USD</th><th></th></tr></thead><tbody>';
-  ap.slice(0,10).forEach(a=>{ h+='<tr><td>'+fmtFecha(a.fecha)+'</td><td><span class="tag socio">'+esc(a.socio)+'</span></td><td><span class="tag verde">Aporte al fondo</span>'+(a.marcaton?' <span class="tag marron">MARCATON</span>':'')+'</td><td class="money">'+fmtUSD(a.montoUSD||0)+'</td>'
+  let h='<table><thead><tr><th>Fecha</th><th>Socio</th><th>Origen</th><th class="money">Pesos</th><th class="money">USD</th><th></th></tr></thead><tbody>';
+  ap.slice(0,10).forEach(a=>{ h+='<tr><td>'+fmtFecha(a.fecha)+'</td><td><span class="tag socio">'+esc(a.socio)+'</span></td><td><span class="tag verde">Aporte al fondo</span>'+(a.marcaton?' <span class="tag marron">MARCATON</span>':'')+'</td>'
+    +'<td class="money" style="font-weight:400;">'+fmtARS(a.montoARS||0,2)+(a.marcaton&&a.montoBrutoARS?'<div style="font-size:11px;color:var(--n-500);">pagado '+fmtARS(a.montoBrutoARS,2)+'</div>':'')+'</td>'
+    +'<td class="money">'+fmtUSD(a.montoUSD||0)+'</td>'
     +'<td style="text-align:right;white-space:nowrap;"><button class="btn btn-ghost btn-sm" data-aedit="'+esc(a.id)+'">Editar</button><button class="btn btn-ghost btn-sm" data-adel="'+esc(a.id)+'" style="color:#9E2B25;">Borrar</button></td></tr>'; });
-  pagos.slice(0,10).forEach(g=>{ h+='<tr><td>'+fmtFecha(g.fecha)+'</td><td><span class="tag socio">'+esc(g.financia)+'</span></td><td><span class="tag marron">Pagó '+esc(g.rubro)+'</span></td><td class="money">'+fmtUSD(g.montoUSD||0)+'</td>'
+  pagos.slice(0,10).forEach(g=>{ h+='<tr><td>'+fmtFecha(g.fecha)+'</td><td><span class="tag socio">'+esc(g.financia)+'</span></td><td><span class="tag marron">Pagó '+esc(g.rubro)+'</span></td><td class="money" style="font-weight:400;">'+fmtARS(g.montoARS||0,2)+'</td><td class="money">'+fmtUSD(g.montoUSD||0)+'</td>'
     +'<td style="text-align:right;"><button class="btn btn-ghost btn-sm" data-gedit="'+esc(g.id)+'">Ver gasto</button></td></tr>'; });
   det.innerHTML=h+'</tbody></table>';
   det.querySelectorAll('[data-aedit]').forEach(b=>b.addEventListener('click',()=>editarAporte(b.dataset.aedit)));
@@ -2331,7 +2358,7 @@ function limpiarFormGasto(){
   actualizarCamposFiscales();
   document.getElementById('form-titulo').textContent='Nuevo gasto'; document.getElementById('btn-guardar').textContent='Guardar gasto';
   document.getElementById('btn-cancelar').style.display='none'; buscarCotizacion(hoyISO(),'g-cot','g-cot-hint');
-  bloquearFormGasto(null);
+  bloquearFormGasto(null); avisoConceptoGasto();
 }
 function editarGasto(id){ const g=Store.gastos.find(x=>x.id===id); if(!g)return;
   asegurarProveedor(g.proveedor,'');
@@ -2350,7 +2377,7 @@ function editarGasto(id){ const g=Store.gastos.find(x=>x.id===id); if(!g)return;
   document.getElementById('g-perc-gan').value=g.percGan||''; document.getElementById('g-otros').value=g.otrosTribARS||'';
   actualizarCamposFiscales();
   document.getElementById('form-titulo').textContent='Editando un gasto'; document.getElementById('btn-guardar').textContent='Guardar cambios';
-  document.getElementById('btn-cancelar').style.display='inline-flex'; recalcularUSD(); bloquearFormGasto(gastoBloqueado(g)?g:null); irA('gastos'); window.scrollTo({top:0,behavior:'smooth'}); }
+  document.getElementById('btn-cancelar').style.display='inline-flex'; recalcularUSD(); bloquearFormGasto(gastoBloqueado(g)?g:null); avisoConceptoGasto(); irA('gastos'); window.scrollTo({top:0,behavior:'smooth'}); }
 function filtrarGastos(){
   const q=(document.getElementById('f-buscar').value||'').trim().toLowerCase();
   const mac=document.getElementById('f-macro').value,fin=document.getElementById('f-financia').value;
@@ -3444,7 +3471,7 @@ function exportarExcel(){
    Todo corre en el navegador: no hay servidor ni costo. */
 const RESPALDO_FORMATO='magna-rio-colorado';
 const RESPALDO_VERSION=2;
-const APP_VERSION='7.2';
+const APP_VERSION='7.3';
 const RESPALDO_CORREO='juliomonti91@gmail.com';   // solo esta cuenta respalda en Drive
 const RESPALDO_CARPETA='RioColorado';
 const RESPALDO_PREFIJO='Rio_Colorado_respaldo_';
@@ -4332,7 +4359,7 @@ function abrirHistorialItem(k){
 }
 /* Modal genérico del módulo */
 function abrirModalCP(titulo,html,textoOk,alOk){
-  const m=document.getElementById('modal-cp');
+  const m=document.getElementById('modal-cp'); m.querySelector('.modal-card').classList.remove('perc-modal');
   document.getElementById('cp-m-titulo').textContent=titulo; document.getElementById('cp-m-cuerpo').innerHTML=html;
   const ok=document.getElementById('cp-m-ok'); ok.style.display=alOk?'':'none'; ok.textContent=textoOk||'Aceptar';
   ok.onclick=()=>{ if(alOk&&alOk()!==false) m.classList.add('oculto'); };
@@ -4908,6 +4935,150 @@ function armarComputoYCertificados(){
   window.addEventListener('beforeunload',e=>{ if(COMP.sucio||CERT.sucio){ e.preventDefault(); e.returnValue=''; } });
 }
 
+/* ---------- PERCEPCIONES CARGADAS COMO RENGLÓN (v7.3) ----------
+   Antes de que existieran los campos de percepciones, algunas se cargaron como un
+   renglón más de la factura ("IIBB", "Percepción IVA"...). Acá se detectan y se pasan
+   a su campo, repartidas entre los otros renglones de la misma factura. */
+const CAMPOS_PERC={ percIIBB:'Percepción IIBB', percIVA:'Percepción IVA', percGan:'Percepción Ganancias', otrosTribARS:'Impuestos internos / otros' };
+const CAMPO_FORM_FACTURA={ percIIBB:'fa-perc-iibb', percIVA:'fa-perc-iva', percGan:'fa-perc-gan', otrosTribARS:'fa-otros' };
+/* Devuelve el campo que corresponde si el concepto parece una percepción o un impuesto; si no, '' */
+function pareceImpuesto(concepto){
+  const t=' '+sinTildes(concepto).replace(/[^a-z0-9%.]+/g,' ')+' ';
+  if(/ imp(uestos?|\.)? ?int(ernos?|\.)? /.test(t)||/ otros tributos /.test(t)) return 'otrosTribARS';
+  const perc=/ perc(ep(cion(es)?)?|\.)? /.test(t)||/ percibid/.test(t);
+  if(/ ganancias /.test(t)&&(perc||/ ret(encion)? /.test(t)||t.trim()==='ganancias')) return 'percGan';
+  if(/iibb/.test(t)||/ (ii bb|ii\.bb\.?|i\.b\.?|ing(resos)?\.? brutos|dgr) /.test(t)) return 'percIIBB';
+  if(perc&&/ (iva|i\.v\.a\.?) /.test(t)) return 'percIVA';
+  if(/ rg ?\d{3,4} /.test(t)) return /iibb|brutos/.test(t)?'percIIBB':'percIVA';
+  if(perc) return 'percIIBB';
+  return '';
+}
+function ignoradosPerc(){ return Array.isArray(Store.config.percIgnorados)?Store.config.percIgnorados:[]; }
+/* Los otros renglones de la misma factura: mismo lote, o mismo proveedor + comprobante */
+function renglonesDeFactura(g){
+  if(g.lote) return Store.gastos.filter(x=>x.lote===g.lote);
+  const c=String(g.comprobante||'').trim(); if(!c) return [g];
+  return Store.gastos.filter(x=>!x.lote&&sinTildes(x.proveedor)===sinTildes(g.proveedor)&&String(x.comprobante||'').trim()===c);
+}
+const PERC={ sel:{}, tipo:{} };
+function candidatosPerc(){
+  const ign=new Set(ignoradosPerc());
+  return Store.gastos.filter(g=>!ign.has(g.id)&&!g.certificadoId&&!g.honorario&&pareceImpuesto(g.concepto))
+    .sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''));
+}
+/* Arma el antes y el después de cada factura afectada con las elecciones actuales */
+function planCorreccionPerc(){
+  const cands=candidatosPerc(); const candIds=new Set(cands.map(g=>g.id));
+  const porFactura={};
+  cands.filter(g=>PERC.sel[g.id]).forEach(g=>{ const fac=renglonesDeFactura(g); const k=fac.map(x=>x.id).sort().join('|'); (porFactura[k]=porFactura[k]||{fac,quitar:[]}).quitar.push(g); });
+  const facturas=[], noSe=[];
+  Object.values(porFactura).forEach(({fac,quitar})=>{
+    const quedan=fac.filter(x=>!quitar.includes(x)&&!candIds.has(x.id));
+    const base=quedan.reduce((s,x)=>s+(Number(x.montoARS)||0),0);
+    if(!quedan.length||!(base>0)){ quitar.forEach(g=>noSe.push(g)); return; }
+    const despues=quedan.map(x=>JSON.parse(JSON.stringify(x)));
+    despues.forEach(x=>{ if(x.montoBrutoARS==null) x.montoBrutoARS=Number(x.montoARS)||0; });   // sin descuento, bruto = monto
+    const mayor=despues.reduce((m,x)=>Math.abs(x.montoARS)>Math.abs(m.montoARS)?x:m,despues[0]);
+    const repartir=(campo,total)=>{ if(!total) return; let asignado=0;
+      despues.forEach(x=>{ const parte=Math.round(total*(Number(quedan.find(q=>q.id===x.id).montoARS)||0)/base*100)/100; x[campo]=Math.round(((Number(x[campo])||0)+parte)*100)/100; asignado+=parte; });
+      mayor[campo]=Math.round(((Number(mayor[campo])||0)+(total-asignado))*100)/100; };
+    quitar.forEach(g=>{ const campo=PERC.tipo[g.id]||pareceImpuesto(g.concepto)||'percIIBB';
+      repartir('montoARS',Number(g.montoARS)||0);
+      repartir('montoBrutoARS',Number(g.montoBrutoARS!=null?g.montoBrutoARS:g.montoARS)||0);
+      repartir(campo,Number(g.montoARS)||0);                 // el renglón entero es la percepción
+      repartir('ivaARS',Number(g.ivaARS)||0);                 // el IVA que se le había prorrateado vuelve a los otros
+      ['percIIBB','percIVA','percGan','otrosTribARS'].forEach(c=>repartir(c,Number(g[c])||0)); });
+    despues.forEach(x=>{ const cot=Number(x.cotizacion)||0; if(cot){ x.montoUSD=x.montoARS/cot; x.ivaUSD=(Number(x.ivaARS)||0)/cot; } });
+    const suma=(lista,c)=>lista.reduce((s,x)=>s+(Number(x[c])||0),0);
+    const percs=lista=>['percIIBB','percIVA','percGan','otrosTribARS'].reduce((s,c)=>s+suma(lista,c),0);
+    facturas.push({ g:quitar[0], quitar, antes:fac, despues, quedan,
+      totalAntes:suma(fac,'montoARS'), totalDespues:suma(despues,'montoARS'),
+      ivaAntes:suma(fac,'ivaARS'), ivaDespues:suma(despues,'ivaARS'),
+      percAntes:percs(fac), percDespues:percs(despues) });
+  });
+  return {facturas,noSe};
+}
+function renderPanelPerc(){
+  const cont=document.getElementById('panel-perc'); if(!cont) return;
+  const cands=candidatosPerc();
+  if(!cands.length){ cont.innerHTML='<div class="empty" style="padding:18px;"><strong>No hay percepciones cargadas como renglón</strong>No se encontraron gastos con un concepto que parezca una percepción o un impuesto.</div>'; return; }
+  cands.forEach(g=>{ if(PERC.sel[g.id]===undefined) PERC.sel[g.id]=renglonesDeFactura(g).length>1; if(!PERC.tipo[g.id]) PERC.tipo[g.id]=pareceImpuesto(g.concepto)||'percIIBB'; });
+  const plan=planCorreccionPerc(); const noSe=new Set(plan.noSe.map(g=>g.id));
+  let h='<table class="perc-tabla"><thead><tr><th></th><th>Fecha</th><th>Proveedor</th><th>Comprobante</th><th>Concepto</th><th class="money">Monto</th><th>Es</th><th></th></tr></thead><tbody>';
+  cands.forEach(g=>{ const solo=renglonesDeFactura(g).filter(x=>x.id!==g.id&&!pareceImpuesto(x.concepto)).length===0;
+    h+='<tr><td><input type="checkbox" data-percsel="'+esc(g.id)+'"'+(PERC.sel[g.id]?' checked':'')+(solo?' disabled':'')+' aria-label="Corregir"></td>'
+      +'<td>'+fmtFecha(g.fecha)+'</td><td>'+esc(g.proveedor)+'</td><td>'+esc(g.comprobante||'—')+'</td><td>'+esc(g.concepto)
+      +(solo||noSe.has(g.id)?'<div><span class="tag rojo">No se puede corregir automáticamente</span> <span style="font-size:11.5px;color:var(--n-500);">no se encontraron los otros renglones de la factura</span></div>':'')+'</td>'
+      +'<td class="money">'+fmtARS(g.montoARS,2)+'</td>'
+      +'<td><select data-perctipo="'+esc(g.id)+'">'+Object.keys(CAMPOS_PERC).map(c=>'<option value="'+c+'"'+(c===PERC.tipo[g.id]?' selected':'')+'>'+CAMPOS_PERC[c]+'</option>').join('')+'</select></td>'
+      +'<td><button type="button" class="btn btn-ghost btn-sm" data-percign="'+esc(g.id)+'">No es una percepción</button></td></tr>'; });
+  h+='</tbody></table>';
+  const n=plan.facturas.reduce((s,f)=>s+f.quitar.length,0);
+  h+='<div class="btn-row" style="margin-top:14px;"><button type="button" class="btn btn-primary" id="perc-ver"'+(n?'':' disabled')+'>Ver antes y después ('+n+')</button></div>';
+  cont.innerHTML=h;
+  cont.querySelectorAll('[data-percsel]').forEach(x=>x.addEventListener('change',()=>{ PERC.sel[x.dataset.percsel]=x.checked; renderPanelPerc(); }));
+  cont.querySelectorAll('[data-perctipo]').forEach(x=>x.addEventListener('change',()=>{ PERC.tipo[x.dataset.perctipo]=x.value; }));
+  cont.querySelectorAll('[data-percign]').forEach(b=>b.addEventListener('click',()=>{
+    Store.config.percIgnorados=ignoradosPerc().concat([b.dataset.percign]); Store.guardarConfig(); renderPanelPerc(); toast('Listo: no se vuelve a mostrar'); }));
+  const v=document.getElementById('perc-ver'); if(v) v.addEventListener('click',abrirPreviaPerc);
+}
+function abrirPreviaPerc(){
+  const plan=planCorreccionPerc(); if(!plan.facturas.length){ toast('No hay nada para corregir',true); return; }
+  const f2=v=>fmtARS(v,2), cel=(a,b)=>'<td class="money">'+f2(a)+'</td><td class="money'+(Math.abs(a-b)>0.004?' perc-cambio':'')+'">'+f2(b)+'</td>';
+  let h='<p class="panel-sub">Cada factura queda con el mismo total y el mismo IVA. El renglón de la percepción va a la papelera y su monto pasa al campo elegido de los otros renglones, en proporción a su monto.</p>';
+  plan.facturas.forEach(f=>{
+    h+='<div class="perc-fac"><div class="perc-fac-tit">'+esc(f.g.proveedor)+' · '+esc(f.g.comprobante||'sin comprobante')+' · '+fmtFecha(f.g.fecha)+'</div>'
+      +'<div class="table-wrap"><table class="perc-prev"><thead><tr><th>Renglón</th><th class="money">Monto antes</th><th class="money">después</th><th class="money">IVA antes</th><th class="money">después</th><th class="money">Percep. antes</th><th class="money">después</th></tr></thead><tbody>';
+    f.antes.forEach(x=>{ const d=f.despues.find(y=>y.id===x.id); const p=o=>(Number(o.percIIBB)||0)+(Number(o.percIVA)||0)+(Number(o.percGan)||0)+(Number(o.otrosTribARS)||0);
+      if(f.quitar.includes(x)) h+='<tr class="perc-sale"><td>'+esc(x.concepto)+' <span class="tag rojo">a la papelera → '+esc(CAMPOS_PERC[PERC.tipo[x.id]])+'</span></td><td class="money">'+f2(x.montoARS)+'</td><td class="money">—</td><td class="money">'+f2(x.ivaARS||0)+'</td><td class="money">—</td><td class="money">'+f2(p(x))+'</td><td class="money">—</td></tr>';
+      else if(d) h+='<tr><td>'+esc(x.concepto)+' <span style="color:var(--n-500);font-size:11.5px;">'+esc(x.rubro)+'</span></td>'+cel(x.montoARS,d.montoARS)+cel(x.ivaARS||0,d.ivaARS||0)+cel(p(x),p(d))+'</tr>';
+      else h+='<tr><td>'+esc(x.concepto)+'</td><td class="money">'+f2(x.montoARS)+'</td><td class="money">'+f2(x.montoARS)+'</td><td class="money">'+f2(x.ivaARS||0)+'</td><td class="money">'+f2(x.ivaARS||0)+'</td><td class="money">'+f2(p(x))+'</td><td class="money">'+f2(p(x))+'</td></tr>'; });
+    const ok=Math.abs(f.totalAntes-f.totalDespues-0)<0.01&&Math.abs(f.ivaAntes-f.ivaDespues)<0.01;
+    h+='<tr class="total-row"><td>Total de la factura</td>'+cel(f.totalAntes,f.totalDespues)+cel(f.ivaAntes,f.ivaDespues)+cel(f.percAntes,f.percDespues)+'</tr></tbody></table></div>'
+      +(ok?'':'<div class="aviso rojo" style="margin:8px 0 0;"><div>El total o el IVA no cierran: no se va a aplicar.</div></div>')+'</div>'; });
+  h+='<div class="aviso marron" style="margin:14px 0 0;"><div>Esto cambia montos de gastos ya cargados. Conviene hacer un respaldo antes. <button type="button" class="btn btn-sm" id="perc-resp" style="margin-left:6px;">Descargar respaldo JSON</button></div></div>';
+  abrirModalCP('Corregir percepciones: antes y después',h,'Aplicar corrección',()=>{ aplicarCorreccionPerc(); return true; });
+  document.querySelector('#modal-cp .modal-card').classList.add('perc-modal');
+  document.getElementById('perc-resp').addEventListener('click',exportarJSON);
+}
+async function aplicarCorreccionPerc(){
+  const plan=planCorreccionPerc(); const ops=[]; let n=0;
+  plan.facturas.forEach(f=>{
+    if(Math.abs(f.totalAntes-f.totalDespues)>=0.01||Math.abs(f.ivaAntes-f.ivaDespues)>=0.01) return;
+    f.despues.forEach(x=>ops.push(opSet('gastos',x)));
+    f.quitar.forEach(g=>{ ops.push(opSet('papelera',registroPapelera('gasto',Object.assign({},g,{corregidoComo:PERC.tipo[g.id]})))); ops.push(opDel('gastos',g.id)); n++; });
+  });
+  if(!ops.length){ toast('No se aplicó nada',true); return; }
+  try{ await escribirOps(ops); PERC.sel={}; renderTodo(); toast(n+' percepción(es) pasada(s) a su campo'); }
+  catch(e){ toast('No se pudo corregir: '+e.message,true); }
+}
+
+/* ---- Aviso en "Leer factura" y en "Cargar gastos" ---- */
+const TEXTO_AVISO_PERC='Esto parece una percepción o un impuesto: cargalo en su campo, no como renglón.';
+function filaAvisoPerc(r){
+  const campo=pareceImpuesto(r.concepto);
+  return '<tr class="fa-perc-aviso" data-avperc="'+r.id+'"'+(campo?'':' style="display:none;"')+'><td colspan="5"><div class="aviso marron" style="margin:0;"><div>'+TEXTO_AVISO_PERC
+    +' <select data-avtipo="'+r.id+'">'+Object.keys(CAMPOS_PERC).map(c=>'<option value="'+c+'"'+(c===(campo||'percIIBB')?' selected':'')+'>'+CAMPOS_PERC[c]+'</option>').join('')+'</select>'
+    +' <button type="button" class="btn btn-sm" data-avpasar="'+r.id+'">Pasar a su campo</button></div></div></td></tr>';
+}
+function pasarRenglonAPercepcion(id,campo){
+  const r=renglones.find(x=>x.id===id); if(!r) return;
+  const otros=renglones.filter(x=>x.id!==id&&(Number(x.monto)||0)>0);
+  if(!otros.length){ toast('No hay otros renglones donde repartirlo: cargá primero los renglones de la factura.',true); return; }
+  const total=renglones.reduce((s,x)=>s+(Number(x.monto)||0),0);
+  const inp=document.getElementById(CAMPO_FORM_FACTURA[campo]); const actual=parseFloat(inp.value)||0; const m=Number(r.monto)||0;
+  /* si la IA ya la había puesto en su campo, no se suma dos veces */
+  if(!(actual>0&&Math.abs(actual-m)<=Math.max(1,m*0.03))) inp.value=Math.round((actual+m)*100)/100;
+  renglones=renglones.filter(x=>x.id!==id);
+  ajustarRenglonesAlTotal(facturaTotal>0?facturaTotal:total);
+  renderRenglones(); toast('Pasado a '+CAMPOS_PERC[campo]+'; el total de la factura no cambió');
+}
+function avisoConceptoGasto(){
+  const h=document.getElementById('g-concepto-perc'); if(!h) return;
+  const c=pareceImpuesto(document.getElementById('g-concepto').value);
+  h.textContent=c?TEXTO_AVISO_PERC+' En el gasto de esa factura usá el campo "'+CAMPOS_PERC[c]+'".':'';
+}
+
 /* ---------- PLANTILLAS Y CARGA MASIVA ---------- */
 const COL_PRESU=['Rubro','Macrorubro','Mano de obra USD','Materiales USD','Otros USD','Mes desde (AAAA-MM)','Mes hasta (AAAA-MM)','Avance fisico %','Notas'];
 const COL_ABAUCAN=['Rubro','Materiales USD','Mano de obra USD','Generales USD','Notas'];
@@ -5053,7 +5224,7 @@ function irA(v){ if(!puedeSalirDeVista(v)) return; document.querySelectorAll('.n
 function renderTodo(){ invalidarAvance(); actualizarProveedores(); renderDashboard(); renderMacro(); renderSocios(); renderMarcaton(); renderTablaGastos(); renderPresupuesto();
   renderProveedoresABM(); renderAvisoLineaBase(); renderDesvioLineaBase(); renderCurva(); renderAnalisis(); renderIVA(); renderProyeccion(); renderAbaucan();
   renderFinanciero(); renderFinSocios(); renderFinMatriz(); renderPapelera(); renderAvisoHonorarios(); renderEstadoTasa(); volcarConfig(); renderEstadoDolar(); renderEstadoIA(); renderEstadoFirebase();
-  renderAvisoRespaldo(); renderPanelRespaldo(); renderComputo(); renderCertificados(); renderCfgCertificados(); avisoCertGasto(); revisarNumeracion(); }
+  renderAvisoRespaldo(); renderPanelRespaldo(); renderComputo(); renderCertificados(); renderCfgCertificados(); avisoCertGasto(); renderPanelPerc(); revisarNumeracion(); }
 
 /* ---------- ARRANQUE ---------- */
 function armarUI(){
@@ -5130,6 +5301,7 @@ function armarUI(){
   document.getElementById('btn-cancelar').addEventListener('click',limpiarFormGasto);
   document.getElementById('btn-nuevo-prov').addEventListener('click',()=>abrirModalProv(null));
   ['g-rubro','g-tipo'].forEach(id=>document.getElementById(id).addEventListener('change',avisoCertGasto));
+  document.getElementById('g-concepto').addEventListener('input',avisoConceptoGasto);
   document.getElementById('form-gasto').addEventListener('submit',e=>{ e.preventDefault();
     { const idEd=document.getElementById('g-id').value; const prevG=idEd?Store.gastos.find(x=>x.id===idEd):null;
       /* gasto de un certificado: solo se cambian pago, estado, comprobante y notas */
