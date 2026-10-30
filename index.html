@@ -1069,6 +1069,9 @@ select.cp-in{padding:4px 2px;}
    cada certificado aprobado genera sus gastos (sin IVA, al MEP de su
    fecha), certificados históricos para la MO ya cargada y número de
    carga fijo.
+   Versión 7.1 · En los certificados nuevos se puede repetir un ítem
+   (mismo ítem con precios distintos): cada renglón genera su gasto y
+   el avance manual del ítem se carga en su último renglón.
    ========================================================= */
 
 /* =========================================================
@@ -3383,7 +3386,7 @@ function exportarExcel(){
    Todo corre en el navegador: no hay servidor ni costo. */
 const RESPALDO_FORMATO='magna-rio-colorado';
 const RESPALDO_VERSION=2;
-const APP_VERSION='7.0';
+const APP_VERSION='7.1';
 const RESPALDO_CORREO='juliomonti91@gmail.com';   // solo esta cuenta respalda en Drive
 const RESPALDO_CARPETA='RioColorado';
 const RESPALDO_PREFIJO='Rio_Colorado_respaldo_';
@@ -4420,13 +4423,16 @@ function montoRenglon(c,r){
 function precioRenglon(c,r){ if(!c.historico) return numAR(r.precio);
   const m=numAR(r.montoARS)||0, q=numAR(r.cantidad); return r.tipoPrecio==='global'?m:(q?m/q:null); }
 /* Recorre los renglones con el acumulado de cada ítem */
+/* Último renglón de cada ítem que no mueve la cantidad: ahí (y solo ahí) se carga el avance manual */
+function ultimoManualPorItem(c){ const m={}; (c.renglones||[]).forEach(r=>{ const it=itemPorId(r.itemId); if(it&&!esCompatible(it,r)) m[it.id]=r.id; }); return m; }
 function analizarRenglones(c){
-  const run={}; const out={};
+  const run={}; const out={}; const ultMan=ultimoManualPorItem(c);
+  const pctManual=it=>{ const r=(c.renglones||[]).find(x=>x.id===ultMan[it.id]); return r?(numAR(r.avanceManual)||0)/100:0; };
   (c.renglones||[]).forEach(r=>{ const it=itemPorId(r.itemId); if(!it){ out[r.id]={it:null}; return; }
     if(!run[it.id]) run[it.id]=estadoItemAntes(it.id,c);
     const ant=Object.assign({},run[it.id]); const comp=esCompatible(it,r); const q=numAR(r.cantidad)||0;
     if(comp){ run[it.id].acc+=q; run[it.id].pct=Math.min(1,Math.max(0,run[it.id].acc/Number(it.cantidadComputo))); }
-    out[r.id]={it,comp,ant,acc:run[it.id].acc,pct:comp?run[it.id].pct:(numAR(r.avanceManual)||0)/100,exceso:comp&&run[it.id].acc>Number(it.cantidadComputo)+1e-9}; });
+    out[r.id]={it,comp,ant,acc:run[it.id].acc,pct:comp?run[it.id].pct:pctManual(it),pideAvance:!comp&&ultMan[it.id]===r.id,exceso:comp&&run[it.id].acc>Number(it.cantidadComputo)+1e-9}; });
   return out;
 }
 function gastoDisponibleHist(g,c){ return mismoContratista(g.proveedor,c.contratista)&&(!g.certificadoId||g.certificadoId===c.id); }
@@ -4444,7 +4450,7 @@ function validarCert(c,aprobar){
   const vistos={}; const an=analizarRenglones(c);
   (c.renglones||[]).forEach(r=>{ const it=itemPorId(r.itemId);
     if(!it){ marca(r,'itemId','Elegí el ítem'); return; }
-    const clave=r.itemId+'|'+(c.historico?r.gastoId:''); if(vistos[clave]) marca(r,'itemId',c.historico?'El ítem se repite en el mismo gasto':'El ítem se repite en este certificado'); vistos[clave]=1;
+    if(c.historico){ const clave=r.itemId+'|'+r.gastoId; if(vistos[clave]) marca(r,'itemId','El ítem se repite en el mismo gasto'); vistos[clave]=1; }
     if(!r.unidad) marca(r,'unidad','Falta la unidad');
     const q=numAR(r.cantidad), p=numAR(r.precio), m=numAR(r.montoARS);
     if(Number.isNaN(q)) marca(r,'cantidad','Cantidad inválida');
@@ -4453,7 +4459,7 @@ function validarCert(c,aprobar){
     else if(p===null||Number.isNaN(p)) marca(r,'precio','Falta el precio');
     const a=an[r.id];
     if(a&&a.comp&&a.acc<-1e-9) marca(r,'cantidad','El acumulado del ítem quedaría negativo');
-    if(a&&!a.comp){ const v=numAR(r.avanceManual); if(v===null||Number.isNaN(v)||v<0||v>100) marca(r,'avanceManual','Avance entre 0 y 100'); }
+    if(a&&a.pideAvance){ const v=numAR(r.avanceManual); if(v===null||Number.isNaN(v)||v<0||v>100) marca(r,'avanceManual','Avance entre 0 y 100'); }
     if(a&&a.exceso) avisos.push(nombreItem(it)+': el acumulado supera el cómputo (el avance se topea en 100 %).');
   });
   if(c.historico){
@@ -4556,6 +4562,7 @@ function dibujarEditorCert(validacion){
       +'<td class="money ct-calc ct-c-ant">'+(it&&a.comp?fmtCant(a.ant.acc):'—')+'</td>'
       +'<td class="money ct-calc ct-c-acc'+(a.exceso?' cp-exceso':'')+'">'+(it&&a.comp?fmtCant(a.acc):'—')+'</td>'
       +'<td class="ct-av">'+(it?(a.comp?'<span class="ct-auto" title="Sale de la cantidad">'+fmtPct(a.pct*100)+'</span>'
+        :!a.pideAvance?'<span class="ct-pct" title="Este ítem se repite: el avance acumulado se carga en su último renglón">'+(ro?fmtPct(a.pct*100):'en el último renglón')+'</span>'
         :'<input data-cr="avanceManual" class="ct-num ct-avm" inputmode="decimal" value="'+esc(r.avanceManual)+'"'+(ro?' disabled':'')+er('avanceManual')+' title="Avance físico acumulado del ítem en este certificado (%)"><span class="ct-pct">%</span>'):'—')+'</td>'
       +'<td>'+(ro?'':'<button type="button" class="btn btn-ghost btn-sm" data-ctquitar="'+esc(r.id)+'" aria-label="Quitar renglón">✕</button>')+'</td></tr>';
     h+=fila;
@@ -4651,7 +4658,7 @@ function docCert(c,extra){
   d.numero=numAR(c.numero); d.mep=c.historico?null:numAR(c.mep);
   d.renglones=(c.renglones||[]).map(r=>({ id:r.id, itemId:r.itemId, unidad:r.unidad||'', tipoPrecio:r.tipoPrecio==='global'?'global':'unitario',
     cantidad:numAR(r.cantidad), precio:c.historico?precioRenglon(c,r):numAR(r.precio), montoARS:redondear(montoRenglon(c,r)),
-    avanceManual:(()=>{ const it=itemPorId(r.itemId); if(it&&esCompatible(it,r)) return null; const v=numAR(r.avanceManual); return Number.isNaN(v)?null:v; })(),
+    avanceManual:(()=>{ const it=itemPorId(r.itemId); if(!it||esCompatible(it,r)||ultimoManualPorItem(c)[it.id]!==r.id) return null; const v=numAR(r.avanceManual); return Number.isNaN(v)?null:v; })(),
     gastoId:r.gastoId||null, cotizacion:r.cotizacion||null }));
   const t=totalesCert(c); d.totalARS=redondear(t.ars); d.totalUSD=redondear(t.usd);
   d.actualizadoEn=new Date().toISOString(); d.actualizadoPor=USUARIO?USUARIO.nombre:'—';
@@ -4686,7 +4693,7 @@ async function aprobarCert(){
       if(!m){ r.gastoId=null; return; }
       const gid=Store.nuevoId(); r.gastoId=gid;
       ops.push(opSet('gastos',{ id:gid, fecha:c.fecha, rubro:it.rubro, tipo:'Mano de obra', proveedor:c.contratista,
-        concepto:'Cert. N° '+numAR(c.numero)+' · '+nombreItem(it)+(m<0?' (descuento)':''), montoARS:m, montoBrutoARS:m, descuentoPct:0, cotizacion:mep, montoUSD:m/mep,
+        concepto:'Cert. N° '+numAR(c.numero)+' · '+nombreItem(it)+' · '+(r.tipoPrecio==='global'?'global':fmtARS(numAR(r.precio))+'/'+(r.unidad||'u'))+(m<0?' (descuento)':''), montoARS:m, montoBrutoARS:m, descuentoPct:0, cotizacion:mep, montoUSD:m/mep,
         unidad:UNIDADES[0], financia:c.financia||FONDO, formaPago:c.formaPago||'', estado:c.estadoPago||'Pendiente', cargadoPor:quien,
         comprobante:c.comprobante||'', notas:c.notas||'', fiscal:FISCAL_SIN, alicuota:null, ivaARS:0, ivaUSD:0, cuitProveedor:cuit,
         lote:c.lote, nroCarga:c.nroCarga, origen:'certificado', certificadoId:c.id, certNumero:numAR(c.numero), itemId:r.itemId,
