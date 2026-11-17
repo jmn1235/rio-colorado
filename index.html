@@ -371,6 +371,8 @@ select.cp-in{padding:4px 2px;}
 .ct-neg{color:#9E2B25 !important;}
 .ct-neg-row td{background:#FDF8F7;}
 .ct-gasto{font-size:12px;min-width:210px;}
+.ct-com{display:block;width:230px;margin-top:4px;font-size:12px !important;padding:4px 6px !important;}
+.ct-com-ro{font-size:11.5px;color:var(--n-700);margin-top:3px;max-width:260px;}
 .ct-gasto div{color:var(--n-500);}
 .ct-auto{font-weight:700;color:var(--verde);}
 .ct-pct{margin-left:3px;color:var(--n-500);}
@@ -413,6 +415,16 @@ select.cp-in{padding:4px 2px;}
 .subvista{display:none;}
 .subvista.activa{display:block;}
 @media (max-width:860px){ .subtabs{margin-bottom:16px;} .subtab{padding:9px 11px 10px;font-size:13px;} }
+/* ---------- PRESUPUESTO: PROYECTADO | EJECUTADO ---------- */
+.presu-tabla{min-width:980px;}
+.presu-tabla thead th{vertical-align:bottom;}
+.presu-tabla th.presu-grp{text-align:center;color:var(--tinta);border-bottom:1.5px solid var(--verde);padding-bottom:6px;}
+.presu-tabla .presu-tot{border-right:1px solid var(--n-200);}
+/* la columna Rubro queda fija al desplazar la tabla de costado */
+.presu-tabla tr.presu-grupos > th:first-child,.presu-tabla tbody tr:not(.p-items) > td:first-child{position:sticky;left:0;z-index:1;background:var(--blanco);box-shadow:1px 0 0 var(--n-200);}
+.presu-tabla tr.macro-row > td:first-child,.presu-tabla tr.total-row > td:first-child{background:var(--n-050);}
+.presu-tabla td:first-child{min-width:150px;}
+.presu-nota{font-size:12px;color:var(--n-500);margin:10px 0 0;}
 :focus-visible{outline:2px solid var(--verde);outline-offset:2px;}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
 </style>
@@ -1114,6 +1126,9 @@ select.cp-in{padding:4px 2px;}
    Presupuesto, Macrorubros, Socios y aportes, Rubros y proveedores,
    Intereses e IVA, Abaucán y Datos y configuración. No cambia ningún
    cálculo ni dato: solo dónde se ve cada cosa.
+   Versión 7.5 · Presupuesto: lo ejecutado separado en mano de obra y
+   materiales (proyectado | ejecutado) con fila de gastos en rubros sin
+   presupuesto. Certificados: concepto / comentario por renglón.
    ========================================================= */
 
 /* =========================================================
@@ -2603,39 +2618,55 @@ function renderPresupuesto(){
     +'<div class="kpi"><div class="kpi-label">Presupuesto por m²</div><div class="kpi-value num">'+fmtUSD(total/PROYECTO.superficie)+'</div><div class="kpi-sub">Objetivo por metro cuadrado</div></div>';
   const cont=document.getElementById('tabla-presupuesto');
   if(!Store.presupuesto.length){ cont.innerHTML='<div class="empty"><strong>Sin rubros presupuestados</strong>Cargalos con el formulario, o usá "Cargar rubros base".</div>'; return; }
-  const porRubro=agrupar(Store.gastos,g=>g.rubro);
+  /* Ejecutado por rubro: mano de obra, materiales y total (el total incluye equipos, subcontratos e indirectos) */
+  const ejeTot=agrupar(Store.gastos,g=>g.rubro);
+  const ejeMO=agrupar(Store.gastos.filter(g=>g.tipo==='Mano de obra'),g=>g.rubro);
+  const ejeMat=agrupar(Store.gastos.filter(g=>g.tipo==='Materiales'),g=>g.rubro);
   const incid=v=>total>0?(v/total*100).toFixed(1)+'%':'—';
-  let html='<table><thead><tr><th>Rubro</th><th class="money">Mano obra</th><th class="money">Materiales</th><th class="money">Otros</th><th class="money">Objetivo</th><th style="width:66px;">Incid.</th><th style="width:80px;">Avance fís.</th><th class="money">Ejecutado</th><th class="money">Saldo</th><th></th></tr></thead><tbody>';
-  let totMO=0,totMat=0,totOtros=0;
+  const u=v=>v?fmtUSD(v):'—';
+  const saldo=v=>'<td class="money" style="color:'+(v<0?'#B3541E':'inherit')+'">'+fmtUSD(v)+'</td>';
+  let html='<table class="presu-tabla"><thead>'
+    +'<tr class="presu-grupos"><th rowspan="2">Rubro</th><th colspan="3" class="presu-grp">Proyectado</th><th rowspan="2" style="width:66px;">Incid.</th><th rowspan="2" style="width:80px;">Avance fís.</th>'
+    +'<th colspan="3" class="presu-grp">Ejecutado</th><th rowspan="2" class="money">Saldo</th><th rowspan="2"></th></tr>'
+    +'<tr><th class="money">Mano de obra</th><th class="money">Materiales</th><th class="money presu-tot">Total</th><th class="money">Mano de obra</th><th class="money">Materiales</th><th class="money presu-tot">Total</th></tr></thead><tbody>';
+  let totMO=0,totMat=0,totEMO=0,totEMat=0;
+  const conPresu=new Set(Store.presupuesto.map(p=>p.rubro));
   MACRORUBROS.forEach(m=>{
     const en=Store.presupuesto.filter(p=>macroDe(p.rubro)===m.nombre); if(!en.length)return;
-    // subtotales del macrorubro
-    const sMO=en.reduce((s,p)=>s+(p.objMO||0),0), sMat=en.reduce((s,p)=>s+(p.objMat||0),0),
-          sOtros=en.reduce((s,p)=>s+(p.objOtros||0),0), sObj=en.reduce((s,p)=>s+objetivoRubro(p),0),
-          sEje=en.reduce((s,p)=>s+(porRubro[p.rubro]||0),0);
-    totMO+=sMO; totMat+=sMat; totOtros+=sOtros;
+    const sum=f=>en.reduce((s,p)=>s+f(p),0);
+    const sMO=sum(p=>p.objMO||0), sMat=sum(p=>p.objMat||0), sObj=sum(objetivoRubro),
+          sEMO=sum(p=>ejeMO[p.rubro]||0), sEMat=sum(p=>ejeMat[p.rubro]||0), sEje=sum(p=>ejeTot[p.rubro]||0);
+    totMO+=sMO; totMat+=sMat; totEMO+=sEMO; totEMat+=sEMat;
     html+='<tr class="macro-row"><td>'+esc(m.nombre)+'</td>'
-      +'<td class="money">'+(sMO?fmtUSD(sMO):'—')+'</td><td class="money">'+(sMat?fmtUSD(sMat):'—')+'</td><td class="money">'+(sOtros?fmtUSD(sOtros):'—')+'</td>'
-      +'<td class="money">'+fmtUSD(sObj)+'</td>'
-      +'<td style="font-size:12px;color:var(--gris);">'+incid(sObj)+'</td>'
-      +'<td></td>'
-      +'<td class="money">'+fmtUSD(sEje)+'</td><td class="money" style="color:'+(sObj-sEje<0?'#B3541E':'inherit')+'">'+fmtUSD(sObj-sEje)+'</td><td></td></tr>';
+      +'<td class="money">'+u(sMO)+'</td><td class="money">'+u(sMat)+'</td><td class="money presu-tot">'+fmtUSD(sObj)+'</td>'
+      +'<td style="font-size:12px;color:var(--gris);">'+incid(sObj)+'</td><td></td>'
+      +'<td class="money">'+u(sEMO)+'</td><td class="money">'+u(sEMat)+'</td><td class="money presu-tot">'+fmtUSD(sEje)+'</td>'+saldo(sObj-sEje)+'<td></td></tr>';
     en.sort((a,b)=>objetivoRubro(b)-objetivoRubro(a)).forEach(p=>{
-      const obj=objetivoRubro(p),e=porRubro[p.rubro]||0;
+      const obj=objetivoRubro(p),e=ejeTot[p.rubro]||0;
       html+='<tr><td>'+esc(p.rubro)+(p.notas?'<div style="font-size:11.5px;color:var(--n-500);">'+esc(p.notas)+'</div>':'')+'</td>'
-        +'<td class="money" style="font-weight:400;">'+(p.objMO?fmtUSD(p.objMO):'—')+'</td><td class="money" style="font-weight:400;">'+(p.objMat?fmtUSD(p.objMat):'—')+'</td><td class="money" style="font-weight:400;">'+(p.objOtros?fmtUSD(p.objOtros):'—')+'</td>'
-        +'<td class="money">'+fmtUSD(obj)+'</td>'
+        +'<td class="money" style="font-weight:400;">'+u(p.objMO)+'</td><td class="money" style="font-weight:400;">'+u(p.objMat)+'</td><td class="money presu-tot">'+fmtUSD(obj)+'</td>'
         +'<td style="font-size:12px;color:var(--gris);">'+incid(obj)+'</td>'
         +'<td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:'+Math.min(avanceDe(p),100).toFixed(0)+'%"></div></div><span style="font-size:11px;color:var(--verde);min-width:30px;text-align:right;">'+fmtPct(avanceDe(p))+'</span></div>'
           +(avanceRubroAuto(p.rubro)?'<button type="button" class="tag verde p-auto" data-pitems="'+esc(p.rubro)+'" title="Sale de los ítems del cómputo">auto ▾</button>':'')+'</td>'
-        +'<td class="money">'+fmtUSD(e)+'</td><td class="money" style="color:'+(obj-e<0?'#B3541E':'inherit')+'">'+fmtUSD(obj-e)+'</td>'
+        +'<td class="money" style="font-weight:400;">'+u(ejeMO[p.rubro])+'</td><td class="money" style="font-weight:400;">'+u(ejeMat[p.rubro])+'</td><td class="money presu-tot">'+fmtUSD(e)+'</td>'+saldo(obj-e)
         +'<td style="white-space:nowrap;text-align:right;"><button class="btn btn-ghost btn-sm" data-pedit="'+esc(p.id)+'">Editar</button><button class="btn btn-ghost btn-sm" data-pdel="'+esc(p.id)+'" style="color:#9E2B25;">Borrar</button></td></tr>'+filasItemsPresu(p);
     });
   });
+  /* gastos de rubros sin presupuesto (por ejemplo, honorarios): así todas las columnas cierran con el total */
+  const sinP=Store.gastos.filter(g=>!conPresu.has(g.rubro));
+  if(sinP.length){
+    const sMO=sinP.filter(g=>g.tipo==='Mano de obra').reduce((s,g)=>s+(g.montoUSD||0),0), sMat=sinP.filter(g=>g.tipo==='Materiales').reduce((s,g)=>s+(g.montoUSD||0),0), sT=sinP.reduce((s,g)=>s+(g.montoUSD||0),0);
+    totEMO+=sMO; totEMat+=sMat;
+    const rubs=[...new Set(sinP.map(g=>g.rubro||'—'))];
+    html+='<tr class="macro-row presu-sin"><td>Gastos en rubros sin presupuesto<div style="font-size:11.5px;font-weight:400;color:var(--n-500);font-family:\'Source Sans 3\',sans-serif;">'+esc(rubs.slice(0,4).join(', ')+(rubs.length>4?' y '+(rubs.length-4)+' más':''))+'</div></td>'
+      +'<td class="money">—</td><td class="money">—</td><td class="money presu-tot">—</td><td></td><td></td>'
+      +'<td class="money">'+u(sMO)+'</td><td class="money">'+u(sMat)+'</td><td class="money presu-tot">'+fmtUSD(sT)+'</td>'+saldo(-sT)+'<td></td></tr>';
+  }
   html+='<tr class="total-row"><td>Total obra</td>'
-    +'<td class="money">'+fmtUSD(totMO)+'</td><td class="money">'+fmtUSD(totMat)+'</td><td class="money">'+fmtUSD(totOtros)+'</td>'
-    +'<td class="money">'+fmtUSD(total)+'</td><td style="font-size:12px;color:var(--gris);">'+(total>0?'100,0%':'—')+'</td><td></td>'
-    +'<td class="money">'+fmtUSD(ejec)+'</td><td class="money">'+fmtUSD(total-ejec)+'</td><td></td></tr></tbody></table>';
+    +'<td class="money">'+fmtUSD(totMO)+'</td><td class="money">'+fmtUSD(totMat)+'</td><td class="money presu-tot">'+fmtUSD(total)+'</td>'
+    +'<td style="font-size:12px;color:var(--gris);">'+(total>0?'100,0%':'—')+'</td><td></td>'
+    +'<td class="money">'+fmtUSD(totEMO)+'</td><td class="money">'+fmtUSD(totEMat)+'</td><td class="money presu-tot">'+fmtUSD(ejec)+'</td>'+saldo(total-ejec)+'<td></td></tr></tbody></table>'
+    +'<p class="presu-nota">Los totales incluyen también lo proyectado como "Otros" y los gastos de equipos, subcontratos e indirectos (como los honorarios), por eso pueden ser mayores que mano de obra + materiales.</p>';
   cont.innerHTML=html;
   cont.querySelectorAll('[data-pedit]').forEach(b=>b.addEventListener('click',()=>editarPresu(b.dataset.pedit)));
   cont.querySelectorAll('[data-pitems]').forEach(b=>b.addEventListener('click',()=>cont.querySelectorAll('tr[data-pitrubro="'+CSS.escape(b.dataset.pitems)+'"]').forEach(tr=>tr.classList.toggle('oculta'))));
@@ -3357,11 +3388,12 @@ function exportarExcel(){
         g.montoUSD?Number(g.montoUSD.toFixed(2)):'',Number(ivaU.toFixed(2)),Number(((g.montoUSD||0)-ivaU).toFixed(2)),
         diasDesde(g.fecha),Number(intU.toFixed(2)),Number(((g.montoUSD||0)+intU).toFixed(2)),g.cargadoPor||'',
         g.cuitProveedor||cuitDeProveedor(g.proveedor),Number(g.percIIBB)||0,Number(g.percIVA)||0,Number(g.percGan)||0,Number(g.otrosTribARS)||0]; }));
-  const fP=[['Rubro','Macrorubro','MO USD','Materiales USD','Otros USD','Objetivo USD',
+  const eMO=agrupar(Store.gastos.filter(g=>g.tipo==='Mano de obra'),g=>g.rubro), eMat=agrupar(Store.gastos.filter(g=>g.tipo==='Materiales'),g=>g.rubro), eTot=agrupar(Store.gastos,g=>g.rubro);
+  const fP=[['Rubro','Macrorubro','MO USD','Materiales USD','Otros USD','Objetivo USD','Ejecutado MO USD','Ejecutado materiales USD','Ejecutado total USD','Saldo USD',
       'Linea base MO USD','Linea base Materiales USD','Linea base Otros USD','Linea base USD','Desvio USD','Desvio %',
       'Avance fisico %','Mes desde','Mes hasta','Notas']]
     .concat(Store.presupuesto.map(p=>{ const ac=objetivoRubro(p),lb=objetivoLineaBase(p),tiene=tieneLineaBase(p);
-      return [p.rubro,macroDe(p.rubro),p.objMO||0,p.objMat||0,p.objOtros||0,ac,
+      return [p.rubro,macroDe(p.rubro),p.objMO||0,p.objMat||0,p.objOtros||0,ac,Number((eMO[p.rubro]||0).toFixed(2)),Number((eMat[p.rubro]||0).toFixed(2)),Number((eTot[p.rubro]||0).toFixed(2)),Number((ac-(eTot[p.rubro]||0)).toFixed(2)),
         tiene?(p.lb.mo||0):'',tiene?(p.lb.mat||0):'',tiene?(p.lb.otros||0):'',tiene?lb:'',
         tiene?Number((ac-lb).toFixed(2)):'',(tiene&&lb)?Number(((ac-lb)/lb*100).toFixed(1)):'',
         Number(avanceDe(p).toFixed(1)),p.mesDesde,p.mesHasta,p.notas||'']; }));
@@ -3488,7 +3520,7 @@ function exportarExcel(){
    Todo corre en el navegador: no hay servidor ni costo. */
 const RESPALDO_FORMATO='magna-rio-colorado';
 const RESPALDO_VERSION=2;
-const APP_VERSION='7.4';
+const APP_VERSION='7.5';
 const RESPALDO_CORREO='juliomonti91@gmail.com';   // solo esta cuenta respalda en Drive
 const RESPALDO_CARPETA='RioColorado';
 const RESPALDO_PREFIJO='Rio_Colorado_respaldo_';
@@ -4508,7 +4540,7 @@ function cerrarEditorCert(forzar){
   if(!forzar&&CERT.sucio&&!confirm('El certificado tiene cambios sin guardar. ¿Descartarlos?')) return false;
   CERT.c=null; CERT.sucio=false; const e=document.getElementById('ct-editor'); if(e) e.innerHTML=''; return true;
 }
-const nuevoRenglon=()=>({ id:'rg'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), itemId:'', unidad:'', tipoPrecio:'unitario', cantidad:'', precio:'', montoARS:'', avanceManual:'', gastoId:null });
+const nuevoRenglon=()=>({ id:'rg'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), itemId:'', unidad:'', tipoPrecio:'unitario', cantidad:'', precio:'', montoARS:'', avanceManual:'', comentario:'', gastoId:null });
 function ultimoPrecioItem(itemId,tipo){ let p=null;
   certsAprobados().forEach(c=>(c.renglones||[]).forEach(r=>{ if(r.itemId===itemId&&(r.tipoPrecio||'unitario')===tipo&&Number(r.precio)) p=Number(r.precio); })); return p; }
 function prepararRenglon(r,c){
@@ -4652,7 +4684,9 @@ function dibujarEditorCert(validacion){
     if(c.historico){ const g=Store.gastos.find(x=>x.id===r.gastoId);
       fila+='<td class="ct-gasto"'+er('gastoId')+'>'+(g?'<strong>N° '+(nums[claveCarga(g)]||'—')+'</strong> · '+fmtFecha(g.fecha)+'<div>'+esc(g.concepto||'')+' · '+fmtARS(g.montoARS,2)+'</div>':'—')
         +(!ro&&g?'<button type="button" class="cp-link" data-ctrepartir="'+esc(r.id)+'">Repartir en otro ítem</button>':'')+'</td>'; }
-    fila+='<td><select data-cr="itemId"'+(ro?' disabled':'')+er('itemId')+' class="ct-item">'+opcionesItems(r.itemId)+'</select>'+etiqueta+'</td>'
+    fila+='<td><select data-cr="itemId"'+(ro?' disabled':'')+er('itemId')+' class="ct-item">'+opcionesItems(r.itemId)+'</select>'+etiqueta
+      +(ro?(r.comentario?'<div class="ct-com-ro">'+esc(r.comentario)+'</div>':'')
+          :'<input data-cr="comentario" class="ct-com" maxlength="160" placeholder="Concepto / comentario (opcional)" value="'+esc(r.comentario||'')+'">')+'</td>'
       +'<td><select data-cr="unidad"'+(ro?' disabled':'')+er('unidad')+'><option value="">—</option>'+unidadesMedida().concat(r.unidad&&unidadesMedida().indexOf(r.unidad)<0?[r.unidad]:[]).map(u=>'<option'+(u===r.unidad?' selected':'')+'>'+esc(u)+'</option>').join('')+'</select></td>'
       +'<td><select data-cr="tipoPrecio"'+(ro?' disabled':'')+'><option value="unitario"'+(r.tipoPrecio!=='global'?' selected':'')+'>Unitario</option><option value="global"'+(r.tipoPrecio==='global'?' selected':'')+'>Global</option></select></td>'
       +'<td><input data-cr="cantidad" class="ct-num" inputmode="decimal" value="'+esc(r.cantidad)+'"'+(ro?' disabled':'')+er('cantidad')+' placeholder="'+(r.tipoPrecio==='global'?'opcional':'')+'"></td>';
@@ -4761,7 +4795,7 @@ function docCert(c,extra){
   d.renglones=(c.renglones||[]).map(r=>({ id:r.id, itemId:r.itemId, unidad:r.unidad||'', tipoPrecio:r.tipoPrecio==='global'?'global':'unitario',
     cantidad:numAR(r.cantidad), precio:c.historico?precioRenglon(c,r):numAR(r.precio), montoARS:redondear(montoRenglon(c,r)),
     avanceManual:(()=>{ const it=itemPorId(r.itemId); if(!it||esCompatible(it,r)||ultimoManualPorItem(c)[it.id]!==r.id) return null; const v=numAR(r.avanceManual); return Number.isNaN(v)?null:v; })(),
-    gastoId:r.gastoId||null, cotizacion:r.cotizacion||null }));
+    gastoId:r.gastoId||null, cotizacion:r.cotizacion||null, comentario:String(r.comentario||'').trim() }));
   const t=totalesCert(c); d.totalARS=redondear(t.ars); d.totalUSD=redondear(t.usd);
   d.actualizadoEn=new Date().toISOString(); d.actualizadoPor=USUARIO?USUARIO.nombre:'—';
   if(!d.creadoEn){ d.creadoEn=d.actualizadoEn; d.creadoPor=d.actualizadoPor; }
@@ -4795,7 +4829,7 @@ async function aprobarCert(){
       if(!m){ r.gastoId=null; return; }
       const gid=Store.nuevoId(); r.gastoId=gid;
       ops.push(opSet('gastos',{ id:gid, fecha:c.fecha, rubro:it.rubro, tipo:'Mano de obra', proveedor:c.contratista,
-        concepto:'Cert. N° '+numAR(c.numero)+' · '+nombreItem(it)+' · '+(r.tipoPrecio==='global'?'global':fmtARS(numAR(r.precio))+'/'+(r.unidad||'u'))+(m<0?' (descuento)':''), montoARS:m, montoBrutoARS:m, descuentoPct:0, cotizacion:mep, montoUSD:m/mep,
+        concepto:'Cert. N° '+numAR(c.numero)+' · '+nombreItem(it)+' · '+(r.tipoPrecio==='global'?'global':fmtARS(numAR(r.precio))+'/'+(r.unidad||'u'))+(String(r.comentario||'').trim()?' · '+String(r.comentario).trim():'')+(m<0?' (descuento)':''), montoARS:m, montoBrutoARS:m, descuentoPct:0, cotizacion:mep, montoUSD:m/mep,
         unidad:UNIDADES[0], financia:c.financia||FONDO, formaPago:c.formaPago||'', estado:c.estadoPago||'Pendiente', cargadoPor:quien,
         comprobante:c.comprobante||'', notas:c.notas||'', fiscal:FISCAL_SIN, alicuota:null, ivaARS:0, ivaUSD:0, cuitProveedor:cuit,
         lote:c.lote, nroCarga:c.nroCarga, origen:'certificado', certificadoId:c.id, certNumero:numAR(c.numero), itemId:r.itemId,
@@ -4834,7 +4868,7 @@ function borrarCert(btn){
 function filasPlanilla(c){
   const an=analizarRenglones(c);
   return (c.renglones||[]).map(r=>{ const a=an[r.id]||{}; const it=a.it; const q=numAR(r.cantidad);
-    return { codigo:it?it.codigo||'':'', descripcion:it?it.descripcion:'(sin ítem)', unidad:r.unidad||'', computo:it&&tieneBase(it)?Number(it.cantidadComputo):null, unidadComputo:it?it.unidad||'':'',
+    return { codigo:it?it.codigo||'':'', descripcion:it?it.descripcion:'(sin ítem)', comentario:String(r.comentario||'').trim(), unidad:r.unidad||'', computo:it&&tieneBase(it)?Number(it.cantidadComputo):null, unidadComputo:it?it.unidad||'':'',
       anterior:a.comp?a.ant.acc:null, presente:q, acumulado:a.comp?a.acc:null, avance:it?a.pct*100:null, tipo:r.tipoPrecio==='global'?'Global':'Unitario',
       precio:precioRenglon(c,r), monto:montoRenglon(c,r), exceso:!!a.exceso, gasto:c.historico?(Store.gastos.find(g=>g.id===r.gastoId)||null):null }; });
 }
@@ -4844,11 +4878,11 @@ function exportarPlanillaCert(c){
   const aoa=[['MAGNA DESARROLLOS'],['Obra Río Colorado · Certificado de mano de obra'+(c.historico?' (histórico)':'')],[],
     ['Certificado N°',numAR(c.numero),'','Contratista',c.contratista],['Fecha',c.fecha,'','Período',(c.periodoDesde||'')+' a '+(c.periodoHasta||'')],
     ['Estado',c.estado==='aprobado'?'Aprobado':'Borrador','','Dólar MEP',c.historico?'Al de cada gasto':R(numAR(c.mep))],[],
-    ['Código','Ítem','Unidad','Cantidad cómputo','Acumulado anterior','Presente','Acumulado actual','% avance','Tipo de precio','Precio unitario $','Monto presente $']];
-  f.forEach(x=>aoa.push([x.codigo,x.descripcion,x.unidad,x.computo===null?'':R(x.computo),R(x.anterior),R(x.presente),R(x.acumulado),x.avance===null?'':redondear(x.avance,1),x.tipo,R(x.precio),R(x.monto)]));
+    ['Código','Ítem','Unidad','Cantidad cómputo','Acumulado anterior','Presente','Acumulado actual','% avance','Tipo de precio','Precio unitario $','Monto presente $','Comentario']];
+  f.forEach(x=>aoa.push([x.codigo,x.descripcion,x.unidad,x.computo===null?'':R(x.computo),R(x.anterior),R(x.presente),R(x.acumulado),x.avance===null?'':redondear(x.avance,1),x.tipo,R(x.precio),R(x.monto),x.comentario]));
   aoa.push([],['','Total del certificado $','','','','','','','','',R(t.ars)],['','Total USD','','','','','','','','',R(t.usd)]);
   if(f.some(x=>x.exceso)) aoa.push([],['Nota: hay ítems cuyo acumulado supera el cómputo (el avance se topea en 100 %).']);
-  const ws=XLSX.utils.aoa_to_sheet(aoa); ws['!cols']=[{wch:8},{wch:44},{wch:8},{wch:12},{wch:12},{wch:10},{wch:12},{wch:9},{wch:11},{wch:14},{wch:16}];
+  const ws=XLSX.utils.aoa_to_sheet(aoa); ws['!cols']=[{wch:8},{wch:44},{wch:8},{wch:12},{wch:12},{wch:10},{wch:12},{wch:9},{wch:11},{wch:14},{wch:16},{wch:36}];
   const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Certificado');
   XLSX.writeFile(wb,'Certificado_'+String(c.contratista||'').replace(/[^\wáéíóúñÁÉÍÓÚÑ]+/g,'_')+'_N'+numAR(c.numero)+'.xlsx'); toast('Planilla exportada');
 }
@@ -4864,13 +4898,13 @@ function imprimirPlanillaCert(c){
     +'table{width:100%;border-collapse:collapse}th{font-family:Montserrat,sans-serif;font-size:8.5px;letter-spacing:.4px;text-transform:uppercase;color:#7B7B79;text-align:left;border-bottom:1.5px solid #D2D2CF;padding:5px 4px}'
     +'td{border-bottom:1px solid #F2F2F1;padding:5px 4px}.r{text-align:right;font-variant-numeric:tabular-nums}.neg{color:#9E2B25}.ex{color:#B3541E;font-weight:600}'
     +'tfoot td{font-family:Montserrat,sans-serif;font-weight:700;border-top:1.5px solid #303038;border-bottom:0}.firmas{display:flex;gap:60px;margin-top:46px}.firmas div{border-top:1px solid #303038;padding-top:5px;width:220px;text-align:center;color:#5C5C5E}'
-    +'.pie{margin-top:18px;color:#9A9A97;font-size:9px}</style></head><body>'
+    +'.pie{margin-top:18px;color:#9A9A97;font-size:9px}.com{font-size:9.5px;color:#7B7B79;margin-top:2px}</style></head><body>'
     +'<header>'+(logo?'<img src="'+logo+'" alt="Magna Desarrollos">':'')+'<div><h1>Certificado de mano de obra N° '+esc(c.numero)+(c.historico?' (histórico)':'')+'</h1><div class="sub">Magna Desarrollos · Obra Río Colorado</div></div></header>'
     +'<div class="cab"><b>Contratista</b><span>'+esc(c.contratista)+'</span><b>Fecha</b><span>'+fmtFecha(c.fecha)+'</span>'
     +'<b>Período</b><span>'+(c.periodoDesde||c.periodoHasta?fmtFecha(c.periodoDesde)+' a '+fmtFecha(c.periodoHasta):'—')+'</span><b>Estado</b><span>'+(c.estado==='aprobado'?'Aprobado':'Borrador')+'</span>'
     +(c.historico?'':'<b>Dólar MEP</b><span>'+fmtARS(numAR(c.mep),2)+'</span>')+'</div>'
     +'<table><thead><tr><th>Código</th><th>Ítem</th><th>Un.</th><th class="r">Cómputo</th><th class="r">Acum. anterior</th><th class="r">Presente</th><th class="r">Acum. actual</th><th class="r">% avance</th><th>Precio</th><th class="r">P. unitario</th><th class="r">Monto presente</th></tr></thead><tbody>'
-    +f.map(x=>'<tr><td>'+esc(x.codigo)+'</td><td>'+esc(x.descripcion)+'</td><td>'+esc(x.unidad)+'</td><td class="r">'+n(x.computo)+'</td><td class="r">'+n(x.anterior)+'</td><td class="r'+(x.presente<0?' neg':'')+'">'+n(x.presente)+'</td>'
+    +f.map(x=>'<tr><td>'+esc(x.codigo)+'</td><td>'+esc(x.descripcion)+(x.comentario?'<div class="com">'+esc(x.comentario)+'</div>':'')+'</td><td>'+esc(x.unidad)+'</td><td class="r">'+n(x.computo)+'</td><td class="r">'+n(x.anterior)+'</td><td class="r'+(x.presente<0?' neg':'')+'">'+n(x.presente)+'</td>'
       +'<td class="r'+(x.exceso?' ex':'')+'">'+n(x.acumulado)+'</td><td class="r">'+(x.avance===null?'—':fmtPct(x.avance))+'</td><td>'+x.tipo+'</td><td class="r">'+(x.precio==null||Number.isNaN(x.precio)?'—':fmtARS(x.precio,2))+'</td><td class="r'+(x.monto<0?' neg':'')+'">'+fmtARS(x.monto,2)+'</td></tr>').join('')
     +'</tbody><tfoot><tr><td colspan="10">Total del certificado</td><td class="r'+(t.ars<0?' neg':'')+'">'+fmtARS(t.ars,2)+'</td></tr><tr><td colspan="10" style="font-weight:500;">Equivalente en dólares</td><td class="r">'+fmtUSD(t.usd,2)+'</td></tr></tfoot></table>'
     +(f.some(x=>x.exceso)?'<p class="ex">Hay ítems cuyo acumulado supera el cómputo; el avance se topea en 100 %.</p>':'')
@@ -4915,7 +4949,7 @@ function actualizarCampoAvance(){
 function filasItemsPresu(p){
   const a=avanceRubroAuto(p.rubro); if(!a) return '';
   return a.items.slice().sort((x,y)=>natCmp(x.codigo,y.codigo)).map(it=>{ const e=avanceItem(it.id);
-    return '<tr class="p-items oculta" data-pitrubro="'+esc(p.rubro)+'"><td colspan="10">'+esc(nombreItem(it))+' · <strong>'+fmtPct(e.pct*100)+'</strong>'
+    return '<tr class="p-items oculta" data-pitrubro="'+esc(p.rubro)+'"><td colspan="11">'+esc(nombreItem(it))+' · <strong>'+fmtPct(e.pct*100)+'</strong>'
       +(tieneBase(it)?' · '+fmtCant(e.acc)+' de '+fmtCant(it.cantidadComputo)+' '+esc(it.unidad):' · sin cantidad base'+(e.manual?' (avance cargado a mano)':''))
       +(Number(it.moPresupUSD)>0?' · pesa '+fmtUSD(it.moPresupUSD):'')+'</td></tr>'; }).join('');
 }
